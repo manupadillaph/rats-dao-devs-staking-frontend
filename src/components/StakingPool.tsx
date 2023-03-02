@@ -602,7 +602,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													swShow={true} 
 													swHash={true} 
 													eUTxOs_Selected={[userStakedData.eUTxO_With_UserDatum!]} poolInfo={poolInfo} 
-
 												/>
 											</div>
 										</div>
