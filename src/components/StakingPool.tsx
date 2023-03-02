@@ -606,11 +606,8 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											</div>
 										</div>
 									</div>
-									
 								</div>
-
 								<div className="pool__flex_break" ><br></br></div>
-								
 							</div>
 					)}
 
