@@ -94,7 +94,6 @@ export default function WalletModalBtn() {
 				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
 			}
 			setWalletStore(walletStore_)
-			//setWalletMessage("Loading Wallet info in parallel...")
 			loadWalletData(walletStore_)
 			setWalletMessage("Connected with <b>" + walletName + "</b>!")
 		} catch (error) {
@@ -111,38 +110,53 @@ export default function WalletModalBtn() {
 
 	const walletFromSeedConnect = async (walletName: string, closeModal = true) => {
 		console.log("[Session] - walletFromSeedConnect")
-		// setWalletMessage("Connecting with " + walletName + "...")
-		// try {
-		// 	var walletSeed: string = ""
-		// 	if (walletName === "Master1") {
-		// 		walletSeed = walletMasterSeed1? walletMasterSeed1 : ""
-		// 	} else if (walletName === "Master2") {
-		// 		walletSeed = walletMasterSeed2? walletMasterSeed2 : ""
-		// 	}
-		// 	//const newBech32PrivateKey = C.PrivateKey.generate_ed25519().to_bech32()
-		// 	//const walletPrivateKey ="ed25519_sk10lc2huyqqx53qkcj8u9x794cesmtrpn95330aurcvkex8wmysljsz062s8" // walletMasterPrivateKey1
-		// 	//alert ("walletPrivateKey: " + walletPrivateKey)
-		// 	// const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
-		// 	const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
-		// 	const adddressWallet = await lucid!.wallet.address()
-		// 	//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
-		// 	const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
-		// 	//console.log("[Session] - walletConnect: addr: " + adddressWallet)
-		// 	console.log("[Session] - walletConnect: pkh: " + pkh)
-		// 	const protocolParameters = await lucid!.provider.getProtocolParameters();
-		// 	const walletStore = { connected: true, name: walletName, walletApi: undefined, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: savedSwEnviarPorBlockfrost, protocolParameters: protocolParameters }
-		// 	await signIn('credentials', { pkh: pkh , redirect: false })
-		// 	setWalletStore(walletStore)
-		// 	setSavedWalletConnected(true)
-		// 	setSavedWalletName(walletName)
-		// 	setSavedIsWalletFromSeed(true)
-		// 	setWalletMessage("Loading Wallet info...")
-		// 	await loadWalletData(walletStore)
-		// 	setWalletMessage("Connected with " + walletName + "!")
-		// } catch (error) {
-		// 	console.error("[Session] - walletConnect Error2: " + error)
-		// 	setWalletMessage("Error Connecting with " + walletName + ": " + error)
-		// }
+		setWalletMessage("Connecting with " + walletName + "...")
+		setWalletError("")
+		try {
+			var walletSeed: string = ""
+			if (walletName === "Master1") {
+				walletSeed = walletMasterSeed1? walletMasterSeed1 : ""
+			} else if (walletName === "Master2") {
+				walletSeed = walletMasterSeed2? walletMasterSeed2 : ""
+			}
+			//const newBech32PrivateKey = C.PrivateKey.generate_ed25519().to_bech32()
+			//const walletPrivateKey ="ed25519_sk10xxxxx" // walletMasterPrivateKey1
+			//alert ("walletPrivateKey: " + walletPrivateKey)
+			//const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
+			const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
+			const adddressWallet = await lucid!.wallet.address()
+			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
+			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
+			//console.log("[Session] - walletConnect: addr: " + adddressWallet)
+			console.log("[Session] - walletConnect: pkh: " + pkh)
+			const protocolParameters = await lucid!.provider.getProtocolParameters();
+			var swEnviarPorBlockfrost_ = swEnviarPorBlockfrost
+			if(status === "authenticated"){
+				if(session && session.user && session.user.swEnviarPorBlockfrost){
+					swEnviarPorBlockfrost_ = (session.user.swEnviarPorBlockfrost)
+				}
+			}
+			swEnviarPorBlockfrost_ = true
+			const walletStore_ = { connected: true, name: walletName, walletApi: undefined, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
+			console.log("[Session] - walletConnect - status: " + status + " - session.user.pkh: " + session?.user?.pkh + " - pkh: " + pkh)
+			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
+				// console.log("LOGIN")
+				await signOut({ redirect: false })
+				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
+			}
+			setWalletStore(walletStore_)
+			loadWalletData(walletStore_)
+			setWalletMessage("Connected with <b>" + walletName + "</b>!")
+			
+		} catch (error) {
+			console.error("[Session] - walletConnect Error2: " + error)
+			const error_explained = explainError(error)
+			setWalletError("Error connecting with <b>" + walletName + "</b><br></br> " + error_explained)
+			setWalletMessage("")
+			if (status === "authenticated") {
+				await signOut({ redirect: false })
+			}
+		}
 	}
 
 	const walletDisconnect = async (closeModal = true) => {

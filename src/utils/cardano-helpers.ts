@@ -208,7 +208,7 @@ export function createValue_Adding_Tokens_Of_AC_Lucid(uTxOsAtWallet: UTxO[], aC_
 
 export	function getTotalOfUnitInWallet(aC_Lucid: AC, uTxOsAtWallet: UTxO []) {
 
-	console.log("storeWallet - getTotalOfUnit - unit: " + aC_Lucid)
+	//console.log("storeWallet - getTotalOfUnit - unit: " + aC_Lucid)
 
 	const CS = aC_Lucid.slice(0, 56);
 	const TN = aC_Lucid.slice(56);
@@ -216,7 +216,7 @@ export	function getTotalOfUnitInWallet(aC_Lucid: AC, uTxOsAtWallet: UTxO []) {
 	const isAda = (aC_Lucid === 'lovelace');
 	const isWithoutTokenName = !isAda && TN == "";
 
-	console.log("storeWallet - getTotalOfUnit - isAda: " + isAda + " - isWithoutTokenName: " + isWithoutTokenName)
+	//console.log("storeWallet - getTotalOfUnit - isAda: " + isAda + " - isWithoutTokenName: " + isWithoutTokenName)
 	let total: BIGINT = 0n;
 
 	uTxOsAtWallet.forEach(u => {
@@ -236,7 +236,7 @@ export	function getTotalOfUnitInWallet(aC_Lucid: AC, uTxOsAtWallet: UTxO []) {
 		}
 	});
 
-	console.log("storeWallet - getTotalOfUnit - total: " + total)
+	//console.log("storeWallet - getTotalOfUnit - total: " + total)
 	return BigInt(total.toString()) as BIGINT;
 }
 

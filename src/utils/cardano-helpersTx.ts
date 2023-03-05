@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 
-import { Assets, C, createCostModels, Lucid, TxComplete, TxSigned } from "lucid-cardano";
+import { Assets, C, createCostModels, Lucid, toHex, TxComplete, TxSigned } from "lucid-cardano";
 import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transaction } from "@dcspark/cardano-multiplatform-lib-browser";
 import { SetStateAction } from "react";
 import { explainErrorTx } from "../stakePool/explainError";
@@ -292,13 +292,14 @@ export async function makeTx(functionName: string, wallet: Wallet, protocolParam
     try {
         if (wallet.swEnviarPorBlockfrost && lucid!.provider) {
             console.log(functionName + " - Tx Using Provider")
-            //txCompleteHash = await lucid!.provider.submitTx(toHex(txCompleteSigned.txSigned.to_bytes()));
+            // txCompleteHash = await lucid!.provider.submitTx(toHex(txCompleteSigned.txSigned.to_bytes()));
+            // txCompleteHash = await blockFrostSubmitTx(txCompleteSigned.txSigned);
             txCompleteHash = await lucid!.provider.submitTx(txCompleteSigned.txSigned);
         } else {
             console.log(functionName + " - Tx Using Wallet")
             //txCompleteHash = await lucid!.wallet.submitTx(toHex(txCompleteSigned.txSigned.to_bytes()));
-            txCompleteHash = await lucid!.wallet.submitTx(txCompleteSigned.txSigned);
             //txCompleteHash = await txCompleteSigned.submit();
+            txCompleteHash = await lucid!.wallet.submitTx(txCompleteSigned.txSigned);
         }
     } catch (error: any) {
         console.error(functionName + " - Error txCompleteHash: " + error)
@@ -307,6 +308,40 @@ export async function makeTx(functionName: string, wallet: Wallet, protocolParam
     console.log(functionName + " - Tx txCompleteHash: " + txCompleteHash)
     return txCompleteHash;
 }
+
+//---------------------------------------------------------------
+
+// export async function blockFrostSubmitTx(tx: Transaction) {
+
+//     // const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/tx/submit'
+
+//     // const requestOptions = {
+//     //     method: 'POST',
+//     //     headers: {
+//     //       'project_id': "xxxxx",
+//     //       "Content-Type": "application/cbor"
+//     //     },
+//     //   }
+
+//     const target = process.env.NEXT_PUBLIC_BLOCKFROST_URL 
+//     const PROJECT_ID = "xxx"
+
+//     const result = await fetch(`${target}/tx/submit`, {
+//         method: "POST",
+//         headers: {
+//             "Content-Type": "application/cbor",
+//             project_id: PROJECT_ID!,
+//         },
+//         body: tx.to_bytes(),
+//     }).then((res) => res.json());
+//     if (!result || result.error) {
+//         if (result?.status_code === 400)
+//             throw new Error(result.message);
+//         else
+//             throw new Error("Could not submit transaction.");
+//     }
+//     return result;
+// }
 
 //---------------------------------------------------------------
 
