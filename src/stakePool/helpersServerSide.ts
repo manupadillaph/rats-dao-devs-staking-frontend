@@ -136,7 +136,9 @@ export async function getEstadoDeployFromFile(filename: string) {
 
     try {
 
-        const pathToFile = path.join(process.cwd(), 'public', 'scripts', filename);
+        //const pathToFile = path.join(process.cwd(), 'public', 'scripts', filename);
+        
+        const pathToFile = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, filename);
 
         const data = await fs.readFile(pathToFile, { encoding: 'utf8' });
         let jsonFile = JSON.parse(data);
