@@ -15,7 +15,7 @@ export function createScriptFromHEXCBOR(hexCbor: string, type: string = "PlutusS
       
 export async function getScriptFromFile(filename: string)  {
     try {
-        const pathToFile = path.join(process.cwd(), 'public','scripts', filename);
+        const pathToFile = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, filename);
 
         const data = await fs.readFile(pathToFile, { encoding: 'utf8' });
         //console.log(data);
@@ -33,7 +33,7 @@ export async function getScriptFromFile(filename: string)  {
 
 export async function getSymbolFromFile(filename: string)  {
     try {
-        const pathToFile = path.join(process.cwd(), 'public','scripts', filename);
+        const pathToFile = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, filename);
 
         const data = await fs.readFile(pathToFile, { encoding: 'utf8' });
         //console.log(data);
@@ -48,7 +48,7 @@ export async function getSymbolFromFile(filename: string)  {
 export async function getTextFromFile(filename: string)  { 
     try {
 
-        const pathToFile = path.join(process.cwd(), 'public','scripts', filename);
+        const pathToFile = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, filename);
         //console.log ("path3: " + path2) 
 
         const data = await fs.readFile(pathToFile, { encoding: 'utf8' });
