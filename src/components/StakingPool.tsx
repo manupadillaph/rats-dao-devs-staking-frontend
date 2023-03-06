@@ -567,10 +567,13 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													postActionError={updateDetailsStakingPoolAndWallet}
 													setIsWorking={handleSetIsWorking} 
 													actionName="Harvest" actionIdx={poolInfo.name + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.txHash + "-" + userStakedData.eUTxO_With_UserDatum!.uTxO.outputIndex} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-													description={poolInfo.swTerminated ? '<p className="info">This Pool in already terminated. You can\'t Harvest anymore.</p>' : undefined}
+													description={poolInfo.swTerminated ? 
+														'<p className="info">This Pool in already terminated. You can\'t Harvest anymore.</p>' 
+														: undefined
+													}
 													poolInfo={poolInfo} 
 													swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
-													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading && !poolInfo.swTerminated} 
+													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading } // && !poolInfo.swTerminated
 													swShow={true} 
 													swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={poolInfo.harvest_Decimals} 
 													swHash={true} 
