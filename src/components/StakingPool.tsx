@@ -417,7 +417,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}  // && !poolInfo.swClosed
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
 											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
@@ -434,7 +434,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											setIsWorking={handleSetIsWorking} 
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 											description={poolInfo.swClosed ? 
-												'<p className="info">This Pool in already closed. You can\'t Deposit anymore. TEST</p>' 
+												'<p className="info">This Pool in already closed. You can\'t Deposit anymore.</p>' 
 												: 
 													staking_AC_isAda? 
 														'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
