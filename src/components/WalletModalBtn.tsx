@@ -142,7 +142,7 @@ export default function WalletModalBtn() {
 			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
 				// console.log("LOGIN")
 				await signOut({ redirect: false })
-				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })
+				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "true",redirect: false })
 			}
 			setWalletStore(walletStore_)
 			loadWalletData(walletStore_)
@@ -191,7 +191,7 @@ export default function WalletModalBtn() {
 		try{
 			if(session && session.user && session.user.walletName){
 				//console.log("[Session] - walletConnect - session.walletName: " + session.user.walletName)
-				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName) && (session.user.walletName==="Master1" || session.user.walletName==="Master2")) {
+				if (window.cardano && ( searchKeyInObject(availableWallets, session.user.walletName) || (session.user.walletName==="Master1" || session.user.walletName==="Master2"))) {
 					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
 					console.log("[Session] - sessionWalletConnect - session.walletName: " + session.user.walletName)
 					setWalletMessage("Loading session...")
