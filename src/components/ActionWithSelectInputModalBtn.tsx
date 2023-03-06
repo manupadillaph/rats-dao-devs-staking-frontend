@@ -408,7 +408,7 @@ export default function ActionWithSelectInputModalBtn(
 																<div>
 																	<button disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == "0" ? true: false}  style={{ width: 45}} onClick={e => {
 																		const v = "0"
-																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		console.log(asset.tokenNameHEX + " - zero v: " +  v)
 																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
 																	}}>ZERO</button>
 
@@ -440,7 +440,7 @@ export default function ActionWithSelectInputModalBtn(
 																<div>
 																	<button  className="btn2" disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == "0" ? true: false}   style={{ width: 45}} onClick={e => {
 																		const v = "0"
-																		// console.log(asset.tokenNameHEX + " - max: " +  v)
+																		console.log(asset.tokenNameHEX + " - zero v: " +  v)
 																		if (v !== undefined) handleChangeValue(asset.tokenNameHEX, v)
 																	}}>No</button>
 																	<button  className="btn2" disabled={ walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.amount == walletAssetsSelect.find((assetSelect) => assetSelect.tokenNameHEX === asset.tokenNameHEX)?.max ? true: false}  style={{ width: 45}} onClick={e => {
