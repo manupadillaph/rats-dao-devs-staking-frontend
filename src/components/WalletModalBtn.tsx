@@ -191,13 +191,17 @@ export default function WalletModalBtn() {
 		try{
 			if(session && session.user && session.user.walletName){
 				//console.log("[Session] - walletConnect - session.walletName: " + session.user.walletName)
-				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName)) {
+				if (window.cardano && searchKeyInObject(availableWallets, session.user.walletName) && (session.user.walletName==="Master1" || session.user.walletName==="Master2")) {
 					//si la wallet estaba conectada en la session anterior, tengo que reconectarla
 					console.log("[Session] - sessionWalletConnect - session.walletName: " + session.user.walletName)
 					setWalletMessage("Loading session...")
 					setWalletError("")
 					await new Promise(r => setTimeout(r, 2000));
-					await walletConnect(session.user.walletName, false, true)
+					if (session.user.walletName==="Master1" || session.user.walletName==="Master2"){
+						walletFromSeedConnect(session.user.walletName, false)
+					}else{
+						await walletConnect(session.user.walletName, false, true)
+					}
 				} else {
 					console.log("[Session] - sessionWalletConnect: Not connecting to any wallet. Wallet of previus session not found: " + session.user.walletName)
 					throw "Wallet of previus session not found"
