@@ -109,6 +109,8 @@ export const maxRewards = 1000000000000000n
 
 export const TIME_OUT_TRY_TX = 6000 // = 6 segundos
 
+export const TIME_OUT_TRY_UPDATESTAKINGPOOL = 2000 // = 6 segundos
+
 export const maxTxExMem = 14000000
 
 export const maxTxExSteps = 10000000000

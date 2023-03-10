@@ -1,7 +1,7 @@
 import path from 'path';
 
 import { EUTxO, InterestRate, Maybe, PoolDatum, UserDatum } from '../types';
-import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN, scriptID_Master_Emergency_TN } from '../types/constantes';
+import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN, scriptID_Master_Emergency_TN, TIME_OUT_TRY_UPDATESTAKINGPOOL } from '../types/constantes';
 import { deleteEUTxOsFromDBByTxHashAndIndex, deleteEUTxOsFromDBPreparingOrConsumingByAddress, getEUTxODBModel, getEUTxOFromDBByTxHashAndIndex, getEUTxOsFromDBByAddress, updateEUTxOsFromDBPreparingOrConsumingByAddress } from '../types/eUTxODBModel';
 import { getStakingPoolDBModel, StakingPoolDBInterface } from '../types/stakePoolDBModel';
 
@@ -253,43 +253,59 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             // const count = await deleteEUTxOsFromDBPreparingOrConsumingByAddress(scriptAddress) 
             // console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in DB Preparing Or Consuming: "+count)
             //------------------
-            const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
-            //------------------
-            var eUTxOs_With_Datum_Extras : EUTxO [] = await getExtraEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
-            for (let i = 0; i < eUTxOs_With_Datum_Extras.length; i++) {
-                const eUTxO = eUTxOs_With_Datum_Extras[i]
-                await deleteEUTxOsFromDBByTxHashAndIndex(eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex) 
-                eUTxOs_With_Datum = eUTxOs_With_Datum.filter(eUTxO_ => ! (eUTxO_.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_.uTxO.outputIndex == eUTxO.uTxO.outputIndex))
-            }
-            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db UTxOs that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
-            //------------------
-            if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script ("+uTxOsAtScript.length+") and DB ("+eUTxOs_With_Datum.length+") Not Match")
-                var eUTxOs_With_Datum_Missing : EUTxO [] = await getMissingEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
-                for (let i = 0; i < eUTxOs_With_Datum_Missing.length; i++) {
-                    const eUTxO = eUTxOs_With_Datum_Missing[i]
-                    const eUTxO_ = await getEUTxOFromDBByTxHashAndIndex (eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex)
-                    if (eUTxO_.length == 0 ){
-                        var EUTxODBModel = getEUTxODBModel()
-                        const newEUTxODB = new EUTxODBModel({
-                            eUTxO: JSON.parse(toJson(eUTxO))
-                        });
-                        try {
-                            await newEUTxODB.save()
-                            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO added")
-                        } catch (error) {
-                            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB")
-                            console.log(error)
-                        }
-                    } else {
-                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB, already there")
+            //hay nueva tx count, pero no se si aun tengo los datos de la nueva transaccion
+            var countTry = 0;
+            var maxTries = 3;
+            while (true) {
+                try {
+                    console.log("ServerSide - Update StakingPool - try (" + countTry + ") For get new Transaction info")
+                    //------------------
+                    const uTxOsAtScript = await lucid!.utxosAt(scriptAddress)
+                    //------------------
+                    var eUTxOs_With_Datum_Extras : EUTxO [] = await getExtraEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
+                    for (let i = 0; i < eUTxOs_With_Datum_Extras.length; i++) {
+                        const eUTxO = eUTxOs_With_Datum_Extras[i]
+                        await deleteEUTxOsFromDBByTxHashAndIndex(eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex) 
+                        eUTxOs_With_Datum = eUTxOs_With_Datum.filter(eUTxO_ => ! (eUTxO_.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_.uTxO.outputIndex == eUTxO.uTxO.outputIndex))
                     }
+                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db UTxOs that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
+                    //------------------
+                    if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
+                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script ("+uTxOsAtScript.length+") and DB ("+eUTxOs_With_Datum.length+") Not Match")
+                        var eUTxOs_With_Datum_Missing : EUTxO [] = await getMissingEUTxOsInDB(lucid!, uTxOsAtScript, eUTxOs_With_Datum)   
+                        for (let i = 0; i < eUTxOs_With_Datum_Missing.length; i++) {
+                            const eUTxO = eUTxOs_With_Datum_Missing[i]
+                            const eUTxO_ = await getEUTxOFromDBByTxHashAndIndex (eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex)
+                            if (eUTxO_.length == 0 ){
+                                var EUTxODBModel = getEUTxODBModel()
+                                const newEUTxODB = new EUTxODBModel({
+                                    eUTxO: JSON.parse(toJson(eUTxO))
+                                });
+                                try {
+                                    await newEUTxODB.save()
+                                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO added")
+                                } catch (error) {
+                                    console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB")
+                                    console.log(error)
+                                }
+                            } else {
+                                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxO Error saving in DB, already there")
+                            }
+                        }
+                        eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
+                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs added (" + eUTxOs_With_Datum_Missing.length + ")")
+                        break;
+                    }else{
+                        console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - Error: can't get new tx info - eUTxOs At Script Match (" + uTxOsAtScript.length + ")")
+                        throw "can't get new tx info"
+                    }
+                } catch (error: any) {
+                    if (++countTry == maxTries) {
+                        tx_count = 0
+                        break;
+                    }
+                    await new Promise(r => setTimeout(r, TIME_OUT_TRY_UPDATESTAKINGPOOL));
                 }
-                eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs added (" + eUTxOs_With_Datum_Missing.length + ")")
-            }else{
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script Match (" + uTxOsAtScript.length + ") - Something is strange... Will try again")
-                tx_count = 0
             }
         }else{
             console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - new_tx_count: " +  new_tx_count + " == old_tx_count: " + tx_count)
