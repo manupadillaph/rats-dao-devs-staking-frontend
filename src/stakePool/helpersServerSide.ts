@@ -206,6 +206,8 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
         const scriptID_User_Harvest_AC_Lucid = scriptID_CS + strToHex(scriptID_User_Harvest_TN)
         const scriptID_User_Withdraw_AC_Lucid = scriptID_CS + strToHex(scriptID_User_Withdraw_TN)
         //------------------
+        await new Promise(r => setTimeout(r, TIME_OUT_TRY_UPDATESTAKINGPOOL));
+        //------------------
         var new_tx_count: number | undefined = undefined
         const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/addresses/' + scriptAddress + '/total'
         const requestOptions = {
