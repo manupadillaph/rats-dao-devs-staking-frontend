@@ -256,6 +256,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
             //hay nueva tx count, pero no se si aun tengo los datos de la nueva transaccion
             var countTry = 0;
             var maxTries = 3;
+            await new Promise(r => setTimeout(r, TIME_OUT_TRY_UPDATESTAKINGPOOL));
             while (true) {
                 try {
                     console.log("ServerSide - Update StakingPool - try (" + countTry + ") For get new Transaction info")
