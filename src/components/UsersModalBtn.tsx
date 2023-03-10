@@ -280,11 +280,13 @@ export default function UsersModalBtn(
 								setIsWorking={handleSetIsWorking} 
 								cancel={handleCancel}
 								actionName="Send Back Deposit Batch" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<li className="info">This process will generate multiple Transactions that you will need to sign</li>'} 
+								description={'<li className="info">Return the Deposit to the Users</li>\
+								<li className="info">This process will generate multiple Transactions that you will need to sign</li>\
+								<li className="info">Please note, the Pool must be terminated before utilizing this feature</li>'} 
 								poolInfo={poolInfo} 
-								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 
-								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 
-								swShow={poolInfo.swPreparado && poolInfo.swTerminated}
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded } 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swTerminated} 
+								swShow={poolInfo.swPreparado}
 								swHash={false} 
 							/>							
 
