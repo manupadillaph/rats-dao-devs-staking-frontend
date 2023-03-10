@@ -339,7 +339,7 @@ export function find_EUTxO_In_EUTxOs(eUTxO: EUTxO, eUTxOs: EUTxO[]) {
 //------------------------------------------------------
 
 export async function findDatumIfMissing(lucid: Lucid, uTxO: UTxO): Promise<UTxO> {
-    console.log ("findDatumIfMissing:" + uTxO.datumHash)
+    console.log ("findDatumIfMissing")
     if (uTxO.datumHash && !uTxO.datum) {
         console.log ("findDatumIfMissing - searching datumHash in Database: " + uTxO.datumHash)
         const datum = await apiGetDatumDB(uTxO.datumHash);
