@@ -287,7 +287,7 @@ export async function getMissingEUTxOsInDB(lucid: Lucid, utxos: UTxO[], eUTxOsDB
 
 export async function getExtraEUTxOsInDB(lucid: Lucid, utxos: UTxO[], eUTxOsDB: EUTxO[]): Promise<EUTxO[]> {
     const eUTxOs: EUTxO[] = []
-    //console.log ("getExtraEUTxOsInDB - init - length script: " + utxos.length + " - db length: " + eUTxOsDB.length)
+    console.log ("getExtraEUTxOsInDB - init - length script: " + utxos.length + " - db length: " + eUTxOsDB.length)
     for (var i = 0; i < eUTxOsDB.length; i += 1) {
         if (!utxos.find(uTxO => uTxO.txHash === eUTxOsDB[i].uTxO.txHash && uTxO.outputIndex === eUTxOsDB[i].uTxO.outputIndex)) {
             eUTxOs.push(eUTxOsDB[i])

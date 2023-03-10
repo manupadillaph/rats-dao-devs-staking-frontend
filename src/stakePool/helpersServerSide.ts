@@ -261,7 +261,7 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
                 await deleteEUTxOsFromDBByTxHashAndIndex(eUTxO.uTxO.txHash, eUTxO.uTxO.outputIndex) 
                 eUTxOs_With_Datum = eUTxOs_With_Datum.filter(eUTxO_ => ! (eUTxO_.uTxO.txHash == eUTxO.uTxO.txHash && eUTxO_.uTxO.outputIndex == eUTxO.uTxO.outputIndex))
             }
-            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db ones that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
+            console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs Delete in db UTxOs that not exist in blockchain: " + eUTxOs_With_Datum_Extras.length)
             //------------------
             if (uTxOsAtScript.length != eUTxOs_With_Datum.length){
                 console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script ("+uTxOsAtScript.length+") and DB ("+eUTxOs_With_Datum.length+") Not Match")
