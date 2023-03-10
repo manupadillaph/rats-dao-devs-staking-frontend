@@ -18,7 +18,7 @@ import { getEUTxO_With_ScriptDatum_InEUxTOList } from '../stakePool/helpersEUTxO
 import { stakingPoolDBParser } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master } from '../types';
-import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_TN, userDeposit_TN } from '../types/constantes';
+import { maxTokensWithDifferentNames, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_TN, userDeposit_TN, poolDatum_NotClaimedFund } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { formatHash } from '../utils/cardano-helpers';
 import { newTransaction } from '../utils/cardano-helpersTx';
@@ -104,7 +104,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		swAllScriptsUser,
 		swAllInitialScripts,
 		swAllMainScripts,
-
+		
+		masterFunders,
+		
 		eUTxO_With_PoolDatum,
 		eUTxOs_With_FundDatum, 
 		eUTxOs_With_UserDatum, 
@@ -1104,6 +1106,56 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	//--------------------------------------
 
+	const masterSendBackFundBatchAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		console.log("StakingPoolAdmin - Send Back Fund Batch - " + toJson(poolInfo?.name))
+		setActionMessage("Creating Transfer, please wait...")
+		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
+		try {
+			
+			let masterFunders_NotClaimed : Master [] = []
+			
+			for (var i = 0; i < masterFunders!.length; i++) {
+				if (masterFunders![i].mfClaimedFund === poolDatum_NotClaimedFund) {
+					masterFunders_NotClaimed.push(masterFunders![i].mfMaster)
+				}
+			}
+			
+			if (masterFunders_NotClaimed!.length === 0) {
+				throw "No Master to Send Back"
+			}
+			var poolInfo_updated = poolInfo!
+			var swSeparateTx = false
+			for (var i = 0; i < masterFunders_NotClaimed!.length && !isCancelling.current; i++) {
+				if (swSeparateTx) {
+					poolInfo_updated = await updateDetailsStakingPoolAndWallet()
+					swSeparateTx = false
+				}
+				setActionMessage("Send Back Fund " + (i + 1) + " of " + masterFunders_NotClaimed!.length + ", please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+				const txHash = await masterSendBackFundAction(poolInfo_updated, undefined, undefined, masterFunders_NotClaimed[i]);
+				pushSucessNotification("Send Back Fund " + (i + 1) + " of " + masterFunders_NotClaimed!.length, txHash, true);
+				setActionHash("")
+				swSeparateTx = true
+			}
+			if (isCancelling.current) {
+				setIsWorkingInABuffer(false)
+				setIsCanceling(false)
+				setIsWorking("")
+				throw "You have cancel the operation"
+			}
+			setIsWorkingInABuffer(false)
+			setIsWorking("")
+			return "Send Back Fund Batch executed"
+		} catch (error: any) {
+			setIsWorkingInABuffer(false)
+			setIsWorking("")
+			setIsCanceling(false)
+			throw error
+		}
+	}
+
+	//--------------------------------------
+
 	const masterShowPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Show Pool - " + toJson(poolInfo?.name))
@@ -1542,6 +1594,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<MasterModalBtn
 									masterGetBackFundAction={masterGetBackFundAction}
 									masterSendBackFundAction={masterSendBackFundAction}
+									masterSendBackFundBatchAction={masterSendBackFundBatchAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorkingParent={handleSetIsWorking} 

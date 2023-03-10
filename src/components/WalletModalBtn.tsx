@@ -123,7 +123,7 @@ export default function WalletModalBtn() {
 			//const walletPrivateKey ="ed25519_sk10xxxxx" // walletMasterPrivateKey1
 			//alert ("walletPrivateKey: " + walletPrivateKey)
 			//const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
-			const lucid = await initializeLucidWithWalletFromSeed(walletSeed)
+			const lucid = await initializeLucidWithWalletFromSeed(walletSeed, {addressType : "Base", accountIndex: 0} )
 			const adddressWallet = await lucid!.wallet.address()
 			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
 			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;

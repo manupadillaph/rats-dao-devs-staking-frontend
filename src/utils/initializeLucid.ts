@@ -42,7 +42,12 @@ export const initializeLucidWithWalletFromPrivateKey = async (walletPrivateKey: 
     }
 }
 
-export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
+export const initializeLucidWithWalletFromSeed = async (
+    walletSeed: string, 
+    options?: {
+        addressType?: "Base" | "Enterprise";
+        accountIndex?: number;
+    }) => {
     // console.log ("initializeLucidWithWalletFromSeed - init")
     try {
         const lucid = await Lucid.new(
@@ -51,7 +56,7 @@ export const initializeLucidWithWalletFromSeed = async (walletSeed: string) => {
                 process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 'Mainnet':'Preview'
         )
         
-        await lucid.selectWalletFromSeed(walletSeed)
+        await lucid.selectWalletFromSeed(walletSeed, options)
     
         console.log ("initializeLucidWithWalletFromSeed - OK")
     

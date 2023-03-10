@@ -22,10 +22,13 @@ export default function MasterModalBtn(
 
 	{ 	actionName, 
 		actionIdx, 
-		masterSendBackFundAction, 
 		masterGetBackFundAction, 
+		masterSendBackFundAction,
+		masterSendBackFundBatchAction,
 		postActionSuccess,
 		postActionError,
+		setIsWorkingParent, 
+		cancel, 
 		poolInfo_, 
 		statePoolData, 
 		swEnabledBtnOpenModal, 
@@ -33,16 +36,17 @@ export default function MasterModalBtn(
 		messageFromParent, 
 		hashFromParent, 
 		isWorkingFromParent, 
-		setIsWorkingParent, 
 		swPaddintTop}:
 		{
 			actionName: string, 
 			actionIdx: string,
 			masterGetBackFundAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
 			masterSendBackFundAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets, master_Selected?: Master) => Promise<any>,
+			masterSendBackFundBatchAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets, master_Selected?: Master) => Promise<any>,
 			postActionSuccess?: () => Promise<any>,
 			postActionError?: () => Promise<any>,
 			setIsWorkingParent?: (isWorking: string) => Promise<any>,
+			cancel?: () => Promise<any>,
 			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
 			swEnabledBtnOpenModal: boolean, 
@@ -117,6 +121,11 @@ export default function MasterModalBtn(
 		setIsWorking(isWorking)
 		setIsWorkingParent ? await setIsWorkingParent(actionNameWithIdx) : null
 		return isWorking
+	}
+
+	const handleCancel = async () => {
+		console.log("UsersModalBtn - " + poolInfo.name + " - handleCancel")
+		cancel ? await cancel() : null
 	}
 
 	return (
@@ -253,6 +262,23 @@ export default function MasterModalBtn(
 								master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  
 							/>
 							
+							<ActionWithInputModalBtn 
+								action={masterSendBackFundBatchAction}  
+								postActionSuccess={postActionSuccess}
+								postActionError={postActionError} 
+								setIsWorking={handleSetIsWorking} 
+								cancel={handleCancel}
+								actionName="Send Back Fund Batch" actionIdx={poolInfo.name + "-MasterModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<li className="info">Return the Fund to the Users</li>\
+								<li className="info">This process will generate multiple Transactions that you will need to sign</li>\
+								<li className="info">Please note, the Pool must be Terminated and all Funds must be deleted before utilizing this feature.</li>'} 
+								poolInfo={poolInfo} 
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded } 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swTerminated && poolInfo.swZeroFunds} 
+								swShow={poolInfo.swPreparado}
+								swHash={false} 
+							/>			
+
 							<div className="modal__action_separator">
 								<br></br>
 								<button className="btn btnStakingPool"
