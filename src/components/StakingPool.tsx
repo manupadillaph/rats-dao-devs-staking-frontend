@@ -406,12 +406,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 												staking_AC_isAda? 
 													'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>' 
+													<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
 												: 
 													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>\
+													<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
 													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
@@ -438,12 +438,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												: 
 													staking_AC_isAda? 
 														'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>' 
+														<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
 													: 
 														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Token (<b>' + userDeposit_TN + '</b>).</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the User Token (<b>' + userDeposit_TN + '</b>).</li>\
+														<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
 														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
 														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
