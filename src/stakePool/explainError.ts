@@ -155,6 +155,10 @@ export function explainErrorTx(errorIn: any): string {
                 res += sep + "There was an incorrect Fee calculation, please try again later!"; sep = ", ";
             }
 
+            if (res === "" && error.includes("InsufficientCollateral") ) {
+                res += sep + "You have no available UTxO with enough ADA to use as collateral! Get more ADA and try the Split Wallet UTxO button to create an UTxO that can be used as collateral."; sep = ", ";
+            }
+
             if (res === "" && error.includes("Error: 400:") && error.includes("consumed")) {
                 res += sep + "A UTxO that is needed does not exist. It may be that another User already consumes it, please try again later! Also check if you are connected with the right wallet and network"; sep = ", ";
             }
