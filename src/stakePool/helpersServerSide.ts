@@ -288,7 +288,8 @@ export async function serverSide_updateStakingPool (poolInfo: StakingPoolDBInter
                 eUTxOs_With_Datum = eUTxOs_With_Datum.concat(eUTxOs_With_Datum_Missing)
                 console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs added (" + eUTxOs_With_Datum_Missing.length + ")")
             }else{
-                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script Match (" + uTxOsAtScript.length + ")")
+                console.log("ServerSide - Update StakingPool - " + poolInfo.name + " - eUTxOs At Script Match (" + uTxOsAtScript.length + ") - Something is strange... Will try again")
+                tx_count = 0
             }
         }else{
             console.log ("ServerSide - Update StakingPool - " + poolInfo.name + " - new_tx_count: " +  new_tx_count + " == old_tx_count: " + tx_count)
