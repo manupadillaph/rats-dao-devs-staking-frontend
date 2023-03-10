@@ -23,8 +23,11 @@ export default function UsersModalBtn(
 	{ 	actionName, 
 		actionIdx, 
 		masterSendBackDepositAction, 
+		masterSendBackDepositBatchAction,
 		postActionSuccess,
 		postActionError,
+		setIsWorkingParent, 
+		cancel, 
 		poolInfo_, 
 		statePoolData, 
 		swEnabledBtnOpenModal, 
@@ -32,15 +35,17 @@ export default function UsersModalBtn(
 		messageFromParent, 
 		hashFromParent, 
 		isWorkingFromParent, 
-		setIsWorkingParent, 
+		
 		swPaddintTop }:
 		{
 			actionName: string, 
 			actionIdx: string,
 			masterSendBackDepositAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
+			masterSendBackDepositBatchAction: (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[], assets?: Assets) => Promise<any>,
 			postActionSuccess?: () => Promise<any>,
 			postActionError?: () => Promise<any>,
 			setIsWorkingParent?: (isWorking: string) => Promise<any>,
+			cancel?: () => Promise<any>,
 			poolInfo_: StakingPoolDBInterface, 
 			statePoolData: ReturnType<typeof useStatePoolData>,
 			swEnabledBtnOpenModal: boolean, 
@@ -116,6 +121,11 @@ export default function UsersModalBtn(
 		return isWorking
 	}
 
+	const handleCancel = async () => {
+		console.log("UsersModalBtn - " + poolInfo.name + " - handleCancel")
+		cancel ? await cancel() : null
+	}
+
 	async function downloadCVS(){
 		let csvContent = "data:text/csv;charset=utf-8," + "Tx Hash,User Pkh,Invest Amount (" + poolInfo.staking_UI + "),Rewards Harvested (" + poolInfo.harvest_UI + "),Rewards Not Claimed (" + poolInfo.harvest_UI + "),ADA locked\n" +  eUTxOs_With_UserDatum.map(
 			e => (
@@ -131,11 +141,6 @@ export default function UsersModalBtn(
 		var encodedUri = encodeURI(csvContent);
 		window.open(encodedUri);
 	}
-
-
-	
-
-
 
 	return (
 		<div className="modal__action_separator">
@@ -267,6 +272,21 @@ export default function UsersModalBtn(
 								swHash={true} 
 								eUTxOs_Selected={eUTxOs_UserDatum_Selected} 
 							/>
+
+							<ActionWithInputModalBtn 
+								action={masterSendBackDepositBatchAction}  
+								postActionSuccess={postActionSuccess}
+								postActionError={postActionError} 
+								setIsWorking={handleSetIsWorking} 
+								cancel={handleCancel}
+								actionName="Send Back Deposit Batch" actionIdx={poolInfo.name + "-UserModal"} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+								description={'<li className="info">This process will generate multiple Transactions that you will need to sign</li>'} 
+								poolInfo={poolInfo} 
+								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 
+								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && poolInfo.swFunded} 
+								swShow={poolInfo.swPreparado && poolInfo.swTerminated}
+								swHash={false} 
+							/>							
 
 							<div className="modal__action_separator">
 								<br></br>

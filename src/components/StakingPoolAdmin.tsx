@@ -1063,6 +1063,47 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	//--------------------------------------
 
+	const masterSendBackDepositBatchAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+		console.log("StakingPoolAdmin - Send Back Deposit Batch - " + toJson(poolInfo?.name))
+		setActionMessage("Creating Transfer, please wait...")
+		setIsWorkingInABuffer(true)
+		setIsCanceling(false)
+		try {
+			if (eUTxOs_With_UserDatum!.length === 0) {
+				throw "No Deposits to Send Back"
+			}
+			var poolInfo_updated = poolInfo!
+			var swSeparateTx = false
+			for (var i = 0; i < eUTxOs_With_UserDatum!.length && !isCancelling.current; i++) {
+				if (swSeparateTx) {
+					poolInfo_updated = await updateDetailsStakingPoolAndWallet()
+					swSeparateTx = false
+				}
+				setActionMessage("Send Back Deposit " + (i + 1) + " of " + eUTxOs_With_UserDatum!.length + ", please wait..." + (isCancelling.current ? " (Canceling when this Tx finishes)" : ""))
+				const txHash = await masterSendBackDepositAction(poolInfo_updated, [eUTxOs_With_UserDatum[i]]);
+				pushSucessNotification("Send Back Deposit " + (i + 1) + " of " + eUTxOs_With_UserDatum!.length, txHash, true);
+				setActionHash("")
+				swSeparateTx = true
+			}
+			if (isCancelling.current) {
+				setIsWorkingInABuffer(false)
+				setIsCanceling(false)
+				setIsWorking("")
+				throw "You have cancel the operation"
+			}
+			setIsWorkingInABuffer(false)
+			setIsWorking("")
+			return "Send Back Deposit Batch executed"
+		} catch (error: any) {
+			setIsWorkingInABuffer(false)
+			setIsWorking("")
+			setIsCanceling(false)
+			throw error
+		}
+	}
+
+	//--------------------------------------
+
 	const masterShowPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
 		console.log("StakingPoolAdmin - Show Pool - " + toJson(poolInfo?.name))
@@ -1486,9 +1527,11 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 								<UsersModalBtn
 									masterSendBackDepositAction={masterSendBackDepositAction}
+									masterSendBackDepositBatchAction={masterSendBackDepositBatchAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
 									setIsWorkingParent={handleSetIsWorking}
+									cancel={handleCancel}
 									actionName="View Deposits" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorkingFromParent={isWorking} 
 									poolInfo_={poolInfo}
 									statePoolData={statePoolData}

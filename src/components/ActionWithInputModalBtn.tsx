@@ -341,10 +341,10 @@ export default function ActionWithInputModalBtn(
 													<button disabled={ tokenAmount === "0" ? true: false}  style={{ width: 45}} onClick={e => {
 															if(inputDecimals){
 																const pot = Math.pow(10, inputDecimals)
-																console.log("zero - setTokenAmountFormatedValue " + (Number("0")/pot).toString())
+																//console.log("zero - setTokenAmountFormatedValue " + (Number("0")/pot).toString())
 																setTokenAmountFormatedValue((Number("0")).toString())
 															}else{
-																console.log("zero - setTokenAmountFormatedValue " + Number("0").toString())
+																//console.log("zero - setTokenAmountFormatedValue " + Number("0").toString())
 																setTokenAmountFormatedValue(Number("0").toString())
 															}
 															setTokenAmount("0")
@@ -355,7 +355,7 @@ export default function ActionWithInputModalBtn(
 																const { formattedValue, value } = values;
 																// formattedValue = $2,223
 																// floatValue = 2223
-																console.log("onChange NumericFormat f:" +  formattedValue + " - v: " + value)
+																//console.log("onChange NumericFormat f:" +  formattedValue + " - v: " + value)
 																if(inputDecimals){
 																	const pot = Math.pow(10, inputDecimals)
 																	// console.log("onChange NumericFormat - setTokenAmount " + (Number(value) * pot).toString())
@@ -373,10 +373,10 @@ export default function ActionWithInputModalBtn(
 																console.log("max - setTokenAmount " +  userMaxTokens?.toString())
 																if(inputDecimals){
 																	const pot = Math.pow(10, inputDecimals)
-																	console.log("max - setTokenAmountFormatedValue " + (Number(userMaxTokens?.toString())/pot).toString())
+																	//console.log("max - setTokenAmountFormatedValue " + (Number(userMaxTokens?.toString())/pot).toString())
 																	setTokenAmountFormatedValue((Number(userMaxTokens?.toString())/pot).toString())
 																}else{
-																	console.log("max - setTokenAmountFormatedValue " + Number(userMaxTokens?.toString()).toString())
+																	//console.log("max - setTokenAmountFormatedValue " + Number(userMaxTokens?.toString()).toString())
 																	setTokenAmountFormatedValue(Number(userMaxTokens?.toString()).toString())
 																}
 																setTokenAmount(userMaxTokens?.toString())
