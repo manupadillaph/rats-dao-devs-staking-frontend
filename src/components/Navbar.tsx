@@ -8,8 +8,8 @@ export default function Navbar({swCreate}: {swCreate ?: boolean}) {
 			<div className="navbar-section navbar-start">
 				<ul>
 					<li><a href="/">Home</a></li>
-					<li><a href="/withdraw">My Deposits V2</a></li>
-					<li><a href="https://staking.ratsdao.io/withdraw">Stake V1</a></li>
+					<li><a href="/withdraw">My Deposits</a></li>
+					<li><a href="http://69.55.59.109:3080/withdraw">Legacy Stake</a></li>
 					<li><a href="/admin">Admin</a></li>
 					<li><a href="/create">Create</a></li>
 					{swCreate === true?
