@@ -51,11 +51,12 @@ export async function delegateTx(lucid: Lucid, protocolParameters: any, addressW
     var tx = lucid.newTx();
     var tx_Building = createTx(lucid, protocolParameters, tx);
     //------------------
-    console.log (functionName + ": " + poolId)
-    console.log (functionName + ": " + rewardAddress)
+    console.log (functionName + " - poolId: " + poolId)
+    console.log (functionName + " - addressWallet: " + addressWallet)
+    console.log (functionName + " - rewardAddress: " + rewardAddress)
     //------------------
     tx_Building = await tx_Building
-        .registerStake(rewardAddress)
+        //.registerStake(rewardAddress)
         .delegateTo(rewardAddress, poolId, redeemer)
         .addSigner(addressWallet)
     //------------------
