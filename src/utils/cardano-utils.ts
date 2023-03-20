@@ -6,6 +6,8 @@ import { bytesUint8ArraToHex } from "./utils";
 //---------------------------------------------------------------
 //USING CARDANO MULTIPLATAFORM, NO LUCID:
 
+
+
 export const addrToPubKeyHash = (bech32Addr: string) => {
     const baseAddress = BaseAddress.from_address(
         Address.from_bech32(bech32Addr)

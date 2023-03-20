@@ -38,7 +38,7 @@ export async function splitUTxOsTx(lucid: Lucid, protocolParameters: any, addres
 
 //--------------------------------------
 
-export async function delegateTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, rewardAddress: string, poolId: PoolId, redeemer?: Redeemer) {
+export async function delegateTx(lucid: Lucid, protocolParameters: any, addressWallet: Address, rewardAddress: string, poolId: PoolId, swAlreadyRegisterStakeAddress: Boolean, redeemer?: Redeemer) {
     //------------------
     const functionName = "EndPoint Tx - Delegate";
     //------------------
@@ -55,11 +55,16 @@ export async function delegateTx(lucid: Lucid, protocolParameters: any, addressW
     console.log (functionName + " - addressWallet: " + addressWallet)
     console.log (functionName + " - rewardAddress: " + rewardAddress)
     //------------------
+    if(!swAlreadyRegisterStakeAddress){
+        tx_Building = await tx_Building.registerStake(rewardAddress)
+    }
+    //------------------
     tx_Building = await tx_Building
-        //.registerStake(rewardAddress)
         .delegateTo(rewardAddress, poolId, redeemer)
         .addSigner(addressWallet)
     //------------------
     const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
     return txComplete_FIXED;
 }
+
+

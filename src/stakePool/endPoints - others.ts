@@ -1,4 +1,4 @@
-import { Assets, PoolId } from 'lucid-cardano';
+import { Assets, C, fromHex } from 'lucid-cardano';
 import { AssetClass, BIGINT, EUTxO } from '../types';
 import { userDeposit_TN, userID_TN } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
@@ -71,11 +71,33 @@ export async function delegate(wallet: Wallet, poolInfo: StakingPoolDBInterface)
     //------------------
     // const master = wallet.pkh!;
     const addr = await lucid!.wallet.address();
-    const rewardAddress = await lucid!.wallet.rewardAddress();
+    const rewardAddressForTx = await lucid!.wallet.rewardAddress();
     //------------------
     const poolId = process.env.NEXT_PUBLIC_STAKEPOOLID
     //------------------
-    var tx_Binded = delegateTx.bind(functionName, lucid!,protocolParameters, addr, rewardAddress, poolId!);
+    let swAlreadyRegisterStakeAddress = false
+    //------------------
+    const [rewardAddressHex] = await wallet.walletApi!.getRewardAddresses();
+    const addressFromHex = C.Address.from_bytes(fromHex(rewardAddressHex))
+    console.log (functionName + " - addressFromHex: " + toJson(addressFromHex))
+    const rewardAddress = C.RewardAddress.from_address(addressFromHex)
+    console.log (functionName + " - rewardAddress: " + toJson(rewardAddress))
+    if(rewardAddress){
+        const rewardAddressBech32 = rewardAddress
+                .to_address()
+                .to_bech32(undefined);
+        console.log (functionName + " - rewardAddressBech32: " + toJson(rewardAddressBech32))
+        const delegatedAt = await lucid!.delegationAt(rewardAddressBech32)
+        console.log (functionName + " - delegatedAt: " + toJson(delegatedAt))
+        //------------------
+        swAlreadyRegisterStakeAddress = (delegatedAt.poolId != null)
+        //------------------
+        if (poolId === delegatedAt.poolId) {
+            throw "Already delegated to this Pool";
+        }
+    }        
+    //------------------
+    var tx_Binded = delegateTx.bind(functionName, lucid!,protocolParameters, addr, rewardAddressForTx, poolId!, swAlreadyRegisterStakeAddress);
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
     //------------------
