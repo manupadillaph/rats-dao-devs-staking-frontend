@@ -338,6 +338,25 @@ export function find_EUTxO_In_EUTxOs(eUTxO: EUTxO, eUTxOs: EUTxO[]) {
 
 //------------------------------------------------------
 
+export function findSmallerUTxO(eUTxOs: EUTxO[]) {
+    
+    // if (eUTxOs.length == 0) return undefined
+
+    let [min, minIndex] = [calculateMinAdaOfAssets (eUTxOs[0].uTxO.assets, false), 0]
+
+    for (var i = 1; i < eUTxOs.length; i++) {
+        const min_ = calculateMinAdaOfAssets (eUTxOs[i].uTxO.assets, false)
+        if (min_ < min) {
+            min = min_
+            minIndex = i
+        }
+    }
+
+    return eUTxOs[minIndex]
+}
+
+//------------------------------------------------------
+
 export async function findDatumIfMissing(lucid: Lucid, uTxO: UTxO): Promise<UTxO> {
     console.log ("findDatumIfMissing")
     if (uTxO.datumHash && !uTxO.datum) {
