@@ -265,13 +265,14 @@ export default function Navbar() {
 				</div>
 			</div>
 
-			{/* <div>
+			<div>
 				{"RatsDAOAdmin: " + session?.user.swRatsDAOAdmin}<br></br>
 				{"RatsDAOCreate: " + session?.user.swRatsDAOCreator}<br></br>
 				{"PortalAdmin: " + session?.user.swPortalAdmin}<br></br>
 				{"PortalUploader: " + session?.user.swPortalUploader}<br></br>
 				{"StakingAdmin: " + swWalletIsAdminOfSomePool}<br></br>
-			</div> */}
+			</div>
+			
 		</div>
 		
 	)
