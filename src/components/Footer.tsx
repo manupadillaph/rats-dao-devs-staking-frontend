@@ -2,19 +2,19 @@ export default function Footer() {
 	return (
 		<div className="footer">
 		  <div className="footer__col footer__col__3">
-		    <h5>$RAT Governance Token Policy ID:</h5>
+		    <h5>{process.env.NEXT_PUBLIC_CLIENT_TOKEN_NAME}:</h5>
 		    <p className="text-break">
-			d5dec6074942b36b50975294fd801f7f28c907476b1ecc1b57c916ed
+			{process.env.NEXT_PUBLIC_CLIENT_TOKEN_POLICY}
 		    </p>
 		  </div>
 		  <div className="footer__col footer__col__1">
-		    <h1>RatsDAO</h1>
+		    <h1>{process.env.NEXT_PUBLIC_CLIENT_NAME}</h1>
 		  </div>
 		  <div className="footer__col footer__col__2">
 		    <div className="social__media">
 		      <a
 		        className="discord"
-		        href="https://discord.gg/jqkwMH3YGh"
+		        href={process.env.NEXT_PUBLIC_CLIENT_DISCORD}
 		        target="_blank"
 		        rel="noreferrer noopener"
 		      >
@@ -25,7 +25,7 @@ export default function Footer() {
 		      </a>
 		      <a
 		        className="twitter"
-		        href="https://twitter.com/RatsDao"
+		        href={process.env.NEXT_PUBLIC_CLIENT_TWITTER}
 		        target="_blank"
 		        rel="noreferrer noopener"
 		      >
@@ -36,7 +36,7 @@ export default function Footer() {
 		      </a>
 		      <a
 		        className="notion"
-		        href="https://ratsdao.notion.site/Rats-DAO-e47d5b4242304c2ebad90947696e6e20"
+		        href={process.env.NEXT_PUBLIC_CLIENT_NOTION}
 		        target="_blank"
 		        rel="noreferrer noopener"
 		      >

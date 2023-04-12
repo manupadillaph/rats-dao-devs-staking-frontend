@@ -6,12 +6,10 @@ import dynamic from 'next/dynamic'
 //--------------------------------------
 
 export default function Layout({
-	children,
-	swCreate
+	children
 }: {
 	children: React.ReactNode
 	home?: boolean
-	swCreate?: boolean
 }) {
 
 	return (
@@ -19,7 +17,7 @@ export default function Layout({
 		<div className="primary_content"> 
 			
 			<div className="content">
-				<Navbar swCreate={swCreate}/>
+				<Navbar />
 
 				<div className="section">
 					

@@ -45,7 +45,7 @@ const Withdraw : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 	}, [stakingPools]);
 	
 	return (
-		<Layout swCreate={session?.user.swCreate}>
+		<Layout>
 		{
 			(status == "loading")? 
 				<Message message={"Loading Page..."} />

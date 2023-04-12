@@ -5,12 +5,12 @@ import Skeleton from "react-loading-skeleton";
 import { getFundAmountsRemains_ForMaster } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO, Master, Master_Funder } from "../types";
-import { ADA_Decimals, ADA_UI, maxTokensWithDifferentNames, poolDatum_ClaimedFund } from "../types/constantes";
+import { ADA_Decimals, ADA_UI, poolDatum_ClaimedFund } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { formatHash } from "../utils/cardano-helpers";
 import { formatAmount, toJson } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
-import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -231,7 +231,7 @@ export default function MasterModalBtn(
 
 						<div className="modal__content_btns">
 							
-							<ActionWithInputModalBtn 
+							<ActionModalBtn 
 								action={masterGetBackFundAction} 
 								postActionSuccess={postActionSuccess}
 								postActionError={postActionError}
@@ -246,7 +246,7 @@ export default function MasterModalBtn(
 								swHash={true} 
 							/>
 							
-							<ActionWithInputModalBtn 
+							<ActionModalBtn 
 								action={masterSendBackFundAction} 
 								postActionSuccess={postActionSuccess}
 								postActionError={postActionError}
@@ -262,7 +262,7 @@ export default function MasterModalBtn(
 								master_Selected={masterFunders_Selected.length>0?masterFunders_Selected[0].mfMaster:undefined }  
 							/>
 							
-							<ActionWithInputModalBtn 
+							<ActionModalBtn 
 								action={masterSendBackFundBatchAction}  
 								postActionSuccess={postActionSuccess}
 								postActionError={postActionError} 

@@ -50,9 +50,8 @@ const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =
 			<br></br>
 			walletStore?.pkh: {walletStore?.pkh}
 			<br></br> */}
-		<Layout swCreate={session?.user.swCreate}>
+		<Layout >
 		{
-			
 			
 			(status == "loading")? 
 				<Message message={"Loading Page..."} />
@@ -88,7 +87,7 @@ export async function getServerSideProps(context : any) {
 		if (session) {
 			console.log ("Admin getServerSideProps - init - session:", toJson (session));
 			if (session.user.pkh !== undefined) {
-				rawDataStakingPools  = await getStakingPools(false, session.user.pkh, session.user.swAdmin)
+				rawDataStakingPools  = await getStakingPools(false, session.user.pkh, session.user.swPortalAdmin)
 			}else{
 				rawDataStakingPools = []
 			}

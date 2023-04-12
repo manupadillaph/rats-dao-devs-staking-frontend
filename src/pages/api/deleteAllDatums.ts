@@ -23,7 +23,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
     }
     const sesionPkh = session?.user.pkh
     //--------------------------------
-	if (!(session?.user.swCreate)){
+	if (!(session?.user.swPortalAdmin)){
 		console.error("/api/deleteAllDatums - You Can't Delete Datums"); 
 		res.status(400).json({ msg: "You Can't Delete Datums"})
 		return 

@@ -7,7 +7,7 @@ import SettingsForm from '../components/SettingsForm';
 const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = ({} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	const { data: session, status } = useSession()
 	return (
-		<Layout swCreate={session?.user.swCreate}>
+		<Layout>
 		{
 			(status == "loading")? 
 				<Message message={"Loading Page..."} />
@@ -15,7 +15,7 @@ const Settings : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>
 				(status === "unauthenticated")? 
 						<Message message={"Connect you wallet to enter in Settings Page"} />
 					:
-						session?.user.swCreate? 
+						(session?.user.swPortalAdmin)? 
 							(typeof window !== 'undefined' && <SettingsForm/>)
 						:
 							<Message message={"Settings Page is restricted to especific Wallets"} />

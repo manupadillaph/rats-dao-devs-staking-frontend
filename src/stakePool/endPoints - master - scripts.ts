@@ -17,7 +17,7 @@ import {
     masterDeleteScriptsTx
 } from "./endPointsTx - master - scripts";
 import { getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList } from './helpersEUTxOs';
-import { apiGetEUTxOsDBByStakingPool } from './apis';
+import { apiGetEUTxOsDBByStakingPool, apiGetStakingPoolWithScriptsDB } from './apis';
 
 //--------------------------------------
 
@@ -71,12 +71,14 @@ export async function masterAddScriptValidator(wallet: Wallet, poolInfo: Staking
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_Validator_Datum, poolInfo.script
+        script_Validator_Datum, poolInfoWithScripts.script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -135,12 +137,14 @@ export async function masterAddScriptsMasterFund(wallet: Wallet, poolInfo: Staki
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_Fund_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_Fund_Datum, poolInfo.txID_Master_Fund_Script
+        script_TxID_Master_Fund_Datum, poolInfoWithScripts.txID_Master_Fund_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -200,12 +204,14 @@ export async function masterAddScriptsMasterFundAndMerge(wallet: Wallet, poolInf
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_FundAndMerge_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_FundAndMerge_Datum, poolInfo.txID_Master_FundAndMerge_Script
+        script_TxID_Master_FundAndMerge_Datum, poolInfoWithScripts.txID_Master_FundAndMerge_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -265,12 +271,14 @@ export async function masterAddScriptsMasterSplitFund(wallet: Wallet, poolInfo: 
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_SplitFund_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_SplitFund_Datum, poolInfo.txID_Master_SplitFund_Script
+        script_TxID_Master_SplitFund_Datum, poolInfoWithScripts.txID_Master_SplitFund_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -330,12 +338,14 @@ export async function masterAddScriptsMasterClosePool(wallet: Wallet, poolInfo: 
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_ClosePool_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_ClosePool_Datum, poolInfo.txID_Master_ClosePool_Script
+        script_TxID_Master_ClosePool_Datum, poolInfoWithScripts.txID_Master_ClosePool_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -396,12 +406,14 @@ export async function masterAddScriptsMasterTerminatePool(wallet: Wallet, poolIn
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_TerminatePool_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_TerminatePool_Datum, poolInfo.txID_Master_TerminatePool_Script
+        script_TxID_Master_TerminatePool_Datum, poolInfoWithScripts.txID_Master_TerminatePool_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -462,12 +474,14 @@ export async function masterAddScriptsMasterEmergency(wallet: Wallet, poolInfo: 
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_Emergency_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_Emergency_Datum, poolInfo.txID_Master_Emergency_Script
+        script_TxID_Master_Emergency_Datum, poolInfoWithScripts.txID_Master_Emergency_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -529,12 +543,14 @@ export async function masterAddScriptsMasterDeleteFund(wallet: Wallet, poolInfo:
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_DeleteFund_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_DeleteFund_Datum, poolInfo.txID_Master_DeleteFund_Script
+        script_TxID_Master_DeleteFund_Datum, poolInfoWithScripts.txID_Master_DeleteFund_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -590,12 +606,14 @@ export async function masterAddScriptsMasterAddScripts(wallet: Wallet, poolInfo:
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_AddScripts_Datum, poolInfo.txID_Master_AddScripts_Script
+        script_TxID_Master_AddScripts_Datum, poolInfoWithScripts.txID_Master_AddScripts_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -656,12 +674,14 @@ export async function masterAddScriptsMasterDeleteScripts(wallet: Wallet, poolIn
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_DeleteScripts_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_DeleteScripts_Datum, poolInfo.txID_Master_DeleteScripts_Script
+        script_TxID_Master_DeleteScripts_Datum, poolInfoWithScripts.txID_Master_DeleteScripts_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -722,12 +742,14 @@ export async function masterAddScriptsMasterSendBackFund(wallet: Wallet, poolInf
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_SendBackFund_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_SendBackFund_Datum, poolInfo.txID_Master_SendBackFund_Script
+        script_TxID_Master_SendBackFund_Datum, poolInfoWithScripts.txID_Master_SendBackFund_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -788,12 +810,14 @@ export async function masterAddScriptsMasterSendBackDeposit(wallet: Wallet, pool
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_Master_SendBackDeposit_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_Master_SendBackDeposit_Datum, poolInfo.txID_Master_SendBackDeposit_Script
+        script_TxID_Master_SendBackDeposit_Datum, poolInfoWithScripts.txID_Master_SendBackDeposit_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -861,12 +885,14 @@ export async function masterAddScriptsUserDeposit(wallet: Wallet, poolInfo: Stak
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_User_Deposit_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_User_Deposit_Datum, poolInfo.txID_User_Deposit_Script
+        script_TxID_User_Deposit_Datum, poolInfoWithScripts.txID_User_Deposit_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -927,12 +953,14 @@ export async function masterAddScriptsUserHarvest(wallet: Wallet, poolInfo: Stak
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_User_Harvest_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_User_Harvest_Datum, poolInfo.txID_User_Harvest_Script
+        script_TxID_User_Harvest_Datum, poolInfoWithScripts.txID_User_Harvest_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];
@@ -993,12 +1021,14 @@ export async function masterAddScriptsUserWithdraw(wallet: Wallet, poolInfo: Sta
     const redeemer_Master_AddScripts = new Redeemer_Master_AddScripts(master, new Maybe<StakeCredentialPubKeyHash>(masterStakeCredential))
     const redeemer_For_Mint_ScriptIDs = new Redeemer_Mint_TxID(redeemer_Master_AddScripts);
     //------------------
-   var tx_Binded = masterAddScriptsTx.bind(functionName,
-        lucid!, protocolParameters, poolInfo, masterAddr,
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["txID_Master_AddScripts_Script", "txID_User_Withdraw_Script"])
+    //------------------
+    var tx_Binded = masterAddScriptsTx.bind(functionName,
+        lucid!, protocolParameters, poolInfo, poolInfoWithScripts, masterAddr,
         eUTxO_With_Script_TxID_Master_AddScripts_Datum,
         eUTxO_With_PoolDatum.uTxO,
         redeemer_For_Mint_ScriptIDs, value_For_Mint_ScriptIDs,
-        script_TxID_User_Withdraw_Datum, poolInfo.txID_User_Withdraw_Script
+        script_TxID_User_Withdraw_Datum, poolInfoWithScripts.txID_User_Withdraw_Script
     );
     //------------------
     var eUTxOs_for_consuming: EUTxO[] = [];

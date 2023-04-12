@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Assets } from "lucid-cardano";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
-import { copyToClipboard, formatAmount } from '../utils/utils';
+import { copyToClipboard, formatAmount, toJson } from '../utils/utils';
 import { NumericFormat } from 'react-number-format';
 import { explainErrorTx } from "../stakePool/explainError";
 import { EUTxO, Master } from "../types";
@@ -96,7 +96,7 @@ export default function ActionWithInputModalBtn(
 		if (messageFromParent && messageFromParent !== "" && isWorking === actionNameWithIdx) {
 			setMessage(messageFromParent)
 		} else {
-			setMessage("")
+			//setMessage("")
 		}
 	}, [messageFromParent])
 
@@ -258,7 +258,7 @@ export default function ActionWithInputModalBtn(
 						hash: {hash} <br></br>
 						isWorking: {isWorking} <br></br>
 						swHash: {swHash? "1" : "0"} <br></br>
-						</> */}
+						</>  */}
 
 						{status !== "idle" ?
 							//no esta idle, esta procesando o termino de procesar ok o con error
@@ -353,9 +353,11 @@ export default function ActionWithInputModalBtn(
 													<NumericFormat style={{ width: 210, fontSize: 12 }} type="text" value={tokenAmountFormatedValue} 
 														onValueChange={(values) => {
 																const { formattedValue, value } = values;
+
+																setTokenAmountFormatedValue(formattedValue)
 																// formattedValue = $2,223
 																// floatValue = 2223
-																//console.log("onChange NumericFormat f:" +  formattedValue + " - v: " + value)
+																console.log("onChange NumericFormat f:" +  formattedValue + " - v: " + value)
 																if(inputDecimals){
 																	const pot = Math.pow(10, inputDecimals)
 																	// console.log("onChange NumericFormat - setTokenAmount " + (Number(value) * pot).toString())
@@ -366,6 +368,20 @@ export default function ActionWithInputModalBtn(
 																}
 															}
 														}
+
+														onFocus={ (event) => event.target.select()} 
+
+														isAllowed={(values) => {
+															const { value } = values;
+															// console.log ("isAllowed - value: " + value + " - userMaxTokens: " + userMaxTokens + " - floatValue: " + floatValue)
+															if(inputDecimals){
+																const pot = Math.pow(10, inputDecimals)
+																return  Number(value) >= 0 //Number(value) <= Number(Number(userMaxTokens?.toString())/pot) &&
+															}else{
+																return  Number(value) >= 0 //Number(value) <= Number(Number(userMaxTokens?.toString())) &&
+															}	
+														}}
+														
 														thousandsGroupStyle="thousand" thousandSeparator="," decimalSeparator="." decimalScale={inputDecimals}
 													/>
 
@@ -383,28 +399,18 @@ export default function ActionWithInputModalBtn(
 															}
 														}>MAX</button>
 												</div>
-														
-												{/* 
-												//antigua barra:
-												<input  style={{ width: 300, fontSize: 12 }}
-												type="number"
-												placeholder="Amount"
-												max={userMaxTokens?.toString()}
-												value={tokenAmount}
-												onChange={e => setTokenAmount(Number(e.target.value).toString())}
-												/> */}
-
+											
 												<input style={{ width: 300, fontSize: 12 }} type="range" min={0} max={userMaxTokens?.toString()} value={tokenAmount}
 													onChange={e => {
 														if(inputDecimals){
 															const pot = Math.pow(10, inputDecimals)
-															console.log("onChange slide setTokenAmountFormatedValue: " +  (Number(e.target.value)/pot).toString())
+															// console.log("onChange slide setTokenAmountFormatedValue: " +  (Number(e.target.value)/pot).toString())
 															setTokenAmountFormatedValue((Number(e.target.value)/pot).toString())
 														}else{
-															console.log("onChange slide setTokenAmountFormatedValue: " +  Number(e.target.value).toString())
+															// console.log("onChange slide setTokenAmountFormatedValue: " +  Number(e.target.value).toString())
 															setTokenAmountFormatedValue(Number(e.target.value).toString())
 														}
-														console.log("onChange slide setTokenAmount: " +  Number(e.target.value).toString())
+														// console.log("onChange slide setTokenAmount: " +  Number(e.target.value).toString())
 														setTokenAmount(Number(e.target.value).toString())
 													}}
 												/>
@@ -425,18 +431,22 @@ export default function ActionWithInputModalBtn(
 												disabled={!swEnabledBtnAction || BigInt(userMaxTokens) == 0n}
 												onClick={(e) => {
 														e.preventDefault()
+														console.log ("tokenamnt3:" + tokenAmount)
+														console.log ("tokenamnt3:" + BigInt(tokenAmount))
+
 														if (tokenAmount === "" || BigInt(tokenAmount) <= 0n) {
 															setMessage("Please enter a valid amount greater than zero")
 														} else if (BigInt(tokenAmount) > BigInt(userMaxTokens)) {
-															const input_CS = inputUnitForLucid!.slice(0, 56)
-															const input_TN = inputUnitForLucid!.slice(56)
-															const input_AC_isAda = (input_CS === 'lovelace')
-															const input_AC_isWithoutTokenName = !input_AC_isAda && input_TN == ""	
-															if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
-																setMessage("You have exceeded the maximum amount per transaction for this token which is: " + formatAmount(maxTokensWithDifferentNames, inputDecimals, inputUnitForShowing) )
-															}else{
-																setMessage("You have exceeded the maximum avalaible tokens which is: " + formatAmount(Number(userMaxTokens), inputDecimals, inputUnitForShowing) )
-															}
+															// const input_CS = inputUnitForLucid!.slice(0, 56)
+															// const input_TN = inputUnitForLucid!.slice(56)
+															// const input_AC_isAda = (input_CS === 'lovelace')
+															// const input_AC_isWithoutTokenName = !input_AC_isAda && input_TN == ""	
+															// if (input_AC_isWithoutTokenName && BigInt(userMaxTokens) == BigInt(maxTokensWithDifferentNames)){
+															// 	setMessage("You have exceeded the maximum amount per transaction for this token which is: " + formatAmount(maxTokensWithDifferentNames, inputDecimals, inputUnitForShowing) )
+															// }else{
+															// setMessage("You have exceeded the maximum avalaible tokens which is: " + formatAmount(Number(userMaxTokens), inputDecimals, inputUnitForShowing) )
+															setMessage("You have exceeded the "+ formatAmount(Number(userMaxTokens), inputDecimals, inputUnitForShowing) +" avalaible" )
+															// }
 														} else {
 															setMessage("")
 															let assets: Assets = { [inputUnitForLucid!]: BigInt(tokenAmount) }

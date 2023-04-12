@@ -3,6 +3,7 @@ import { EUTxO, FundDatum, PoolDatum, Redeemer_Burn_TxID, Redeemer_Mint_TxID, Re
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
 import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
+import { apiGetStakingPoolWithScriptsDB } from './apis';
 
 //--------------------------------------
 
@@ -17,6 +18,8 @@ export async function userDepositTx(
 ) {
     //------------------
     const functionName = "EndPoint Tx User - Deposit";
+    //------------------
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_User_Deposit_Script"])
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
@@ -36,14 +39,14 @@ export async function userDepositTx(
     if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_User_Deposit_Script);
     }
     //------------------
     // no consume nada, no necesita el validador
     // if (eUTxO_With_ScriptDatum) {
     //     tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     // } else {
-    //     tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script);
+    //     tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script);
     // }
     //------------------
     tx_Building = await tx_Building
@@ -76,6 +79,8 @@ export async function userHarvestPoolTx(
     //------------------
     const functionName = "EndPoint Tx User - Harvest";
     //------------------
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_User_Harvest_Script"])
+    //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
     const datum_hex_and_values_for_FundDatum: { datum_hex: string; value: Assets; }[] = [];
@@ -102,13 +107,13 @@ export async function userHarvestPoolTx(
     if (eUTxO_With_ScriptDatum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script);
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Harvest_Datum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Harvest_Datum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Harvest_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_User_Harvest_Script);
     }
     //------------------
     tx_Building = await tx_Building
@@ -151,6 +156,8 @@ export async function userWithdrawTx(
     //------------------
     const functionName = "EndPoint Tx User - Withdraw";
     //------------------
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_User_Withdraw_Script", "txID_User_Deposit_Script"])
+    //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
     const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_UserDatum, true);
@@ -169,19 +176,19 @@ export async function userWithdrawTx(
     if (eUTxO_With_ScriptDatum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script);
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Withdraw_Datum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Withdraw_Datum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Withdraw_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_User_Withdraw_Script);
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Deposit_Datum) {
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO]);
     } else {
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Deposit_Script);
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_User_Deposit_Script);
     }
     //------------------
     if (poolDatum_Out !== undefined) {

@@ -19,7 +19,7 @@ import { pushSucessNotification, pushWarningNotification } from "../utils/pushNo
 import { copyToClipboard, formatAmount, toJson } from '../utils/utils';
 import { useStoreActions, useStoreState } from '../utils/walletProvider';
 import ActionWithInputModalBtn from './ActionWithInputModalBtn';
-import ActionWithSelectInputModalBtn from './ActionWithSelectInputModalBtn';
+import ActionWithInputMultiAssetsModalBtn from './ActionWithInputMultiAssetsModalBtn';
 import LoadingSpinner from './LoadingSpinner';
 //--------------------------------------
 
@@ -52,9 +52,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	const [actionHash, setActionHash] = useState("")
 
 	const [walletStakingAmountUI, setWalletStakingAmountUI] = useState<string | 0>(ui_notConnected)
-	const [walletHarvestAmountUI, setWalletHarvestAmountUI] = useState<string | 0>(ui_notConnected)
-	const [maxStakingAmountUI, setMaxStakingAmountUI] = useState<string | 0>(ui_notConnected)
-	const [maxHarvestAmountUI, setMaxHarvestAmountUI] = useState<string | 0>(ui_notConnected)
 
 	const [walletStakingAssets, setWalletStakingAssets] = useState<Assets>({})
 	
@@ -108,39 +105,17 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	const staking_AC_isAda = (staking_CS === 'lovelace')
 	const staking_AC_isWithoutTokenName = !staking_AC_isAda && staking_TN == ""
 	//------------------
-	const harvest_CS = stakingPoolInfo.harvest_Lucid.slice(0, 56)
-	const harvest_TN = stakingPoolInfo.harvest_Lucid.slice(56)
-	const harvest_AC_isAda = (harvest_CS === 'lovelace')
-	const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
-	//------------------
 
 	useEffect(() => {
 		// console.log("StakingPool - " + poolInfo.name + " - useEffect - walletStore.connected: " + walletStore.connected + " - isWalletDataLoaded: " + isWalletDataLoaded)
 		if (walletStore.connected && !isWalletDataLoaded) {
 			setWalletStakingAmountUI(ui_loading)
-			setWalletHarvestAmountUI(ui_loading)
-			setMaxStakingAmountUI(ui_loading)
-			setMaxHarvestAmountUI(ui_loading)
 			setWalletStakingAssets({})
 		} else if (walletStore.connected && isWalletDataLoaded) {
 			//------------------
 			const walletStakingAmount = walletGetTotalOfUnit(poolInfo.staking_Lucid)
-			const walletHarvestAmount = walletGetTotalOfUnit(poolInfo.harvest_Lucid)
 			//------------------
 			setWalletStakingAmountUI(walletStakingAmount.toString())
-			setWalletHarvestAmountUI(walletHarvestAmount.toString())
-			//------------------
-			if (walletStakingAmount > maxTokensWithDifferentNames && staking_AC_isWithoutTokenName) {
-				setMaxStakingAmountUI(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxStakingAmountUI(walletStakingAmount.toString())
-			}
-			//------------------
-			if (walletHarvestAmount > maxTokensWithDifferentNames && harvest_AC_isWithoutTokenName) {
-				setMaxHarvestAmountUI(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxHarvestAmountUI(walletHarvestAmount.toString())
-			}
 			//------------------
 			const assets = uTxOsAtWallet.reduce((acc : Assets, utxo) => { return addAssets (acc, utxo.assets) }, {})
 			const assetsOfAC : Assets = {}
@@ -154,9 +129,6 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 			setWalletStakingAssets(assetsOfAC)
 		} else {
 			setWalletStakingAmountUI(ui_notConnected)
-			setWalletHarvestAmountUI(ui_notConnected)
-			setMaxStakingAmountUI(ui_notConnected)
-			setMaxHarvestAmountUI(ui_notConnected)
 			setWalletStakingAssets({})
 		}
 	}, [walletStore, isWalletDataLoaded])
@@ -395,7 +367,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							{
 								staking_AC_isWithoutTokenName?
 									<>
-										<ActionWithSelectInputModalBtn 
+										<ActionWithInputMultiAssetsModalBtn 
 											action={userDepositAction} 
 											postActionSuccess={updateDetailsStakingPoolAndWallet}
 											postActionError={updateDetailsStakingPoolAndWallet}
@@ -417,10 +389,10 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded}  // && !poolInfo.swClosed
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed}  
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
-											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
+											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 											walletAssets={walletStakingAssets}
 											swPaddintTop={false} 
 										/>
@@ -449,9 +421,9 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} //  && !poolInfo.swClosed
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed}  
 											swShow={poolInfo.swFunded} 
-											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals}  
+											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals}  
 											swHash={true} 
 											swPaddintTop={false} 
 										/>
@@ -468,7 +440,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 									description={poolInfo.swClosed ? '<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' : '<p className="info">Create multiple Transactions for new Deposits in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo} 
-									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={maxStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
+									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
 									swShow={poolInfo.swFunded} 
@@ -573,7 +545,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 													}
 													poolInfo={poolInfo} 
 													swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading} 
-													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading } // && !poolInfo.swTerminated
+													swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && swUserRegistered && !userStakedData.isLoading && !poolInfo.swTerminated} 
 													swShow={true} 
 													swShowInput={true} inputUnitForLucid={poolInfo.harvest_Lucid} inputUnitForShowing={poolInfo.harvest_UI} inputMax={userStakedData.rewardsToPay.toString()} inputDecimals={poolInfo.harvest_Decimals} 
 													swHash={true} 

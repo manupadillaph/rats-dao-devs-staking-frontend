@@ -1,7 +1,7 @@
 import { Html, Head, Main, NextScript } from 'next/document'
 
 export default function Document() {
-  const siteTitle = `RatsDAO Staking Portal`
+  const siteTitle = process.env.NEXT_PUBLIC_CLIENT_PORTAL_NAME
   
   return (
     <Html>
@@ -10,7 +10,7 @@ export default function Document() {
 				<meta name="application-name" content={siteTitle} />
 				<meta
 					name="description"
-					content="RatsDAO Staking Portal - Use your membership for good."
+					content={process.env.NEXT_PUBLIC_CLIENT_PORTAL_DESC}
 				/>
 				<meta
 					property="og:image"

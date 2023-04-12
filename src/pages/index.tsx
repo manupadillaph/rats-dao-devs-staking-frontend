@@ -33,7 +33,7 @@ const Home : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> = 
 	// const StakingPool = dynamic(() => import('../components/StakingPool'), { ssr: false, loading: () => <p>Loading...</p> })
 
 	return (
-		<Layout swCreate={session?.user.swCreate}>
+		<Layout >
 		{
 			(status == "loading")? 
 				<Message message={"Loading Page..."} />

@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - others";
-import { apiGetTokenMetadata, getEstadoDeployAPI, apiCreateStakingPool } from "../stakePool/apis";
+import { apiGetTokenMetadata, apiRequestStakingPool, getEstadoDeployAPI } from "../stakePool/apis";
 import { ADA_Decimals, ADA_UI, maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
@@ -19,51 +19,41 @@ import { AssetClass, EUTxO } from '../types';
 import { newTransaction } from '../utils/cardano-helpersTx';
 import { toJson } from '../utils/utils';
 import { getDecimalsInMetadata } from '../utils/cardano-helpers';
-import JSZip from 'jszip';
-import { saveAs } from "file-saver";
-
-import * as React from 'react';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-
-import { useSearchParams } from "react-router-dom";
 
 //--------------------------------------
 
-export default function CreateStakingPool({query}: any ) {
-
-	console.log("query: "+ toJson(query))
+export default function RequestStakingPool( ) {
 
 	const walletStore = useStoreState(state => state.wallet)
 
-	const [stakingPoolCreated, setStakingPoolCreated] = useState<StakingPoolDBInterface | undefined>(undefined)
+	const [stakingPoolRequested, setStakingPoolRequested] = useState(false)
 
-	const [nombrePool, setNombrePool] = useState(query?.nombrePool? query?.nombrePool : process.env.NEXT_PUBLIC_DEFAULT_POOL_NAME)
-	const [image, setImage] = useState(query?.image? query?.image : process.env.NEXT_PUBLIC_DEFAULT_POOL_IMAGE)
+	const [username, setUsername] = useState("")
+	const [email, setEmail] = useState("")
+
+	const [nombrePool, setNombrePool] = useState("")
+	const [image, setImage] = useState("https://")
 	
-	const [masters, setMasters] = useState(query?.masters? query?.masters : walletStore.pkh)
-	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState(query?.poolID_TxOutRef? query?.poolID_TxOutRef : "")
-	const [beginAt, setBeginAt] = useState(query?.beginAt? query?.beginAt : Date.now().toString())
-	const [deadline, setppDeadline] = useState(query?.deadline? query?.deadline : (parseInt(Date.now().toString()) + 1000000000).toString())
+	const [masters, setMasters] = useState(walletStore.pkh)
+	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState("")
+	const [beginAt, setBeginAt] = useState(Date.now().toString())
+	const [deadline, setppDeadline] = useState((parseInt(Date.now().toString()) + 1000000000).toString())
 
-	const [graceTime, setppGraceTime] = useState(query?.graceTime? query?.graceTime : (1000 * 60 * 60 * 24 * 15).toString()) // 15 dias
+	const [graceTime, setppGraceTime] = useState((1000 * 60 * 60 * 24 * 15).toString()) // 15 dias
 
-	const [staking_CS, setppStakingCS] = useState(query?.staking_CS? query?.staking_CS : "")
-	const [harvest_CS, setppHarvestCS] = useState(query?.harvest_CS? query?.harvest_CS : "")
+	const [staking_CS, setppStakingCS] = useState("")
+	const [harvest_CS, setppHarvestCS] = useState("")
 
-	const [staking_TN, setppStakingTN] = useState(query?.staking_TN? query?.staking_TN : "")
-	const [harvest_TN, setppHarvestTN] = useState(query?.harvest_TN? query?.harvest_TN : "")
+	const [staking_TN, setppStakingTN] = useState("")
+	const [harvest_TN, setppHarvestTN] = useState("")
 
-	const [staking_UI, setStakingUnitForShowing] = useState(query?.staking_UI? query?.staking_UI : ADA_UI)
-	const [harvest_UI, setHarvestUnitForShowing] = useState(query?.harvest_UI? query?.harvest_UI : ADA_UI)
+	const [staking_UI, setStakingUnitForShowing] = useState(ADA_UI)
+	const [harvest_UI, setHarvestUnitForShowing] = useState(ADA_UI)
 
-	const [staking_Decimals, setppStakingDecimals] = useState(query?.staking_Decimals? query?.staking_Decimals : "0")
-	const [harvest_Decimals, setppHarvestDecimals] = useState(query?.harvest_Decimals? query?.harvest_Decimals : "0")
+	const [staking_Decimals, setppStakingDecimals] = useState("0")
+	const [harvest_Decimals, setppHarvestDecimals] = useState("0")
 
-	const [interest, setppInterest] = useState(query?.interest? query?.interest : (365 * 24 * 60).toString()) //uno por minuto
+	const [interest, setppInterest] = useState((365 * 24 * 60).toString()) //uno por minuto
 
 	const [dateInputValueppBeginAt, setDateInputValueppBeginAt] = useState(new Date(parseInt(beginAt)))
 	const [dateInputValueppDeadline, setDateInputValueppDeadline] = useState(new Date(parseInt(deadline)))
@@ -77,25 +67,25 @@ export default function CreateStakingPool({query}: any ) {
 	const [actionHash, setActionHash] = useState("")
 
 	const getUTxOsFromWallet = async () => {
-		console.log("CreateStakingPool - getUTxOsFromWallet")
+		console.log("RequestStakingPool - getUTxOsFromWallet")
 		if (walletStore.connected) {
 			const lucid = walletStore.lucid
 			const uTxOs = await lucid!.wallet?.getUtxos();
 			setUTxOsAtWalllet(uTxOs)
-			console.log("CreateStakingPool - uTxOs.length: " + uTxOs.length)
+			console.log("RequestStakingPool - uTxOs.length: " + uTxOs.length)
 			return uTxOs
 		}
 		return []
 	}
 
 	const getPoolID_TxOutRef = async () => {
-		console.log("CreateStakingPool - getPoolID_TxOutRef")
+		console.log("RequestStakingPool - getPoolID_TxOutRef")
 		if (walletStore.connected) {
 			const lucid = walletStore.lucid
 			setIsUTxOsFromWalletLoading(true)
 			const uTxOs = await getUTxOsFromWallet()
 			setIsUTxOsFromWalletLoading(false)
-			console.log("CreateStakingPool - uTxOsAtWalllet.length: " + uTxOs.length)
+			console.log("RequestStakingPool - uTxOsAtWalllet.length: " + uTxOs.length)
 			if (uTxOs.length > 0){
 				setPoolID_TxOutRef(uTxOs[0].txHash + "#" + uTxOs[0].outputIndex)
 			}
@@ -103,7 +93,7 @@ export default function CreateStakingPool({query}: any ) {
 	}
 
 	const getDataFromWallet = async () => {
-		console.log("CreateStakingPool - getDataFromWallet")
+		console.log("RequestStakingPool - getDataFromWallet")
 		if (walletStore.connected) {
 			if (masters === ""){
 				setMasters(walletStore.pkh)
@@ -117,62 +107,35 @@ export default function CreateStakingPool({query}: any ) {
 	}
 
 	useEffect(() => {
-		// console.log("CreateStakingPool - useEffect - walletStore.connected: " + walletStore.connected)
+		// console.log("RequestStakingPool - useEffect - walletStore.connected: " + walletStore.connected)
 		if (walletStore.connected){
 			getDataFromWallet()
 		}
 	}, [walletStore])
 
 	const handleSetIsWorking = async (isWorking: string) => {
-		console.log("CreateStakingPool - handleCallback isWorking: ", isWorking)
+		console.log("RequestStakingPool - handleCallback isWorking: ", isWorking)
 		setIsWorking(isWorking)
 		return isWorking
 	}
 	
 	//--------------------------------------
 
-	const IniciarPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+	const requestPoolAction = async () => {
 
-		console.log("CreateStakingPool - Iniciar Pool Action")
+		console.log("RequestStakingPool - Request StakingPool")
 
-		window.location.href = "/admin#" + poolInfo!.name;
-	}
-
-	const createNewPoolAction = async () => {
-
-		console.log("CreateStakingPool - Create New StakingPool Files")
-
-		setStakingPoolCreated(undefined)
-	}
-
-	const createPoolFilesAction = async (swCreate: boolean, swAdd: boolean, swDownload: boolean) => {
-
-		console.log("CreatePoolFilesAction - Create StakingPool Files")
-
-		setActionMessage("Creating Smart Contracts, please wait...")
-
-		const timeoutGetEstadoDeploy = setInterval(async function () {
-			const message = await getEstadoDeployAPI(nombrePool)
-			setActionMessage("Creating Smart Contracts: " + message)
-
-			if (message.includes("Done!")) {
-				clearInterval(timeoutGetEstadoDeploy)
-				//setActionMessage("Smart Contracts created!")
-			}
-		}, 4000);
+		setActionMessage("Preparing request, please wait...")
 
 		try {
 
 			let data = {
-				nombrePool: nombrePool,
-				image: image,
-
-				swCreate: swCreate,
-				swAdd: swAdd,
-				swDownload: swDownload,
-
+				username: username,
+				email: email,
 				pkh: walletStore.pkh,
 
+				nombrePool: nombrePool,
+				image: image,
 				masters: masters,
 				poolID_TxOutRef: poolID_TxOutRef,
 				beginAt: beginAt,
@@ -181,62 +144,20 @@ export default function CreateStakingPool({query}: any ) {
 				staking_UI: staking_UI,
 				staking_CS: staking_CS,
 				staking_TN: staking_TN,
+				staking_Decimals: staking_Decimals,
 				harvest_UI: harvest_UI,
 				harvest_CS: harvest_CS,
 				harvest_TN: harvest_TN,
-
-				staking_Decimals: staking_Decimals,
 				harvest_Decimals: harvest_Decimals,
-				
 				interest: interest
 			}
-			
-			const [stakingPool, files] = await apiCreateStakingPool(data)
 
-			if (files && files.length > 0 && swDownload) {
-				setActionMessage("Creating ZIP file...")
-
-				try {
-					const zip = new JSZip();
-					const remoteZips = files.map(async (file: { url: RequestInfo | URL; name: any; type: any; }) => {
-						const response = await fetch(file.url);
-
-						const data = await response.blob();
-						zip.file(`${file.name}`, data);
-
-						return data;
-					});
-
-					Promise.all(remoteZips)
-						.then(() => {
-							zip.generateAsync({ type: "blob" }).then((content) => {
-								saveAs(content, nombrePool + "-files.zip");
-							});
-							setActionMessage("ZIP file created!")
-						})
-						.catch(() => {
-							setActionMessage("Error creating Zip File!")
-						});
-
-					setActionMessage("Smart Contracts created!")
-				} catch (error) {
-					setActionMessage("Error creating Zip File!")
-				}
-			}
-
-			setActionMessage("Smart Contracts created!")
-			clearInterval(timeoutGetEstadoDeploy)
-
-			if(stakingPool && swAdd){
-				setTimeout(setStakingPoolCreated, 3000, stakingPool);
-				setIsWorking("")
-				return "Redirecting page...";
-			}
-
+			await apiRequestStakingPool(data)
+			setActionMessage("Smart Contracts requested!")
+            setTimeout(setStakingPoolRequested, 3000, true);
             setIsWorking("")
-			return "Smart Contracts created!";
+			return "Smart Contracts requested, redirecting page...";
 		} catch (error) {
-			clearInterval(timeoutGetEstadoDeploy)
 			setIsWorking("")
 			throw error
 		}
@@ -245,7 +166,7 @@ export default function CreateStakingPool({query}: any ) {
 	//--------------------------------------
 
 	const splitUTxOsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
-		return await newTransaction ("CreateStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
+		return await newTransaction ("RequestStakingPool - Split Wallet UTxOs", walletStore, poolInfo, splitUTxOs, false, setActionMessage, setActionHash, setIsWorking, eUTxOs_Selected, assets) 
 	}
 
 	//--------------------------------------
@@ -253,35 +174,13 @@ export default function CreateStakingPool({query}: any ) {
 	return (
 		<>
 
-			{stakingPoolCreated ?
-				<div >
-					
-					<br></br>
-					<button className="btn btnStakingPool"
-						onClick={(e) => {
-								e.preventDefault()
-								IniciarPoolAction(stakingPoolCreated)
-							}
-						}
-					>Prepare Pool
-					</button>
-					<br></br>
+			{stakingPoolRequested ?
+
 					<div>
-
-					<li className="info">Prepare your newly created Pool immediately.</li>
-					<li className="info">Avoid making other Transactions as the Contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>
-					</div>
-					<br></br>
-
-					<button className="btn btnStakingPool"
-						onClick={(e) => {
-							e.preventDefault()
-							createNewPoolAction()
-						}
-						}
-					>New Staking Pool
-					</button>
-
+					<p>Thank you for requesting a new staking pool! The {process.env.NEXT_PUBLIC_RATS_NAME} team will be in touch with you shortly to continue the process.</p>
+					<br />
+					<button className="btn btnStakingPool" onClick={() => window.location.href='/'}>Return to Home</button>
+					
 				</div>
 				:
 				<>
@@ -304,8 +203,17 @@ export default function CreateStakingPool({query}: any ) {
 										<form>
 											<h3 className="pool__stat-title">Staking Pool</h3>
 											<br></br>
+											
+											<h4 className="pool__stat-title">Your name</h4>
+											<input name='username' value={username} style={{ width: 400, fontSize: 12 }} onChange={(event) => setUsername(event.target.value)} type="text" required />
+											<br></br><br></br>
 
-											<h4 className="pool__stat-title">Name</h4>
+											<h4 className="pool__stat-title">Email</h4>
+											<input name='email' value={email} style={{ width: 400, fontSize: 12 }} onChange={(event) => setEmail(event.target.value)} type="email" required />
+
+											<br></br><br></br>
+
+											<h4 className="pool__stat-title">Pool Name</h4>
 											<input name='nombrePool' value={nombrePool} style={{ width: 400, fontSize: 12 }} onChange={(event) => setNombrePool(event.target.value)}  ></input>
 											<br></br><br></br>
 
@@ -487,80 +395,31 @@ export default function CreateStakingPool({query}: any ) {
 
 										</form>
 
-										<div className="modal__content_btns">
-											<ActionModalBtn 
-												action={createPoolFilesAction.bind(undefined, true, true, true)} 
-												postActionSuccess={undefined}
-												postActionError={undefined}
-												setIsWorking={handleSetIsWorking} 
-												actionName="Create and Add" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-												description={'<li className="info">Create files and add the Staking Pool in the Portal.</li>\
-												<li className="info">Remember to prepare your newly created Pool immediately.</li>\
-												<li className="info">Avoid making other Transactions as the Contract is dependent on a specific UTxO to mint the PoolID NFT that should not be consumed before.</li>'}
-												swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
-												swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
-												swShow={true}
-												swHash={false} 
-												/>
+										<ActionModalBtn 
+											action={requestPoolAction} 
+											postActionSuccess={undefined}
+											postActionError={undefined}
+											setIsWorking={handleSetIsWorking} 
+											actionName="Request Staking Pool" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											description={'The request you are creating will be sent to the '+process.env.NEXT_PUBLIC_RATS_NAME+' team. Thy will review your request and if approved, your Staking Pool will be added to the list of available Staking Pools.'}
+											swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
+											swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
+											swShow={true}
+											swHash={false} 
+											/>
 
-											<ActionModalBtn 
-												action={createPoolFilesAction.bind(undefined, true, false, true)}
-												postActionSuccess={undefined}
-												postActionError={undefined}
-												setIsWorking={handleSetIsWorking} 
-												actionName="Create and Download" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-												description={'<p className="info" style="text-align: center;">Create files and donwload as Zip. Don\'t add the Staking Pool to the Portal.</p>'}
-												swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
-												swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
-												swShow={true}
-												swHash={false} 
-												/>
-										</div>
-										<div className="modal__content_btns">
-											{process.env.NODE_ENV==="development" && (
-												<>
-												<ActionModalBtn 
-													action={createPoolFilesAction.bind(undefined, false, true, true)}
-													postActionSuccess={undefined}
-													postActionError={undefined}
-													setIsWorking={handleSetIsWorking} 
-													actionName="Create Dummy and Add" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-													description={'<p className="info" style="text-align: center;">Don\'t create new Files, use instead existing ones and add the Staking Pool to the Portal.</p'}
-													swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
-													swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
-													swShow={true}
-													swHash={false} 
-													/>
-
-												<ActionModalBtn 
-													action={createPoolFilesAction.bind(undefined, false, false, true)}
-													postActionSuccess={undefined}
-													postActionError={undefined}
-													setIsWorking={handleSetIsWorking} 
-													actionName="Create Dummy and Download" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-													description={'<p className="info" style="text-align: center;">Don\'t create new Files, use instead existing ones and add the Staking Pool to the Portal.</p'}
-													swEnabledBtnOpenModal={walletStore.connected && uTxOsAtWalllet.length > 0} 
-													swEnabledBtnAction={walletStore.connected && uTxOsAtWalllet.length > 0} 
-													swShow={true}
-													swHash={false} 
-													/>
-												</>
-											)}
-
-											<ActionModalBtn 
-												action={splitUTxOsAction} 
-												postActionSuccess={getDataFromWallet}
-												postActionError={getDataFromWallet}
-												setIsWorking={handleSetIsWorking}
-												actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-												description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
-												swEnabledBtnOpenModal={walletStore.connected}
-												swEnabledBtnAction={walletStore.connected}
-												swShow={true}
-												swHash={true}
-												/>
-
-										</div>
+										<ActionModalBtn 
+											action={splitUTxOsAction} 
+											postActionSuccess={getDataFromWallet}
+											postActionError={getDataFromWallet}
+											setIsWorking={handleSetIsWorking}
+											actionName="Split Wallet UTxOs" actionIdx="1" messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+											description={'<p className="info" style="text-align: center;">It is recommended to Split your Wallet\'s UTxOs (Unspent Transaction Outputs) into smaller amounts. This will make it easier to use them as collateral for Smart Contracts and will provide more flexibility in managing your funds.</p>'}
+											swEnabledBtnOpenModal={walletStore.connected}
+											swEnabledBtnAction={walletStore.connected}
+											swShow={true}
+											swHash={true}
+											/>
 									</div>
 								</div>
 							</div>

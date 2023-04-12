@@ -10,7 +10,7 @@ import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { formatHash } from "../utils/cardano-helpers";
 import { copyToClipboard } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
-import ActionWithInputModalBtn from "./ActionWithInputModalBtn";
+import ActionModalBtn from "./ActionWithInputModalBtn";
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -235,7 +235,7 @@ export default function EUTxOsModalBtn(
 					
 						<div className="modal__content_btns">
 
-							<ActionWithInputModalBtn
+							<ActionModalBtn
 									action={masterUpdateEUTxODBAction}
 									postActionSuccess={postActionSuccess}
 									postActionError={postActionError}

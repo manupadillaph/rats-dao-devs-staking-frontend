@@ -5,12 +5,12 @@ import Skeleton from "react-loading-skeleton";
 import { getRewardsToPay_In_EUTxO_With_UserDatum } from "../stakePool/helpersStakePool";
 import useStatePoolData from '../stakePool/useStatePoolData';
 import { EUTxO } from "../types";
-import { ADA_Decimals, ADA_UI, maxTokensWithDifferentNames } from "../types/constantes";
+import { ADA_Decimals, ADA_UI } from "../types/constantes";
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { formatHash } from "../utils/cardano-helpers";
 import { copyToClipboard, formatAmount } from "../utils/utils";
 import { useStoreState } from '../utils/walletProvider';
-import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionModalBtn from './ActionWithInputModalBtn';
 import LoadingSpinner from "./LoadingSpinner";
 //--------------------------------------
 
@@ -257,7 +257,7 @@ export default function UsersModalBtn(
 
 						<div className="modal__content_btns">
 
-							<ActionWithInputModalBtn 
+							<ActionModalBtn 
 								action={masterSendBackDepositAction} 
 								postActionSuccess={postActionSuccess}
 								postActionError={postActionError}
@@ -273,7 +273,7 @@ export default function UsersModalBtn(
 								eUTxOs_Selected={eUTxOs_UserDatum_Selected} 
 							/>
 
-							<ActionWithInputModalBtn 
+							<ActionModalBtn 
 								action={masterSendBackDepositBatchAction}  
 								postActionSuccess={postActionSuccess}
 								postActionError={postActionError} 

@@ -1,10 +1,12 @@
 
-import { MintingPolicy, SpendingValidator } from 'lucid-cardano';
+import { MintingPolicy, Script, SpendingValidator } from 'lucid-cardano';
 import { model, models, Schema } from 'mongoose';
 import { serverSide_updateStakingPool } from '../stakePool/helpersServerSide';
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool';
+import { toJson } from '../utils/utils';
 import { getEUTxOsFromDBByAddressAndPkh } from './eUTxODBModel';
 import { BIGINT, CurrencySymbol, EUTxO, PoolParams, TxOutRef, UTxO_Simple } from './types';
+import { initializeLucid } from '../utils/initializeLucid';
 
 // 1. Create an interface representing a document in MongoDB.
 export interface StakingPoolDBInterface {
@@ -229,7 +231,7 @@ export function getStakingPoolDBModel (){
 }
 
 
-export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefined, swAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
+export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefined, swPortalAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
 
 	const StakingPoolDBModel = getStakingPoolDBModel()
 
@@ -239,41 +241,87 @@ export async function getAllStakingPoolsForAdminFromDB (pkh? : string | undefine
 		{
 			swShowOnSite : true,
 			swDeleted : false,
-		}
-		// ,
+		},
 		// {
-		// 	script: 0, 
-		// 	poolID_Script: 0, 
-		// 	txID_Master_Fund_Script: 0,
-		// 	txID_Master_FundAndMerge_Script: 0,
-		// 	txID_Master_SplitFund_Script: 0,
-		// 	txID_Master_ClosePool_Script: 0,
-		// 	txID_Master_TerminatePool_Script: 0,
-		// 	txID_Master_Emergency_Script: 0,
-		// 	txID_Master_DeleteFund_Script: 0,
-		// 	txID_Master_SendBackFund_Script: 0,
-		// 	txID_Master_SendBackDeposit_Script: 0,
-		// 	txID_Master_AddScripts_Script: 0,
-		// 	txID_Master_DeleteScripts_Script: 0,
-		// 	txID_User_Deposit_Script: 0,
-		// 	txID_User_Harvest_Script: 0,
-		// 	txID_User_Withdraw_Script: 0
+		// 	"_id": 1,
+		// 	name: 1,
+		// 	imageSrc: 1,
+		// 	masters: 1,
+		// 	pParams: 1
 		// }
+		{
+			script: 0, 
+			poolID_Script: 0, 
+			txID_Master_Fund_Script: 0,
+			txID_Master_FundAndMerge_Script: 0,
+			txID_Master_SplitFund_Script: 0,
+			txID_Master_ClosePool_Script: 0,
+			txID_Master_TerminatePool_Script: 0,
+			txID_Master_Emergency_Script: 0,
+			txID_Master_DeleteFund_Script: 0,
+			txID_Master_SendBackFund_Script: 0,
+			txID_Master_SendBackDeposit_Script: 0,
+			txID_Master_AddScripts_Script: 0,
+			txID_Master_DeleteScripts_Script: 0,
+			txID_User_Deposit_Script: 0,
+			txID_User_Harvest_Script: 0,
+			txID_User_Withdraw_Script: 0
+		}
+		
 	)
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
 	
 	if(pkh){
+		const lucid = await initializeLucid ()
+
 		for (let i = 0; i < stakingPoolsDB_.length; i++) {
 			const stakingPoolDB_Parsed = stakingPoolDBParser(stakingPoolsDB_[i]);
-			const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPoolDB_Parsed)
-			if (stakingPoolDB_Updated.masters.includes(pkh) || swAdmin === true){
+			const stakingPoolDB_Updated = await serverSide_updateStakingPool (lucid, stakingPoolDB_Parsed)
+			if (stakingPoolDB_Updated.masters.includes(pkh) || swPortalAdmin === true){
 				stakingPoolsDB.push(stakingPoolDB_Updated)
 			}
 		}
 	}
 	
 	return stakingPoolsDB
+}
+
+
+export async function getCountStakingPoolsForAdminFromDB (pkh? : string | undefined) : Promise <number> {
+
+	const StakingPoolDBModel = getStakingPoolDBModel()
+
+	console.log ("getCountStakingPoolsForAdminFromDB - pkh: " + pkh )
+
+	const stakingPoolsDB_ : StakingPoolDBInterface [] = await StakingPoolDBModel.find(
+		{
+			swShowOnSite : true,
+			swDeleted : false,
+		}
+		,
+		{
+			"_id": 1,
+			masters: 1,
+			pParams: 1
+		}
+	)
+	
+	var count : number = 0
+	
+	if(pkh){
+		for (let i = 0; i < stakingPoolsDB_.length; i++) {
+			const stakingPoolDB_Parsed = stakingPoolDBParser(stakingPoolsDB_[i]);
+			if (stakingPoolDB_Parsed.masters.includes(pkh) ){
+				count = count + 1
+			}
+		}
+	}
+
+	// console.log (toJson(stakingPoolsDB_))
+	// console.log ("count: " + count)
+	
+	return count
 }
 
 export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined) : Promise <StakingPoolDBInterface []> {
@@ -286,30 +334,37 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 		{
 			swShowOnSite : true,
 			swDeleted : false
-		}
-		// ,
+		},
 		// {
-		// 	script: 0, 
-		// 	poolID_Script: 0, 
-		// 	txID_Master_Fund_Script: 0,
-		// 	txID_Master_FundAndMerge_Script: 0,
-		// 	txID_Master_SplitFund_Script: 0,
-		// 	txID_Master_ClosePool_Script: 0,
-		// 	txID_Master_TerminatePool_Script: 0,
-		// 	txID_Master_Emergency_Script: 0,
-		// 	txID_Master_DeleteFund_Script: 0,
-		// 	txID_Master_SendBackFund_Script: 0,
-		// 	txID_Master_SendBackDeposit_Script: 0,
-		// 	txID_Master_AddScripts_Script: 0,
-		// 	txID_Master_DeleteScripts_Script: 0,
-		// 	txID_User_Deposit_Script: 0,
-		// 	txID_User_Harvest_Script: 0,
-		// 	txID_User_Withdraw_Script: 0
+		// 	"_id": 1,
+		// 	masters: 1,
+		// 	pParams: 1
 		// }
+		// ,
+		{
+			script: 0, 
+			poolID_Script: 0, 
+			txID_Master_Fund_Script: 0,
+			txID_Master_FundAndMerge_Script: 0,
+			txID_Master_SplitFund_Script: 0,
+			txID_Master_ClosePool_Script: 0,
+			txID_Master_TerminatePool_Script: 0,
+			txID_Master_Emergency_Script: 0,
+			txID_Master_DeleteFund_Script: 0,
+			txID_Master_SendBackFund_Script: 0,
+			txID_Master_SendBackDeposit_Script: 0,
+			txID_Master_AddScripts_Script: 0,
+			txID_Master_DeleteScripts_Script: 0,
+			txID_User_Deposit_Script: 0,
+			txID_User_Harvest_Script: 0,
+			txID_User_Withdraw_Script: 0
+		}
 	)
 
 	var stakingPoolsDB : StakingPoolDBInterface [] = []
 	
+	const lucid = await initializeLucid ()
+
 	for (let i = 0; i < stakingPoolsDB_.length; i++) {
 		const stakingPoolDB = stakingPoolsDB_[i];
 		// console.log("getAllStakingPoolsForHomeFromDB - stakingPoolDB: ", stakingPoolDB)
@@ -317,7 +372,7 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 		if(stakingPoolDB.swShowOnHome){
 
 			const stakingPoolDB_Parsed = stakingPoolDBParser(stakingPoolsDB_[i]);
-			const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPoolDB_Parsed)
+			const stakingPoolDB_Updated = await serverSide_updateStakingPool (lucid, stakingPoolDB_Parsed)
 
 			if(pkh){
 				const address = stakingPoolDB_Updated.scriptAddress
@@ -347,32 +402,115 @@ export async function getStakingPoolFromDBByName (name_ : string) : Promise <Sta
 		{
 			name : name_
 		}
-		// ,
-		// {
-		// 	script: 0, 
-		// 	poolID_Script: 0, 
-		// 	txID_Master_Fund_Script: 0,
-		// 	txID_Master_FundAndMerge_Script: 0,
-		// 	txID_Master_SplitFund_Script: 0,
-		// 	txID_Master_ClosePool_Script: 0,
-		// 	txID_Master_TerminatePool_Script: 0,
-		// 	txID_Master_Emergency_Script: 0,
-		// 	txID_Master_DeleteFund_Script: 0,
-		// 	txID_Master_SendBackFund_Script: 0,
-		// 	txID_Master_SendBackDeposit_Script: 0,
-		// 	txID_Master_AddScripts_Script: 0,
-		// 	txID_Master_DeleteScripts_Script: 0,
-		// 	txID_User_Deposit_Script: 0,
-		// 	txID_User_Harvest_Script: 0,
-		// 	txID_User_Withdraw_Script: 0
-		// }
+		,
+		{
+			script: 0, 
+			poolID_Script: 0, 
+			txID_Master_Fund_Script: 0,
+			txID_Master_FundAndMerge_Script: 0,
+			txID_Master_SplitFund_Script: 0,
+			txID_Master_ClosePool_Script: 0,
+			txID_Master_TerminatePool_Script: 0,
+			txID_Master_Emergency_Script: 0,
+			txID_Master_DeleteFund_Script: 0,
+			txID_Master_SendBackFund_Script: 0,
+			txID_Master_SendBackDeposit_Script: 0,
+			txID_Master_AddScripts_Script: 0,
+			txID_Master_DeleteScripts_Script: 0,
+			txID_User_Deposit_Script: 0,
+			txID_User_Harvest_Script: 0,
+			txID_User_Withdraw_Script: 0
+		}
 		)
 
 	return stakingPoolsDB
 	
 }
 
-export async function getStakingPools(forHome: boolean = true, pkh? : string | undefined, swAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
+
+
+export async function getStakingPoolWithScriptsFromDBByName (name_ : string, script_ : string []) : Promise <StakingPoolDBInterface []> {
+
+	//console.log ("getStakingPoolScriptFromDBByName - name: " + name_ )
+
+	const StakingPoolDBModel = getStakingPoolDBModel()
+
+	let fieldScript: any = {
+		"_id": 1,
+		name: 1
+	};
+
+	script_.forEach(scriptItem => {
+		if (scriptItem === "script") {
+			fieldScript.script = 1;
+		} else if (scriptItem === "poolID_Script") {
+			fieldScript.poolID_Script = 1;
+		} else if (scriptItem === "txID_Master_Fund_Script") {
+			fieldScript.txID_Master_Fund_Script = 1;
+		} else if (scriptItem === "txID_Master_FundAndMerge_Script") {
+			fieldScript.txID_Master_FundAndMerge_Script = 1;
+		} else if (scriptItem === "txID_Master_SplitFund_Script") {
+			fieldScript.txID_Master_SplitFund_Script = 1;
+		} else if (scriptItem === "txID_Master_ClosePool_Script") {
+			fieldScript.txID_Master_ClosePool_Script = 1;
+		} else if (scriptItem === "txID_Master_TerminatePool_Script") {
+			fieldScript.txID_Master_TerminatePool_Script = 1;
+		} else if (scriptItem === "txID_Master_Emergency_Script") {
+			fieldScript.txID_Master_Emergency_Script = 1;
+		} else if (scriptItem === "txID_Master_DeleteFund_Script") {
+			fieldScript.txID_Master_DeleteFund_Script = 1;
+		} else if (scriptItem === "txID_Master_SendBackFund_Script") {
+			fieldScript.txID_Master_SendBackFund_Script = 1;
+		} else if (scriptItem === "txID_Master_SendBackDeposit_Script") {
+			fieldScript.txID_Master_SendBackDeposit_Script = 1;
+		} else if (scriptItem === "txID_Master_AddScripts_Script") {
+			fieldScript.txID_Master_AddScripts_Script = 1;
+		} else if (scriptItem === "txID_Master_DeleteScripts_Script") {
+			fieldScript.txID_Master_DeleteScripts_Script = 1;
+		} else if (scriptItem === "txID_User_Deposit_Script") {
+			fieldScript.txID_User_Deposit_Script = 1;
+		} else if (scriptItem === "txID_User_Harvest_Script") {
+			fieldScript.txID_User_Harvest_Script = 1;
+		} else if (scriptItem === "txID_User_Withdraw_Script") {
+			fieldScript.txID_User_Withdraw_Script = 1;
+		}
+	});
+
+	const stakingPoolsDB = await StakingPoolDBModel.find(
+		{
+			name : name_
+		}
+		,
+		fieldScript
+	)
+
+	return stakingPoolsDB
+	
+}
+
+export async function getStakingPoolWithTxCountFromDBByName (name_ : string) : Promise <StakingPoolDBInterface []> {
+
+	//console.log ("getTxCountStakingPoolFromDB - name: " + name_ )
+
+	const StakingPoolDBModel = getStakingPoolDBModel()
+
+	const stakingPoolsDB = await StakingPoolDBModel.find(
+		{
+			name : name_
+		}
+		,
+		{
+			"_id": 1,
+			name: 1,
+			tx_count : 1
+		}
+	)
+
+	return stakingPoolsDB
+}
+
+
+export async function getStakingPools(forHome: boolean = true, pkh? : string | undefined, swPortalAdmin? : boolean | undefined) : Promise <StakingPoolDBInterface []> {
 
 	console.log("getStakingPools - Init - forHome: " + forHome + " - pkh: " + pkh);
 
@@ -381,10 +519,12 @@ export async function getStakingPools(forHome: boolean = true, pkh? : string | u
 	if (forHome) {
 		stakingPoolsDB = await getAllStakingPoolsForHomeFromDB(pkh);
 	} else {
-		stakingPoolsDB = await getAllStakingPoolsForAdminFromDB(pkh, swAdmin);
+		stakingPoolsDB = await getAllStakingPoolsForAdminFromDB(pkh, swPortalAdmin);
 	}
 
 	return stakingPoolsDB;
 
 }
+
+
 

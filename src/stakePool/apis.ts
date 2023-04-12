@@ -182,7 +182,38 @@ export async function apiDeleteAllDatumDB() {
 
 //----------------------------------------------------------------------
 
-export async function apiCreateStakingPoolDB(data: any) {
+export async function apiRequestStakingPool(data: any) {
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/requestStakingPool"
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions)
+    const json = await response.json()
+    const message = json.msg
+
+    switch (response.status) {
+        case 500:
+            console.error("apiRequestStakingPool - api/requestStakingPool: Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiRequestStakingPool - api/requestStakingPool - Error: " + message)
+            throw message;
+        default:
+            console.error("apiRequestStakingPool - api/requestStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiRequestStakingPool - api/requestStakingPool: " + message)
+    }
+}
+
+//----------------------------------------------------------------------
+
+export async function apiCreateStakingPool(data: any) {
 
     const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/createStakingPool"
 
@@ -198,17 +229,55 @@ export async function apiCreateStakingPoolDB(data: any) {
 
     switch (response.status) {
         case 500:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error 500")
+            console.error("apiCreateStakingPool - api/createStakingPool: Error 500")
             throw "Error 500";
         case 400:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool - Error: " + message)
+            console.error("apiCreateStakingPool - api/createStakingPool - Error: " + message)
             throw message;
         default:
-            console.error("apiCreateStakingPoolDB - api/createStakingPool: Error Unknown")
+            console.error("apiCreateStakingPool - api/createStakingPool: Error Unknown")
             throw "Error Unknown";
         case 200:
-            console.log("apiCreateStakingPoolDB - api/createStakingPool: " + message)
-            const stakingPool : StakingPoolDBInterface = stakingPoolDBParser(json.stakingPool)
+            console.log("apiCreateStakingPool - api/createStakingPool: " + message)
+            let stakingPool : StakingPoolDBInterface | undefined = undefined
+            if (json.stakingPool)
+                stakingPool = stakingPoolDBParser(json.stakingPool)
+            const files = json.files
+            return [stakingPool, files]
+    }
+}
+
+//----------------------------------------------------------------------
+
+export async function apiUploadStakingPool(formData: any) {
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/uploadStakingPool"
+
+    const requestOptions = {
+        method: 'POST',
+        body: formData
+    };
+
+    const response = await fetch(urlApi, requestOptions)
+    const json = await response.json()
+    const message = json.msg
+
+    switch (response.status) {
+        case 500:
+            console.error("apiUploadStakingPool - api/uploadStakingPool: Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiUploadStakingPool - api/uploadStakingPool - Error: " + message)
+            throw message;
+        default:
+            console.error("apiUploadStakingPool - api/uploadStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiUploadStakingPool - api/uploadStakingPool: " + message)
+            let stakingPool : StakingPoolDBInterface | undefined = undefined
+            if (json.stakingPool)
+                stakingPool = stakingPoolDBParser(json.stakingPool)
+           
             return stakingPool
     }
 }
@@ -253,6 +322,124 @@ export async function apiGetStakingPoolDB(nombrePool: string)  {
 }
 
 //------------------------------------------------------
+
+export async function apiGetStakingPoolWithScriptsDB(nombrePool: string, scripts : string[])  {
+    console.log("apiGetStakingPoolWithScriptsDB - /api/getStakingPoolWithScript - get: " + nombrePool)
+    
+    let data = {
+        nombrePool: nombrePool,
+        scripts: scripts
+    }
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/getStakingPoolWithScript";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiGetStakingPoolWithScriptsDB - /api/getStakingPoolWithScript - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiGetStakingPoolWithScriptsDB - /api/getStakingPoolWithScript - Error: " + message);
+            throw message;
+        default:
+            console.error("apiGetStakingPoolWithScriptsDB - api/getStakingPoolWithScript: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiGetStakingPoolWithScriptsDB - /api/getStakingPoolWithScript: " + message)
+            // const stakingPool : StakingPoolDBInterface = stakingPoolDBParser(json.stakingPool)
+            return json.stakingPool
+    }
+
+}
+
+//------------------------------------------------------
+
+export async function apiGetTxCountStakingPoolFromDB(nombrePool: string)  {
+    console.log("apiGetStakingPoolDB - /api/getTxCountStakingPool - nombrePool: " + nombrePool)
+    
+    let data = {
+        nombrePool: nombrePool
+    }
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/getTxCountStakingPool";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiGetTxCountStakingPoolFromDB - /api/getTxCountStakingPool - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiGetTxCountStakingPoolFromDB - /api/getTxCountStakingPool - Error: " + message);
+            throw message;
+        default:
+            console.error("apiGetTxCountStakingPoolFromDB - api/getTxCountStakingPool: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiGetTxCountStakingPoolFromDB - /api/getTxCountStakingPool: " + message)
+            const count = json.count
+            return count
+    }
+}
+
+//------------------------------------------------------
+
+export async function apiGetCountStakingPoolsForAdminFromDB(pkh: string)  {
+    console.log("apiGetStakingPoolDB - /api/getCountStakingPoolsForAdmin - get: " + pkh)
+    
+    let data = {
+        pkh: pkh
+    }
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/getCountStakingPoolsForAdmin";
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions);
+    const json = await response.json();
+    const message = json.msg;
+
+    switch (response.status) {
+        case 500:
+            console.error("apiGetCountStakingPoolsForAdminFromDB - /api/getCountStakingPoolsForAdmin - Error 500");
+            throw "Error 500";
+        case 400:
+            console.error("apiGetCountStakingPoolsForAdminFromDB - /api/getCountStakingPoolsForAdmin - Error: " + message);
+            throw message;
+        default:
+            console.error("apiGetCountStakingPoolsForAdminFromDB - api/getCountStakingPoolsForAdmin: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiGetCountStakingPoolsForAdminFromDB - /api/getCountStakingPoolsForAdmin: " + message)
+            const count = json.count
+            return count
+    }
+
+}
+
+//------------------------------------------------------
+
 
 export async function apiUpdateStakingPoolShowOnHomeDB(nombrePool: string, swShowOnHome: boolean = true) {
 

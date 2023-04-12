@@ -37,17 +37,23 @@ export default NextAuth({
 				// Add logic here to look up the user from the credentials supplied
 				if(credentials?.pkh != "" && credentials?.walletName != ""){ 
 
-					const pkhAdmins = process.env.pkhAdmins?.split (",") || [];
-					const pkhCreators = process.env.pkhCreators?.split (",") || [];
+					const pkhRatsDAOAdmins = process.env.pkhRatsDAOAdmins?.split (",") || [];
+					const pkhRatsDAOCreators = process.env.pkhRatsDAOCreators?.split (",") || [];
+					const pkhPortalAdmins = process.env.pkhPortalAdmins?.split (",") || [];
+					const pkhPortalUploader = process.env.pkhPortalUploader?.split (",") || [];
 
-					const swAdmin = pkhAdmins.includes (credentials?.pkh!)
-					const swCreate = pkhAdmins.includes (credentials?.pkh!) || pkhCreators.includes (credentials?.pkh!)
-
+					const swRatsDAOAdmin = pkhRatsDAOAdmins.includes (credentials?.pkh!)
+					const swRatsDAOCreator = pkhRatsDAOAdmins.includes (credentials?.pkh!) || pkhRatsDAOCreators.includes (credentials?.pkh!)
+					const swPortalAdmin = pkhRatsDAOAdmins.includes (credentials?.pkh!) || pkhPortalAdmins.includes (credentials?.pkh!)
+					const swPortalUploader = pkhRatsDAOAdmins.includes (credentials?.pkh!) || pkhPortalAdmins.includes (credentials?.pkh!) || pkhPortalUploader.includes (credentials?.pkh!)
+					
 					const user : User = { 
 						id: credentials?.pkh!, 
 						pkh: credentials?.pkh!, 
-						swAdmin: swAdmin, 
-						swCreate: swCreate, 
+						swRatsDAOAdmin: swRatsDAOAdmin, 
+						swRatsDAOCreator: swRatsDAOCreator, 
+						swPortalAdmin: swPortalAdmin, 
+						swPortalUploader: swPortalUploader, 
 						walletName: credentials?.walletName! ,
 						swEnviarPorBlockfrost: credentials?.swEnviarPorBlockfrost! === "true" ? true : false ,
 						isWalletFromSeedletName: credentials?.isWalletFromSeedletName! === "true" ? true : false
@@ -164,7 +170,11 @@ export default NextAuth({
 		// async signIn({ user, account, profile, email, credentials }) { return true },
 		// async redirect({ url, baseUrl }) { return baseUrl },
 		async jwt({ token, user, account, profile, isNewUser }) { 
+			// console.log("/api/auth/[...nextauth].ts - jwt - token: " + toJson(token))
 			// console.log("/api/auth/[...nextauth].ts - jwt - user: " + toJson(user))
+			// console.log("/api/auth/[...nextauth].ts - jwt - account: " + toJson(account))
+			// console.log("/api/auth/[...nextauth].ts - jwt - profile: " + toJson(profile))
+			// console.log("/api/auth/[...nextauth].ts - jwt - isNewUser: " + toJson(isNewUser))
 
 			user && (token.user = user);
 			return token

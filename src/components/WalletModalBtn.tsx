@@ -88,7 +88,24 @@ export default function WalletModalBtn() {
 			swEnviarPorBlockfrost_ = false
 			const walletStore_ = { connected: true, name: walletName, walletApi: walletApi, pkh: pkh, lucid: lucid, swEnviarPorBlockfrost: swEnviarPorBlockfrost_, protocolParameters: protocolParameters }
 			console.log("[Session] - walletConnect - status: " + status + " - session.user.pkh: " + session?.user?.pkh + " - pkh: " + pkh)
-			if (status !== "authenticated" || (status === "authenticated" && session && session.user && session.user.pkh !== pkh)) {
+
+			let swUpdateSession = (status !== "authenticated")
+			if (status === "authenticated" && session && session.user ){
+				// pkh: credentials?.pkh!, 
+				// swRatsDAOAdmin: swRatsDAOAdmin, 
+				// swRatsDAOCreator: swRatsDAOCreator, 
+				// swPortalAdmin: swPortalAdmin, 
+				// swPortalUploader: swPortalUploader, 
+				// walletName: credentials?.walletName! ,
+				// swEnviarPorBlockfrost: credentials?.swEnviarPorBlockfrost! === "true" ? true : false ,
+				// isWalletFromSeedletName: credentials?.isWalletFromSeedletName! === "true" ? true : false
+				//all the fields must be setted in the session.user
+				let swSettedSessionOk = (session.user.pkh !== undefined && session.user.swRatsDAOAdmin !== undefined && session.user.swRatsDAOCreator !== undefined  && session.user.swPortalAdmin !== undefined  && session.user.swPortalUploader !== undefined  && session.user.walletName !== undefined  && session.user.swEnviarPorBlockfrost !== undefined  && session.user.isWalletFromSeedletName !== undefined )
+				console.log("[Session] - walletConnect - session with all the fields setted: " + swSettedSessionOk)
+				swUpdateSession = (session.user.pkh !== pkh || !swSettedSessionOk)
+			}
+
+			if (swUpdateSession) {
 				// console.log("LOGIN")
 				await signOut({ redirect: false })
 				await signIn('credentials', { pkh: pkh , walletName: walletName, swEnviarPorBlockfrost: swEnviarPorBlockfrost_?"true":"false", isWalletFromSeedletName: "false",redirect: false })

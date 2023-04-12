@@ -96,10 +96,24 @@ export async function userDeposit(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     }
     console.log(functionName + " - UTxO with PoolDatum: " + eUTxO_With_PoolDatum.uTxO.txHash + "#" + eUTxO_With_PoolDatum.uTxO.outputIndex);
     //------------------
-    // const depositAmount = assets![poolInfo!.staking_Lucid];
-    // const value_Deposit = createValue_Adding_Tokens_Of_AC_Lucid(uTxOsAtWallet, poolInfo!.staking_Lucid, depositAmount);
-    const depositAmount = Object.entries(assets!).reduce ((acc, cur) => acc + BigInt(cur[1]), 0n)
-    const value_Deposit = assets!
+    let depositAmount 
+    let value_Deposit 
+    //check if key poolInfo!.staking_Lucid exists in assets:
+    if (assets![poolInfo!.staking_Lucid]) {
+        //usa el input simple. Si tiene más de un token estan todos en el mismo input, por eso creo el value a partir de las utxos del wallet
+        depositAmount = assets![poolInfo!.staking_Lucid];
+        value_Deposit = createValue_Adding_Tokens_Of_AC_Lucid(uTxOsAtWallet, poolInfo!.staking_Lucid, depositAmount);
+    }else{
+        depositAmount = Object.entries(assets!).reduce ((acc, cur) => acc + BigInt(cur[1]), 0n)
+        //value_Deposit = assets!
+        //take from assets only value > 0 and save then in value_Deposit
+        value_Deposit = Object.entries(assets!).reduce ((acc, cur) => {
+            if (BigInt(cur[1]) > 0n) {
+                acc[cur[0]] = BigInt(cur[1])
+            }
+            return acc
+        }, {} as Assets)
+    }
     console.log(functionName + " - Deposit Amount: " + depositAmount);
     console.log(functionName + " - Value Deposit: " + toJson(value_Deposit));
     //------------------

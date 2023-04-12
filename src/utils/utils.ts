@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 //----------------------------------------------------------------------
 
-export function formatAmount(number: number, decimals: number | undefined, unit: string | undefined) {
+export function formatAmount(number: number, decimals?: number | undefined, unit?: string | undefined) {
     if (decimals === undefined) decimals = 0
     if (unit === undefined) {
         unit = ""
@@ -114,10 +114,10 @@ export function sha256HexStr(hexStr: string) {
 //----------------------------------------------------------------------
 
 //for printing pretty any object
-export function toJson(data: any) {
+export function toJson(data: any, space?: string | number | undefined) {
     if (data) {
 
-        var json = JSON.stringify(data, getCircularReplacer())
+        var json = JSON.stringify(data, getCircularReplacer(), space)
         //console.log(json)
 
         if (json === "{}") {

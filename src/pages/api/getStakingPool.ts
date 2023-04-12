@@ -11,6 +11,7 @@ import { PoolDatum } from '../../types';
 import { serverSide_updateStakingPool } from '../../stakePool/helpersServerSide';
 import { getSession } from 'next-auth/react';
 import { stakingPoolDBParser } from '../../stakePool/helpersStakePool';
+import { initializeLucid } from '../../utils/initializeLucid';
 
 type Data = {
     msg: string
@@ -50,7 +51,8 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
         } else {
             const stakingPool = stakingPoolWithSameName[0]
             const stakingPool_Parsed = stakingPoolDBParser(stakingPool);
-            const stakingPoolDB_Updated = await serverSide_updateStakingPool (stakingPool_Parsed)
+            const lucid = await initializeLucid ()
+            const stakingPoolDB_Updated = await serverSide_updateStakingPool (lucid, stakingPool_Parsed)
 
             //console.log("/api/getStakingPool - StakingPool found: " + stakingPoolDB_Updated.name);
             res.status(200).json({ msg: "StakingPool found", stakingPool : stakingPoolDB_Updated})

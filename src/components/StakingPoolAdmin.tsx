@@ -7,7 +7,9 @@ import { useEffect, useRef, useState } from 'react';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { apiUpdateStakingPoolShowOnHomeDB, apiDeleteStakingPoolDB, apiDeleteEUTxOsDBByStakingPool } from '../stakePool/apis';
-import { masterAddInitialScripts, masterClosePool, masterDeleteFunds, masterFundAndMerge, masterGetBackFund, masterMergeFunds, masterNewFund, masterPreparePool, masterSendBackDeposit, masterSendBackFund, masterSplitFund, masterTerminatePool } from '../stakePool/endPoints - master';
+import { 
+	// masterAddInitialScripts, 
+	masterClosePool, masterDeleteFunds, masterFundAndMerge, masterGetBackFund, masterMergeFunds, masterNewFund, masterPreparePool, masterSendBackDeposit, masterSendBackFund, masterSplitFund, masterTerminatePool } from '../stakePool/endPoints - master';
 import {
 	masterAddScriptsMasterAddScripts,
 	masterAddScriptsMasterClosePool, masterAddScriptsMasterDeleteFund, masterAddScriptsMasterDeleteScripts, masterAddScriptsMasterEmergency, masterAddScriptsMasterFund, masterAddScriptsMasterFundAndMerge, masterAddScriptsMasterSendBackDeposit, masterAddScriptsMasterSendBackFund, masterAddScriptsMasterSplitFund, masterAddScriptsMasterTerminatePool, masterAddScriptsUserDeposit, masterAddScriptsUserHarvest, masterAddScriptsUserWithdraw, masterAddScriptValidator, masterDeleteScripts,
@@ -25,8 +27,7 @@ import { newTransaction } from '../utils/cardano-helpersTx';
 import { pushSucessNotification, pushWarningNotification } from "../utils/pushNotification";
 import { copyToClipboard, formatAmount, htmlEscape, searchValueInArray, strToHex, toJson } from '../utils/utils';
 import { useStoreActions, useStoreState } from '../utils/walletProvider';
-import ActionWithInputModalBtn from './ActionWithInputModalBtn';
-import ActionWithSelectInputModalBtn from './ActionWithSelectInputModalBtn';
+import ActionModalBtn from './ActionWithInputModalBtn';
 import EUTxOsModalBtn from './EUTxOsModalBtn';
 import FundsModalBtn from './FundsModalBtn';
 import LoadingSpinner from './LoadingSpinner';
@@ -66,8 +67,6 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 	const [walletStakingAmountUI, setWalletStakingAmountUI] = useState<string | 0>(ui_notConnected)
 	const [walletHarvestAmountUI, setWalletHarvestAmountUI] = useState<string | 0>(ui_notConnected)
-	const [maxStakingAmountUI, setMaxStakingAmountUI] = useState<string | 0>(ui_notConnected)
-	const [maxHarvestAmountUI, setMaxHarvestAmountUI] = useState<string | 0>(ui_notConnected)
 
 	const [isMasterUI, setIsMasterUI] = useState<string | 0>(ui_notConnected)
 
@@ -149,10 +148,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 		if (walletStore.connected && !isWalletDataLoaded) {
 			setWalletStakingAmountUI(ui_loading)
 			setWalletHarvestAmountUI(ui_loading)
-			setMaxStakingAmountUI(ui_loading)
-			setMaxHarvestAmountUI(ui_loading)
-			setIsMasterUI(ui_loading)
 		} else if (walletStore.connected && isWalletDataLoaded) {
+			setIsMasterUI(ui_loading)
 			//------------------
 			const walletStakingAmount = walletGetTotalOfUnit(poolInfo.staking_Lucid)
 			const walletHarvestAmount = walletGetTotalOfUnit(poolInfo.harvest_Lucid)
@@ -160,24 +157,10 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 			setWalletStakingAmountUI(walletStakingAmount.toString())
 			setWalletHarvestAmountUI(walletHarvestAmount.toString())
 			//------------------
-			if (walletStakingAmount > maxTokensWithDifferentNames && staking_AC_isWithoutTokenName) {
-				setMaxStakingAmountUI(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxStakingAmountUI(walletStakingAmount.toString())
-			}
-			//------------------
-			if (walletHarvestAmount > maxTokensWithDifferentNames && harvest_AC_isWithoutTokenName) {
-				setMaxHarvestAmountUI(maxTokensWithDifferentNames.toString())
-			} else {
-				setMaxHarvestAmountUI(walletHarvestAmount.toString())
-			}
-			//------------------
 			setIsMasterUI(searchValueInArray(poolInfo.masters, walletStore.pkh) ? "Yes" : "No")
 		} else {
 			setWalletStakingAmountUI(ui_notConnected)
 			setWalletHarvestAmountUI(ui_notConnected)
-			setMaxStakingAmountUI(ui_notConnected)
-			setMaxHarvestAmountUI(ui_notConnected)
 			setIsMasterUI(ui_notConnected)
 		}
 	}, [walletStore, isWalletDataLoaded])
@@ -1160,7 +1143,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 
 		console.log("StakingPoolAdmin - Show Pool - " + toJson(poolInfo?.name))
 
-		setActionMessage("Cambiando estado de la Pool, please wait...")
+		setActionMessage("Updating Staking Pool, please wait...")
 
 		try {
 
@@ -1410,7 +1393,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					<div className="pool__action_card ">
 						<div className="pool__stat">
 							<div className="pool__column">
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterPreparePoolAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1426,7 +1409,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={false}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterAddInitialScriptsAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1444,7 +1427,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={false}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterAddScriptsMasterAllAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1462,7 +1445,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={poolInfo.swPreparado && !swAllInitialScripts}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterDeleteScriptsMasterAllAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1483,7 +1466,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={poolInfo.swPreparado && !swAllScriptsMaster}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterAddScriptsUserAllAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1501,7 +1484,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster))}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterDeleteScriptsUserAllAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1535,7 +1518,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser) || (poolInfo.swTerminated && swAnyScriptsUser))}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={splitUTxOsAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1611,7 +1594,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 						</div>
 						<div className="pool__stat">
 							<div className="pool__column">
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterShowPoolAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1626,7 +1609,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swPaddintTop={false}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterClosePoolAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1643,7 +1626,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swHash={true}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterTerminatePoolAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1659,7 +1642,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swHash={true}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterDeleteMainScriptsAction}
 									postActionSuccess={updateDetailsStakingPoolAndWallet}
 									postActionError={updateDetailsStakingPoolAndWallet}
@@ -1681,7 +1664,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									swHash={false}
 								/>
 
-								<ActionWithInputModalBtn
+								<ActionModalBtn
 									action={masterDeletePoolAction}
 									postActionSuccess={updatePageInTimeOut}
 									postActionError={updateDetailsStakingPoolAndWallet}

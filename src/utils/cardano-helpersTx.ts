@@ -5,9 +5,9 @@ import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transacti
 import { SetStateAction } from "react";
 import { explainErrorTx } from "../stakePool/explainError";
 import { EUTxO, Master, Maybe, POSIXTime } from "../types";
-import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, txConsumingTime, txPreparingTime, validTimeRangeInSlots } from "../types/constantes";
+import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, TIME_OUT_TRY_UPDATESTAKINGPOOL, TIME_SAFETY_AFTER_TX, txConsumingTime, txPreparingTime, validTimeRangeInSlots } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
-import { apiDeleteEUTxODB, apiUpdateEUTxODBIsConsuming, apiUpdateEUTxODBIsPreparing } from "../stakePool/apis";
+import { apiDeleteEUTxODB, apiGetTxCountStakingPoolFromDB, apiUpdateEUTxODBIsConsuming, apiUpdateEUTxODBIsPreparing } from "../stakePool/apis";
 import { showPtrInHex, toJson } from "./utils";
 import { Wallet } from "./walletProvider";
 
@@ -36,12 +36,7 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
 
         setActionHash(txHash)
 
-        await waitForTxConfirmation (lucid!, txHash, eUTxOs_for_consuming) 
-
-        // if (isWorkingInABuffer) {
-        console.log(title + " - Waiting extra safety time");
-        await new Promise(r => setTimeout(r, 20000));
-        // }
+        await waitForTxConfirmation (lucid!, txHash, eUTxOs_for_consuming, poolInfo) 
 
         if (!isWorkingInABuffer) setIsWorking("")
 
@@ -425,7 +420,7 @@ export const saveTxSignedToFile = async (txSigned: TxSigned) => {
 
 //---------------------------------------------------------------
 
-export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxOs_for_consuming: EUTxO[]) {
+export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxOs_for_consuming: EUTxO[], poolInfo: StakingPoolDBInterface | undefined) {
     var timeOut : any = undefined;
     async function updateIsConsuming(setIsConsuming: boolean) {
         console.log("waitForTxConfirmation - updateIsConsuming: " + (setIsConsuming? "SET":"UNSET") + " - " + eUTxOs_for_consuming.length);
@@ -451,7 +446,40 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
         if (await lucid.awaitTx(txhash)) {
             console.log("waitForTxConfirmation - Tx confirmed");
             // await deleteIsConsuming();
-            // update: no elimino utxo. se eliminaran en el server cuando se confirme la nueva tx y se actualice la tx count.s
+            // update: no elimino utxo. se eliminaran en el server cuando se confirme la nueva tx y se actualice la tx count
+            
+            // console.log("waitForTxConfirmation - Waiting extra safety time");
+            // await new Promise(r => setTimeout(r, TIME_SAFETY_AFTER_TX));
+
+            if(poolInfo){
+                const tx_count = await apiGetTxCountStakingPoolFromDB(poolInfo.name);
+                console.log("waitForTxConfirmation - Waiting for tx_count to be updated at: " + poolInfo.name + " - addr: " + poolInfo.scriptAddress + "" + " - count: " + tx_count);
+                var countTry = 0;
+                var maxTries = 3;    
+                while(true){
+                    try{
+                        if (countTry>0) console.log("waitForTxConfirmation - try again" );
+                        var tx_count_blockchain: number | undefined = await getTxCountBlockchain(poolInfo.scriptAddress);
+                        if (tx_count_blockchain === undefined || Number.isNaN(tx_count_blockchain)) {
+                            throw "Can't get tx_count from Blockfrost";
+                        }else{
+                            if (tx_count_blockchain > tx_count) {
+                                console.log("waitForTxConfirmation - Tx count updated: " + tx_count_blockchain);
+                                break;
+                            } 
+                        }
+                        throw "Tx count not updated: " + tx_count_blockchain;
+                    } catch (error) {
+                        if (++countTry == maxTries) {
+                            console.log("waitForTxConfirmation - Leaving without confirming");
+                            break;
+                        }
+                        console.log("waitForTxConfirmation - Error: " + error);
+                        await new Promise(r => setTimeout(r, TIME_OUT_TRY_UPDATESTAKINGPOOL));
+                    }
+                }
+                // console.log ("waitForTxConfirmation - tx_count_blockchain: " + tx_count_blockchain);
+            }
         } else {
             console.log("waitForTxConfirmation - Tx not confirmed");
             await updateIsConsuming(false);
@@ -463,6 +491,8 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
     } 
 }
 
+//---------------------------------------------------------------
+
 export function errorIsBecauseEUTxOsAreNotUpdated (error: string) : boolean {
 
     const error_explained = explainErrorTx(error)
@@ -473,4 +503,25 @@ export function errorIsBecauseEUTxOsAreNotUpdated (error: string) : boolean {
 
     return true;
 
+}
+
+//---------------------------------------------------------------
+
+export async function getTxCountBlockchain(scriptAddress: string) {
+    var tx_count_blockchain: number | undefined = undefined;
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/addresses/' + scriptAddress + '/total';
+    const requestOptions = {
+        method: 'GET',
+        headers: {
+            'project_id': "xxxxx"
+        },
+    };
+    await fetch(urlApi, requestOptions)
+        .then(response => response.json())
+        .then(json => {
+            //console.log(toJson(json))
+            tx_count_blockchain = Number(json.tx_count);
+        }
+    );
+    return tx_count_blockchain;
 }

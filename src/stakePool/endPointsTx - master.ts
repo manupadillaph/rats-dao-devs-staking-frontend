@@ -8,8 +8,9 @@ import {
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
 import { objToPlutusData } from "../utils/cardano-utils";
-import { showPtrInHex } from '../utils/utils';
+import { showPtrInHex, toJson } from '../utils/utils';
 import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
+import { apiGetStakingPoolWithScriptsDB } from './apis';
 //--------------------------------------
 
 export async function masterPreparePoolTx(
@@ -22,7 +23,9 @@ export async function masterPreparePoolTx(
     //------------------
     console.log(functionName + " - poolID_UTxO: " + poolID_UTxO.txHash + "#" + poolID_UTxO.outputIndex)
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["poolID_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -43,7 +46,7 @@ export async function masterPreparePoolTx(
     //------------------
     tx_Building = await tx_Building
         .collectFrom([poolID_UTxO])
-        .attachMintingPolicy(poolInfo.poolID_Script)
+        .attachMintingPolicy(poolInfoWithScripts.poolID_Script)
         .mintAssets(value_For_Mint_PoolID, redeemer_For_Mint_PoolID_Hex)
         .payToContract(scriptAddress, { inline: poolDatum_Out_Hex }, value_For_PoolDatum)
         .addSigner(addressWallet)
@@ -53,56 +56,6 @@ export async function masterPreparePoolTx(
     const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters)
     return txComplete_FIXED
 }
-
-//------------------
-
-export async function masterAddInitialScriptsTx(
-    lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
-    redeemer_For_Mint_TxID_Master_AddScripts: Redeemer_Mint_TxID, value_For_Mint_TxID_Master_AddScripts: Assets ,
-    scriptDatum : ScriptDatum, value_For_ScriptDatum : Assets ,
-    script_TxID_Master_AddScripts_Datum: ScriptDatum, value_For_Script_TxID_Master_AddScripts: Assets 
-) {
-    //------------------
-    const functionName = "EndPoint Tx Master - Add Initial Scripts"
-    //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
-    //------------------
-    const scriptDatum_Hex = await getHexFrom_Validator_Datum (scriptDatum, true);
-    //------------------
-    const script_TxID_Master_AddScripts_Datum_Hex = await getHexFrom_Validator_Datum (script_TxID_Master_AddScripts_Datum, true);
-    //------------------
-    const redeemer_For_Mint_TxID_Master_AddScripts_Hex = await getHexFrom_Redeemer_TxID (redeemer_For_Mint_TxID_Master_AddScripts, true);
-    //------------------
-    // const now = Math.floor(Date.now())
-    // console.log(functionName + " - now: " + now)
-    // const from = now - (5 * 60 * 1000)
-    // const until = now + (validTimeRange) - (5 * 60 * 1000) 
-    //------------------
-    var tx = lucid.newTx()
-    var tx_Building = createTx( lucid, protocolParameters, tx);
-    //------------------
-    tx_Building = await tx_Building
-        .attachMintingPolicy(poolInfo.txID_Master_AddScripts_Script) 
-        .mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
-        //.mintAssets(value_For_Mint_TxID_Master_AddScripts, redeemer_For_Mint_TxID_Master_AddScripts_Hex) 
-        .payToContract(scriptAddress, {
-            inline: scriptDatum_Hex,
-            scriptRef: poolInfo.script, 
-        }, value_For_ScriptDatum)
-        .payToContract(scriptAddress, {
-            inline: script_TxID_Master_AddScripts_Datum_Hex,
-            scriptRef: poolInfo.txID_Master_AddScripts_Script,
-        }, value_For_Script_TxID_Master_AddScripts)
-        .addSigner(addressWallet)
-        // .validFrom(from)
-        // .validTo(until)
-    //------------------
-    const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters)
-    return txComplete_FIXED
-}
-
-//------------------
-
 
 export async function masterNewFundTx(
     lucid: Lucid, protocolParameters: any, poolInfo: StakingPoolDBInterface, addressWallet: Address,
@@ -116,7 +69,9 @@ export async function masterNewFundTx(
     //------------------
     const functionName = "EndPoint Tx Master - New Fund"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_Fund_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     const fundDatum_Out_Hex = await getHexFrom_Validator_Datum (fundDatum_Out, true);
@@ -135,13 +90,13 @@ export async function masterNewFundTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     if (eUTxO_With_Script_TxID_Master_Fund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_Fund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_Fund_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -173,7 +128,9 @@ export async function masterFundAndMergeTx(
     //------------------
     const functionName = "EndPoint Tx Master - Fund And Merge"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_FundAndMerge_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     const fundDatum_Out_Hex = await getHexFrom_Validator_Datum (fundDatum_Out, true);fundDatum_Out
@@ -194,14 +151,14 @@ export async function masterFundAndMergeTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_FundAndMerge_Datum: " + toJson(eUTxO_With_Script_TxID_Master_FundAndMerge_Datum))
     if (eUTxO_With_Script_TxID_Master_FundAndMerge_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_FundAndMerge_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_FundAndMerge_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_FundAndMerge_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -239,7 +196,9 @@ export async function masterSplitFundTx(
     //------------------
     const functionName = "EndPoint Tx Master - Split Fund"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_SplitFund_Script", "txID_Master_Fund_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     const fundDatum_Split_Out_Hex = await getHexFrom_Validator_Datum (fundDatum_Split_Out, true);
@@ -262,21 +221,21 @@ export async function masterSplitFundTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_SplitFund_Datum: " + toJson(eUTxO_With_Script_TxID_Master_SplitFund_Datum))
     if (eUTxO_With_Script_TxID_Master_SplitFund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_SplitFund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_SplitFund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_SplitFund_Script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_Fund_Datum: " + toJson(eUTxO_With_Script_TxID_Master_Fund_Datum))
     if (eUTxO_With_Script_TxID_Master_Fund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_Fund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_Fund_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -308,7 +267,9 @@ export async function masterClosePoolTx(
     //------------------
     const functionName = "EndPoint Tx Master - Close Pool"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_ClosePool_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -327,14 +288,14 @@ export async function masterClosePoolTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_ClosePool_Datum: " + toJson(eUTxO_With_Script_TxID_Master_ClosePool_Datum))
     if (eUTxO_With_Script_TxID_Master_ClosePool_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_ClosePool_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_ClosePool_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_ClosePool_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -362,7 +323,9 @@ export async function masterTerminatePoolTx(
     //------------------
     const functionName = "EndPoint Tx Master - Terminate Pool"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_TerminatePool_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -382,14 +345,14 @@ export async function masterTerminatePoolTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_TerminatePool_Datum: " + toJson(eUTxO_With_Script_TxID_Master_TerminatePool_Datum))
     if (eUTxO_With_Script_TxID_Master_TerminatePool_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_TerminatePool_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_TerminatePool_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_TerminatePool_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -420,7 +383,9 @@ export async function masterDeleteFundsTx(
     //------------------
     const functionName = "EndPoint Tx Master - Delete Funds"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_DeleteFund_Script", "txID_Master_Fund_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -441,21 +406,21 @@ export async function masterDeleteFundsTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_DeleteFund_Datum: " + toJson(eUTxO_With_Script_TxID_Master_DeleteFund_Datum))
     if (eUTxO_With_Script_TxID_Master_DeleteFund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_DeleteFund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_DeleteFund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_DeleteFund_Script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_Fund_Datum: " + toJson(eUTxO_With_Script_TxID_Master_Fund_Datum))
     if (eUTxO_With_Script_TxID_Master_Fund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_Fund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_Fund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_Fund_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -486,7 +451,9 @@ export async function masterSendBackFundTx(
     //------------------
     const functionName = "EndPoint Tx Master - Send Back Fund"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_SendBackFund_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const poolDatum_Out_Hex = await getHexFrom_Validator_Datum (poolDatum_Out, true);
     //------------------
@@ -506,14 +473,14 @@ export async function masterSendBackFundTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     // console.log(functionName + " - eUTxO_With_Script_TxID_Master_SendBackFund_Datum: " + toJson(eUTxO_With_Script_TxID_Master_SendBackFund_Datum))
     if (eUTxO_With_Script_TxID_Master_SendBackFund_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_SendBackFund_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_SendBackFund_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_SendBackFund_Script) 
     }
     //------------------
     tx_Building = await tx_Building
@@ -548,7 +515,9 @@ export async function masterSendBackDepositTx(
     //------------------
     const functionName = "EndPoint Tx Master - Send Back Deposit"
     //------------------
-    const scriptAddress: Address = poolInfo.scriptAddress
+    const poolInfoWithScripts = await apiGetStakingPoolWithScriptsDB(poolInfo.name,["script", "txID_Master_SendBackDeposit_Script", "txID_User_Deposit_Script"])
+    //------------------
+    const scriptAddress:Address = poolInfo.scriptAddress
     //------------------
     const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer (redeemer_For_Consuming_UserDatum, true);
     //------------------
@@ -566,19 +535,19 @@ export async function masterSendBackDepositTx(
     if (eUTxO_With_ScriptDatum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_ScriptDatum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachSpendingValidator(poolInfo.script) 
+        tx_Building = await tx_Building.attachSpendingValidator(poolInfoWithScripts.script) 
     }
     //------------------
     if (eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_Master_SendBackDeposit_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_Master_SendBackDeposit_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_Master_SendBackDeposit_Script) 
     }
     //------------------
     if (eUTxO_With_Script_TxID_User_Deposit_Datum){
         tx_Building = await tx_Building.readFrom([eUTxO_With_Script_TxID_User_Deposit_Datum.uTxO])
     }else{
-        tx_Building = await tx_Building.attachMintingPolicy(poolInfo.txID_User_Deposit_Script) 
+        tx_Building = await tx_Building.attachMintingPolicy(poolInfoWithScripts.txID_User_Deposit_Script) 
     }
     //------------------
     if (poolDatum_Out !== undefined){

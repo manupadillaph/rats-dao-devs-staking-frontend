@@ -101,7 +101,7 @@ export const tokenNameLenght = 3
 
 export const maxTokensWithDifferentNames = 20
 
-export const maxMasters = 20
+export const maxMasters = 10
 
 export const maxRewards = 1000000000000000n
 
@@ -109,7 +109,11 @@ export const maxRewards = 1000000000000000n
 
 export const TIME_OUT_TRY_TX = 6000 // = 6 segundos
 
-export const TIME_OUT_TRY_UPDATESTAKINGPOOL = 4000 // = 4 segundos
+export const TIME_OUT_TRY_UPDATESTAKINGPOOL = 5000 // = 4 segundos
+
+export const TIME_SAFETY_AFTER_TX = 5000 // = 5 segundos
+
+//------------------------------------------
 
 export const maxTxExMem = 14000000
 
@@ -133,4 +137,7 @@ export const poolDatum_NotClaimedFund = 0
 
 export const poolDatum_ClaimedFund = 1
 
+
+
 //----------------------------------------------------------------------
+

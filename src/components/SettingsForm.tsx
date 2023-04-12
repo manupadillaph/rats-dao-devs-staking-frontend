@@ -7,7 +7,7 @@ import { apiDeleteAllDatumDB, apiGetDatumsCountDB } from '../stakePool/apis';
 import { EUTxO } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { toJson } from '../utils/utils';
-import ActionWithInputModalBtn from './ActionWithInputModalBtn';
+import ActionModalBtn from './ActionWithInputModalBtn';
 //--------------------------------------
 
 export default function SettingsForm() {
@@ -60,11 +60,11 @@ export default function SettingsForm() {
 
 	//--------------------------------------
 
-	const masterShowPoolAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
+	const masterDeleteDatumsAction = async (poolInfo?: StakingPoolDBInterface, eUTxOs_Selected?: EUTxO[] | undefined, assets?: Assets) => {
 
-		console.log("StakingPoolAdmin - Show Pool - " + toJson(poolInfo?.name))
+		console.log("StakingPoolAdmin - Delete Datums - " + toJson(poolInfo?.name))
 
-		setActionMessage("Cambiando estado de la Pool, please wait...")
+		setActionMessage("Deleting, please wait...")
 
 		try {
 			await apiDeleteAllDatumDB()
@@ -95,8 +95,8 @@ export default function SettingsForm() {
 							There are: {datumsCount} datums in Database
 						</div>
 
-						<ActionWithInputModalBtn 
-							action={masterShowPoolAction} 
+						<ActionModalBtn 
+							action={masterDeleteDatumsAction} 
 							postActionSuccess={undefined}
 							postActionError={undefined}
 							setIsWorking={handleSetIsWorking} 

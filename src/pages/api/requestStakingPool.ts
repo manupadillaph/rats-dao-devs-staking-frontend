@@ -1,30 +1,21 @@
+
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { connect } from '../../utils/dbConnect';
-import { exec } from 'child_process';
-import { toJson } from '../../utils/utils';
-import { MintingPolicy, SpendingValidator } from 'lucid-cardano';
 import { getSession } from 'next-auth/react';
-import { crearFileListForZip, crearStakingPoolFromFiles, createMainJsonFile, getEstadoDeployFromFile, getPABPoolParamsFromFile } from "../../stakePool/helpersServerSide";
-import { CurrencySymbol, PoolParams } from '../../types';
-import { maxMasters } from '../../types/constantes';
-import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from '../../types/stakePoolDBModel';
-import { getScriptFromFile, getTextFromFile, rmdir } from '../../utils/utilsServerSide';
-import path from 'path';
 import * as yup from "yup";
 import { setLocale } from 'yup';
+import { sendRequestMail } from '../../stakePool/helpersSendRequestEmail';
+import { maxMasters } from '../../types/constantes';
+import { toJson } from '../../utils/utils';
 
 const fs = require('fs/promises');
 
 type Data = {
 	msg: string
-	stakingPool?: StakingPoolDBInterface | undefined,
-	files?: any [] | undefined
 }
 
 setLocale({
 	mixed: {
 		notType: '${label} is not a valid ${type}',
-
 	},
   });
 
@@ -68,10 +59,10 @@ let formSchema = yup.object().shape({
 	masters: yup.string().matches(/^[a-f0-9]{56}(,[a-f0-9]{56})*$/, "${label} must be a list of comma-separated strings, each consisting of 56 hexadecimal characters").required().label("Masters"),
 	image: yup.string().url().required().label("Pool Image"),
 	nombrePool: yup.string().required().label("Pool Name"),
-	// email: yup.string().email().required().label("Your Email"),
-	// username: yup.string().required().label("Your Name"),
+	email: yup.string().email().required().label("Your Email"),
+	username: yup.string().required().label("Your Name"),
 });
-
+  
 export default async function handler( req: NextApiRequest, res: NextApiResponse<Data | string>) {
 
 	try {
@@ -81,19 +72,16 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 			throw "Must Connect to your Wallet"
 		}
 		const sesionPkh = session?.user.pkh
+
 		//--------------------------------
-		if (!(session?.user.swRatsDAOCreator)){
-			throw "You Can't Create Staking Pool"
-		}
+
+		const username = req.body.username
+		const email = req.body.email
+
 		//--------------------------------
 
 		const nombrePool = req.body.nombrePool
 		const image = req.body.image
-
-		const swCreate = req.body.swCreate 
-		const swAdd = req.body.swAdd 
-		const swDownload = req.body.swDownload 
-
 		const masters = req.body.masters
 		const poolID_TxOutRef = req.body.poolID_TxOutRef
 		const beginAt = req.body.beginAt
@@ -102,34 +90,21 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		const staking_UI = req.body.staking_UI
 		const staking_CS = req.body.staking_CS
 		const staking_TN = req.body.staking_TN
+		const staking_Decimals = req.body.staking_Decimals
 		const harvest_UI = req.body.harvest_UI
 		const harvest_CS = req.body.harvest_CS
 		const harvest_TN = req.body.harvest_TN
-
-		const staking_Decimals = req.body.staking_Decimals
 		const harvest_Decimals = req.body.harvest_Decimals
-
 		const interest = req.body.interest
 
-		const ruta = process.env.REACT_SERVER_PATH_FOR_SCRIPTS
-
-		await connect();
-
-		console.log("/api/createStakingPool - Request: " + toJson(req.body));
-		// console.log("/api/createStakingPool - Ruta: " + ruta);
+		console.log("/api/requestStakingPool - Request: " + toJson(req.body));
 
 		try {
 			await formSchema.validate(req.body);
 		} catch (error) {
-			throw error
+			throw error 
 		}
 		
-		const stakingPoolWithSameName = await getStakingPoolFromDBByName (nombrePool)
-		
-		if (stakingPoolWithSameName.length> 0 && swAdd){
-			throw "Can't add to Pool with existing name"
-		}
-
 		const mastersSplited = masters.split(',');
 
 		if (masters.length == 0 ){
@@ -139,7 +114,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		if (mastersSplited.length> maxMasters ){
 			throw "Can't create Pool with so many masters"
 		}
-		
+
 		if (deadline < beginAt ){
 			throw "Deadline must be greater than begin at"
 		}
@@ -156,81 +131,14 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 			throw "Harvest Token Name must be set if Harvest Currency Symbol is not empty"	
 		}
 
-		if (swCreate){
-			const rutaPool = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, nombrePool);
-			await rmdir (rutaPool)
-		}
+		await sendRequestMail(process.env.REQUEST_FROM! , process.env.REQUEST_TO!, 'New Staking Pool request', req.body);
 
-		if (swCreate){
-			const execDeploy = 'deploy \"' + nombrePool + '\" \"' + masters + '\" \"' + poolID_TxOutRef + '\" \"' + beginAt + '\" \"' + deadline + '\" \"' + graceTime + '\" \"' + staking_UI + '\" \"' + staking_CS + '\" \"' + staking_TN + '\" \"' + harvest_UI + '\" \"' + harvest_CS + '\" \"' + harvest_TN + '\" \"' + interest + '\" \"' +  ruta + '\"' 
-			console.log("/api/createStakingPool - exec: " + execDeploy)
-			
-			async function getEstado (){
-				const estadoJsonFileName = nombrePool + "/" + 'estado.json';
-				const estado = await getEstadoDeployFromFile(estadoJsonFileName);
-				console.log("/api/createStakingPool - estado: " + estado );
-				return estado
-			}
+		console.log("/api/requestStakingPool - StakingPool requested!");
+		res.status(200).json({ msg: "Smart Contracts created!"});
+		return
 
-			const timeoutGetEstadoWhileDeploy = setInterval(async function () { 
-				await getEstado()
-			}, 4000);
-
-			exec(execDeploy, async (error, stdout, stderr) => {
-				console.log("/api/createStakingPool - exec - stdout: " + stdout );
-				if (error) {
-					var errorStr = toJson(stderr)
-					errorStr = errorStr.indexOf("CallStack") > -1 ? errorStr.slice(7,errorStr.indexOf("CallStack")-2) : errorStr  
-					throw "There were an error creating Smart Contracts: " + errorStr
-				}else {
-					clearInterval(timeoutGetEstadoWhileDeploy)
-					const timeoutGetEstadoEndDeploy = setInterval(async function () { 
-						const estado = await getEstado()
-						if (estado.includes("Done!") ) {
-							clearInterval(timeoutGetEstadoEndDeploy)
-
-							let files = undefined
-							let newStakingPoolDB = undefined
-
-							if (swDownload){
-								files = await crearFileListForZip (nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals);
-								console.log("/api/createStakingPool - StakingPool zip created!");
-							}
-
-							if (swAdd){
-								newStakingPoolDB = await crearStakingPoolFromFiles(nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals)
-								console.log("/api/createStakingPool - StakingPool saved in Database!");
-							}
-
-							res.status(200).json({ msg: "Smart Contracts created!", files: files, stakingPool: newStakingPoolDB });
-							return
-
-						}
-					}, 4000); 
-					
-				}
-			})
-
-		}else{
-					
-			let files = undefined
-			let newStakingPoolDB = undefined
-			
-			if (swDownload){
-				files = await crearFileListForZip (nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals);
-				console.log("/api/createStakingPool - StakingPool zip created!");
-			}
-
-			if (swAdd){
-				newStakingPoolDB = await crearStakingPoolFromFiles(nombrePool, image, staking_UI, harvest_UI, staking_Decimals, harvest_Decimals)
-				console.log("/api/createStakingPool - StakingPool saved in Database!");
-			}
-
-			res.status(200).json({ msg: "Smart Contracts created!", files: files, stakingPool: newStakingPoolDB });
-			return
-		}
 	} catch (error: any) {
-		console.error("/api/createStakingPool - Error: " + error);
+		console.error("/api/requestStakingPool - Error: " + error);
 		res.status(400).json({ msg: error });
 		return;
 	}
