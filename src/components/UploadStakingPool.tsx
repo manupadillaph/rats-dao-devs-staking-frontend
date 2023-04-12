@@ -108,7 +108,7 @@ export default function UpdateStakingPool( ) {
 									<div className="pool__stat-actions">
 
 										<form>
-											<h3 className="pool__stat-title">Staking Pool</h3>
+											<h3 className="pool__stat-title">Upload Staking Pool</h3>
 											<br></br>
 											
 											<UploadZip setStakingPoolCreated={setStakingPoolCreated} />

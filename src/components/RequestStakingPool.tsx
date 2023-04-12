@@ -201,7 +201,7 @@ export default function RequestStakingPool( ) {
 									<div className="pool__stat-actions">
 
 										<form>
-											<h3 className="pool__stat-title">Staking Pool</h3>
+											<h3 className="pool__stat-title">Request Staking Pool</h3>
 											<br></br>
 											
 											<h4 className="pool__stat-title">Your name</h4>
