@@ -223,7 +223,8 @@ export default function RequestStakingPool( ) {
 
 											<h4 className="pool__stat-title">Masters</h4>
 											<input name='ppMasters' value={masters} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
-											<li className="info">Separate by comma the <b>PaymentPubKeyHashes</b> of the wallets. Each one must be a Hexadecimal string of 56 characters length</li>
+											<li className="info">Separate by comma the <b>PaymentPubKeyHashes</b> of the wallets</li>
+											<li className="info">Each one must be a Hexadecimal string of 56 characters length</li>
 											<li className="info">Up to a maximum of {maxMasters}</li>
 											<br></br>
 
@@ -331,7 +332,6 @@ export default function RequestStakingPool( ) {
 											}}>Metadata</button>
 											{isDecimalsInMetadataLoading  ? <div style={{ position: 'relative', top: -20, left: 3 }}><LoadingSpinner size={15} border={3} align="left" /></div> : <></>}
 											<li className="info">Decimals are only used for displaying in the user interface</li>	
-											<li className="info">Inside the system and calculations, all numbers are rounded and integers</li>	
 											<li className="info">If you already filled the currency symbol and token name you can try to get the decimals of this token from the metadata online</li>	
 
 
@@ -372,7 +372,6 @@ export default function RequestStakingPool( ) {
 											}}>Metadata</button>
 											{isDecimalsInMetadataLoading  ? <div style={{ position: 'relative', top: -20, left: 3 }}><LoadingSpinner size={15} border={3} align="left" /></div> : <></>}
 											<li className="info">Decimals are only used for displaying in the user interface</li>	
-											<li className="info">Inside the system and calculations, all numbers are rounded and integers</li>	
 											<li className="info">If you already filled the currency symbol and token name you can try to get the decimals of this token from the metadata online</li>	
 
 											<br></br>
