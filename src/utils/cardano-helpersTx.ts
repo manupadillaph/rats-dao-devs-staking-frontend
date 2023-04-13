@@ -443,6 +443,10 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
         //------------------
         timeOut = setTimeout(updateIsConsuming, txConsumingTime, false);
         //------------------
+        let tx_count
+        if(poolInfo){
+            tx_count = await apiGetTxCountStakingPoolFromDB(poolInfo.name);
+        }
         if (await lucid.awaitTx(txhash)) {
             console.log("waitForTxConfirmation - Tx confirmed");
             // await deleteIsConsuming();
@@ -452,7 +456,24 @@ export async function waitForTxConfirmation (lucid: Lucid, txhash: string, eUTxO
             // await new Promise(r => setTimeout(r, TIME_SAFETY_AFTER_TX));
 
             if(poolInfo){
-                const tx_count = await apiGetTxCountStakingPoolFromDB(poolInfo.name);
+
+                //TENGO DOS ESCENARIOS: 
+                //leo la tx count de mi base de datos antes de esperar la confirmacion, 1 o 2 minutos antes, o la leo aquí, antes de perdirsela a blockfrost
+                //si la leo antes tengo problemas
+                //si la leo ahora tambien
+
+                //si la leo antes, tengo problemas porque mientras yo espero la confirmacion, otra transaccion puede haber terminado
+                //y cuando yo pida a blockfrost la tx count, va a ser mayor pero no por esta tx que estoy esperando, si no por la otra de otro usuairo
+                //leí 23 antes de confirmar de mi base de datos. en ese tiempo blockfrost confirma otra tx y me da tx count 24. yo creo que es confirmacion para esta, pero no.
+
+                //si la leo ahora, como la tx count se actualiza en el server
+                //pudo ya haberse actualizado con esta transaccion
+                //entonces yo al leer este valor ahora, ya es el valor sumado
+                //en ese caso cuando espere recibir de blockfrost la tx count mayor, nunca va ser el caso. ya es el valor final.
+                //leo 24 ahora. ese es el valor ya actualizado en mi base de datos sin darme cuenta. blockfrost me da 24. me quedo esperando que sea mayor.
+                //elijo leer ahora. 
+
+                tx_count = await apiGetTxCountStakingPoolFromDB(poolInfo.name);
                 console.log("waitForTxConfirmation - Waiting for tx_count to be updated at: " + poolInfo.name + " - addr: " + poolInfo.scriptAddress + "" + " - count: " + tx_count);
                 var countTry = 0;
                 var maxTries = 3;    

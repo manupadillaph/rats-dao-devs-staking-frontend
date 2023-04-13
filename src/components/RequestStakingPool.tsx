@@ -223,7 +223,7 @@ export default function RequestStakingPool( ) {
 
 											<h4 className="pool__stat-title">Masters</h4>
 											<input name='ppMasters' value={masters} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
-											<li className="info">Separate by comma the different <b>PaymentPubKeyHashes</b>, must by a Hexadecimal string of 56 characteres lenght each</li>
+											<li className="info">Separate by comma the <b>PaymentPubKeyHashes</b> of the wallets. Each one must be a Hexadecimal string of 56 characters length</li>
 											<li className="info">Up to a maximum of {maxMasters}</li>
 											<br></br>
 
@@ -308,14 +308,14 @@ export default function RequestStakingPool( ) {
 											<h4 className="pool__stat-title">Currency Symbol</h4>
 											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
-											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
+											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 											
 											<h4 className="pool__stat-title">Token Name</h4>
 											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
-											<li className="info">Leave empty to use any Token Name within the chossen Currency Symbol</li>
-											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in Hexadecimal</li>
+											<li className="info">Leave empty to use any Token Name within the chosen Currency Symbol</li>
+											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
@@ -348,14 +348,14 @@ export default function RequestStakingPool( ) {
 											<h4 className="pool__stat-title">Currency Symbol</h4>
 											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
-											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characteres lenght</li>
+											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Token Name</h4>
 											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Can't be empty if you choose to use another Currency Symbol</li>
-											<li className="info">Enter the <b>Token Name</b> in Hexadecimal</li>
+											<li className="info">Enter the <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
@@ -380,7 +380,7 @@ export default function RequestStakingPool( ) {
 											<h3 className="pool__stat-title">Rewards</h3>
 											<br></br>
 
-											<h4 className="pool__stat-title">Anual pay of Havest Unit per each Staking Unit</h4>
+											<h4 className="pool__stat-title">Annual pay of Harvest Unit per each Staking Unit</h4>
 
 											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input>
 											<li className="info">(To have 1 per year, enter: 1)</li>

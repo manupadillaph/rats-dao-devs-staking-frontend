@@ -38,11 +38,11 @@ setLocale({
 // 	harvest_TN: yup.string().matches(/^([a-f0-9]{2})+$/, {message: "${label} must be a string consisting of pairs of hexadecimal characters", excludeEmptyString: true}).label("Harvest Token Name"),
 // 	staking_Decimals: yup.number().min(0).max(6).required().label("Staking Decimals"),
 // 	harvest_Decimals: yup.number().min(0).max(6).required().label("Harvest Decimals"),
-// 	interest: yup.number().required().label("Anual pay of Havest Unit per each Staking Unit")
+// 	interest: yup.number().required().label("Annual pay of Harvest Unit per each Staking Unit")
 //   });
 
 let formSchema = yup.object().shape({
-	interest: yup.number().min(0).required().label("Anual pay of Havest Unit per each Staking Unit"),
+	interest: yup.number().min(0).required().label("Annual pay of Harvest Unit per each Staking Unit"),
 	harvest_Decimals: yup.number().min(0).max(6).required().label("Harvest Decimals"),
 	harvest_TN: yup.string().matches(/^([a-f0-9]{2})+$/, {message: "${label} must be a string consisting of pairs of hexadecimal characters", excludeEmptyString: true}).label("Harvest Token Name"),
 	harvest_CS: yup.string().matches(/^[a-f0-9]{56}$/,{message: "${label} must be a string consisting of 56 hexadecimal characters", excludeEmptyString: true}).label("Harvest Currency Symbol"),
