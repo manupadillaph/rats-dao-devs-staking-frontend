@@ -2,7 +2,7 @@ import { Address, Assets, Lucid, UTxO } from 'lucid-cardano';
 import { EUTxO, FundDatum, PoolDatum, Redeemer_Burn_TxID, Redeemer_Mint_TxID, Redeemer_User_Harvest, Redeemer_User_Withdraw, UserDatum } from '../types';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
-import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
+import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum_And_SaveDB, getHexFrom_Validator_Redeemer_And_SaveDB } from "./helpersDatumsAndRedeemers";
 import { apiGetStakingPoolWithScriptsDB } from './apis';
 
 //--------------------------------------
@@ -23,7 +23,7 @@ export async function userDepositTx(
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
-    const userDatum_Out_Hex = await getHexFrom_Validator_Datum(userDatum_Out, true);
+    const userDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(userDatum_Out, true);
     console.log(functionName + " - userDatum_Out_Hex: " + userDatum_Out_Hex)
     //------------------
     const redeemer_For_Mint_TxID_User_Deposit_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_User_Deposit, true);
@@ -86,14 +86,14 @@ export async function userHarvestPoolTx(
     const datum_hex_and_values_for_FundDatum: { datum_hex: string; value: Assets; }[] = [];
     datum_and_values_for_FundDatum.forEach(async (datum_and_value_for_FundDatum, index) => {
         const fundDatum_Out = datum_and_value_for_FundDatum.datum;
-        const fundDatum_Out_Hex = await getHexFrom_Validator_Datum(fundDatum_Out, true);
+        const fundDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(fundDatum_Out, true);
         datum_hex_and_values_for_FundDatum.push({ datum_hex: fundDatum_Out_Hex, value: datum_and_value_for_FundDatum.value });
     });
     //------------------
-    const userDatum_Out_Hex = await getHexFrom_Validator_Datum(userDatum_Out, true);
+    const userDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(userDatum_Out, true);
     //------------------
-    const redeemer_For_Consuming_FundDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_FundDatum, true);
-    const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_UserDatum, true);
+    const redeemer_For_Consuming_FundDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_FundDatum, true);
+    const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_UserDatum, true);
     const redeemer_For_Mint_TxID_User_Harvest_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_User_Harvest, true);
     //------------------
     // const now = Math.floor(Date.now())
@@ -160,7 +160,7 @@ export async function userWithdrawTx(
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
-    const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_UserDatum, true);
+    const redeemer_For_Consuming_UserDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_UserDatum, true);
     //------------------
     const redeemer_For_Mint_TxID_User_Withdraw_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_User_Withdraw, true);
     const redeemer_Burn_UserID_Hex = await getHexFrom_Redeemer_TxID(redeemer_Burn_UserID, true);
@@ -192,8 +192,8 @@ export async function userWithdrawTx(
     }
     //------------------
     if (poolDatum_Out !== undefined) {
-        const poolDatum_Out_Hex = await getHexFrom_Validator_Datum(poolDatum_Out, true);
-        const redeemer_For_Consuming_PoolDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_PoolDatum!, true);
+        const poolDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(poolDatum_Out, true);
+        const redeemer_For_Consuming_PoolDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_PoolDatum!, true);
         //------------------
         tx_Building = await tx_Building
             .mintAssets(value_For_Mint_TxID_User_Withdraw, redeemer_For_Mint_TxID_User_Withdraw_Hex)
@@ -210,8 +210,8 @@ export async function userWithdrawTx(
         const txComplete_FIXED = await fixTx(tx_Building, lucid, protocolParameters);
         return txComplete_FIXED;
     } else {
-        const fundDatum_Out_Hex = await getHexFrom_Validator_Datum(fundDatum_Out!, true);
-        const redeemer_For_Consuming_FundDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_FundDatum!, true);
+        const fundDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(fundDatum_Out!, true);
+        const redeemer_For_Consuming_FundDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_FundDatum!, true);
         //------------------
         tx_Building = await tx_Building
             .mintAssets(value_For_Mint_TxID_User_Withdraw, redeemer_For_Mint_TxID_User_Withdraw_Hex)

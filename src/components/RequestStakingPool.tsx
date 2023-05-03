@@ -196,15 +196,13 @@ export default function RequestStakingPool( ) {
 								<div className="pool__flex_gap"></div>
 								<div className="pool__stat">
 
-
-
 									<div className="pool__stat-actions">
 
 										<form>
 											<h3 className="pool__stat-title">Request Staking Pool</h3>
 											<br></br>
 											
-											<h4 className="pool__stat-title">Your name</h4>
+											<h4 className="pool__stat-title">Your names</h4>
 											<input name='username' value={username} style={{ width: 400, fontSize: 12 }} onChange={(event) => setUsername(event.target.value)} type="text" required />
 											<br></br><br></br>
 

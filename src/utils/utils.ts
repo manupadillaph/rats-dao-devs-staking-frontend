@@ -115,7 +115,7 @@ export function sha256HexStr(hexStr: string) {
 
 //for printing pretty any object
 export function toJson(data: any, space?: string | number | undefined) {
-    if (data) {
+    if (data != null && data != undefined) {
 
         var json = JSON.stringify(data, getCircularReplacer(), space)
         //console.log(json)
@@ -132,6 +132,7 @@ export function toJson(data: any, space?: string | number | undefined) {
         return "{}"
     }
 }
+
 
 const getCircularReplacer = () => {
     const seen = new WeakSet()

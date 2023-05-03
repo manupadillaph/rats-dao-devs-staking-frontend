@@ -113,6 +113,8 @@ export const TIME_OUT_TRY_UPDATESTAKINGPOOL = 5000 // = 4 segundos
 
 export const TIME_SAFETY_AFTER_TX = 5000 // = 5 segundos
 
+export const TIME_WAIT_DEPLOY = 4000 // = 4 segundos
+
 //------------------------------------------
 
 export const maxTxExMem = 14000000

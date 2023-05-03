@@ -71,10 +71,10 @@ export default function WalletModalBtn() {
 			}
 
 			const lucid = await initializeLucid(walletApi)
-			const adddressWallet = await lucid!.wallet.address()
-			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
-			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
-			//console.log("[Session] - walletConnect: addr: " + adddressWallet)
+			const addressWallet = await lucid!.wallet.address()
+			//const pkh = C.Address.from_bech32(addressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
+			const pkh = lucid!.utils.getAddressDetails(addressWallet)?.paymentCredential?.hash;
+			//console.log("[Session] - walletConnect: addr: " + addressWallet)
 			console.log("[Session] - walletConnect: pkh: " + pkh)
 			const protocolParameters = await lucid!.provider.getProtocolParameters();
 			var swEnviarPorBlockfrost_ = swEnviarPorBlockfrost
@@ -141,10 +141,10 @@ export default function WalletModalBtn() {
 			//alert ("walletPrivateKey: " + walletPrivateKey)
 			//const lucid = await initializeLucidWithWalletFromPrivateKey(walletPrivateKey)
 			const lucid = await initializeLucidWithWalletFromSeed(walletSeed, {addressType : "Base", accountIndex: 0} )
-			const adddressWallet = await lucid!.wallet.address()
-			//const pkh = C.Address.from_bech32(adddressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
-			const pkh = lucid!.utils.getAddressDetails(adddressWallet)?.paymentCredential?.hash;
-			//console.log("[Session] - walletConnect: addr: " + adddressWallet)
+			const addressWallet = await lucid!.wallet.address()
+			//const pkh = C.Address.from_bech32(addressWallet).as_base()?.payment_cred().to_keyhash()?.to_hex();
+			const pkh = lucid!.utils.getAddressDetails(addressWallet)?.paymentCredential?.hash;
+			//console.log("[Session] - walletConnect: addr: " + addressWallet)
 			console.log("[Session] - walletConnect: pkh: " + pkh)
 			const protocolParameters = await lucid!.provider.getProtocolParameters();
 			var swEnviarPorBlockfrost_ = swEnviarPorBlockfrost

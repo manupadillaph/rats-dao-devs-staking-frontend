@@ -469,7 +469,7 @@ export async function getDecimalsInMetadata(asset_CS: string, asset_TN: string) 
         asset_Decimals = 0
     }else{
         const asset_Metadata = await apiGetTokenMetadata(asset_AC)
-        console.log("getDecimalsInMetadata: " + toJson(asset_Metadata))
+        // console.log("getDecimalsInMetadata: " + toJson(asset_Metadata))
         if(asset_Metadata && asset_Metadata?.metadata?.decimals) {
             asset_Decimals = asset_Metadata.metadata.decimals
         }else{

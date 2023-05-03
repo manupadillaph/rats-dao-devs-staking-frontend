@@ -9,6 +9,14 @@ import { bytesUint8ArraToHex } from "./utils";
 
 
 export const addrToPubKeyHash = (bech32Addr: string) => {
+
+    //FIXME: lucid!.utils.getAddressDetails anda mejor, considera muchos caminos
+
+    // const pkh1 = C.Address.from_bech32(bech32Addr).as_base()?.payment_cred().to_keyhash()?.to_hex()
+    // const pkh2 = lucid!.utils.getAddressDetails(addressWallet)?.paymentCredential?.hash;
+
+    // console.log ("bech32Addr : "+ bech32Addr + " pkh1: "+ pkh1)
+
     const baseAddress = BaseAddress.from_address(
         Address.from_bech32(bech32Addr)
     );
@@ -16,8 +24,12 @@ export const addrToPubKeyHash = (bech32Addr: string) => {
     if (baseAddress) {
         const pkh = baseAddress.payment_cred().to_keyhash();
         const res = bytesUint8ArraToHex(pkh!.to_bytes());
+        console.log ("bech32Addr : "+ bech32Addr + " pkh2: "+ res)
+
         return res;
     } else {
+        console.log ("bech32Addr : "+ bech32Addr + " pkh2: no")
+
         return undefined;
     }
 
@@ -127,6 +139,8 @@ export function Bip32PrivateKeyToAddress(bip32: Bip32PrivateKey, network: number
 // network: mainnet = 1    Tesnet = 0
 
 export function pubKeyHashToAddress(network: number, pkh: PaymentKeyHash, stakePkh?: PaymentKeyHash) {
+
+    console.log ("pubKeyHashToAddress - pkh: "+ pkh)
 
     const keyHash = Ed25519KeyHash.from_bytes(fromHex(pkh));
 

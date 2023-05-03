@@ -8,8 +8,8 @@ import { format } from 'date-fns';
 import { Assets, UTxO } from 'lucid-cardano';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { splitUTxOs } from "../stakePool/endPoints - others";
-import { apiGetTokenMetadata, getEstadoDeployAPI, apiCreateStakingPool } from "../stakePool/apis";
-import { ADA_Decimals, ADA_UI, maxMasters } from '../types/constantes';
+import { apiGetTokenMetadata, getEstadoDeployAPI, apiCreateStakingPool, apiCreateStakingPoolInit, apiCreateStakingPoolEnd } from "../stakePool/apis";
+import { ADA_Decimals, ADA_UI, TIME_WAIT_DEPLOY, maxMasters } from '../types/constantes';
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { pushSucessNotification } from "../utils/pushNotification";
 import { useStoreState } from '../utils/walletProvider';
@@ -30,12 +30,12 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 
 import { useSearchParams } from "react-router-dom";
+import { pubKeyHashToAddress } from '../utils/cardano-utils';
+import { thunkOn } from 'easy-peasy';
 
 //--------------------------------------
 
 export default function CreateStakingPool({query}: any ) {
-
-	console.log("query: "+ toJson(query))
 
 	const walletStore = useStoreState(state => state.wallet)
 
@@ -44,7 +44,11 @@ export default function CreateStakingPool({query}: any ) {
 	const [nombrePool, setNombrePool] = useState(query?.nombrePool? query?.nombrePool : process.env.NEXT_PUBLIC_DEFAULT_POOL_NAME)
 	const [image, setImage] = useState(query?.image? query?.image : process.env.NEXT_PUBLIC_DEFAULT_POOL_IMAGE)
 	
-	const [masters, setMasters] = useState(query?.masters? query?.masters : walletStore.pkh)
+	// const [masters, setMasters] = useState("")
+	// const [masters, setMasters] = useState(query?.masters? query?.masters : walletStore.pkh)
+
+	const [mastersAddresses, setMastersAddresses] = useState("")
+
 	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState(query?.poolID_TxOutRef? query?.poolID_TxOutRef : "")
 	const [beginAt, setBeginAt] = useState(query?.beginAt? query?.beginAt : Date.now().toString())
 	const [deadline, setppDeadline] = useState(query?.deadline? query?.deadline : (parseInt(Date.now().toString()) + 1000000000).toString())
@@ -76,6 +80,7 @@ export default function CreateStakingPool({query}: any ) {
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
 
+	
 	const getUTxOsFromWallet = async () => {
 		console.log("CreateStakingPool - getUTxOsFromWallet")
 		if (walletStore.connected) {
@@ -102,11 +107,56 @@ export default function CreateStakingPool({query}: any ) {
 		}
 	}
 
+	const convertListOfMasterPkhToListOfMasterAddresses = (input: string): string => {
+		const values = input.split(',');
+		const results = values.map((value) => {
+			if (value === "" || value === undefined) return undefined
+			try{
+				const result = pubKeyHashToAddress(process.env.NEXT_PUBLIC_USE_MAINNET === 'true' ? 1 : 0,value);
+				return result;
+			}
+			catch(error){
+				console.log("Can't convert Master Pkh <"+value+"> to Address")
+				throw "Can't convert Master Pkh <"+value+"> to Address"
+			}
+		});
+		return results.join(',');
+	}
+
+	useEffect(() => {
+		if (query?.masters != undefined && query?.masters != ""){
+			try{
+				setMastersAddresses(convertListOfMasterPkhToListOfMasterAddresses(query?.masters))
+			}
+			catch(error){
+				setMastersAddresses("")
+			}
+		}
+	}, [])
+
+	const convertListOfMasterAddressesToListOfMasterPkh = (input: string): string => {
+		const values = input.split(',');
+		const results = values.map((value) => {
+			if (value === "" || value === undefined) return undefined
+			try{
+				const result = walletStore.lucid!.utils.getAddressDetails(value)?.paymentCredential?.hash;
+				console.log ("ADDRESS : "+value +" > "+ result)
+				return result;
+			}
+			catch(error){
+				console.log("Can't convert Master address <"+value+"> to Payment Pub Key Hash")
+				throw "Can't convert Master address <"+value+"> to Payment Pub Key Hash"
+			}
+		});
+		return results.join(',');
+	}
+
 	const getDataFromWallet = async () => {
 		console.log("CreateStakingPool - getDataFromWallet")
 		if (walletStore.connected) {
-			if (masters === ""){
-				setMasters(walletStore.pkh)
+			if (mastersAddresses === ""){
+				//setMasters(walletStore.pkh!)
+				setMastersAddresses(await walletStore.lucid!.wallet.address())
 			}
 			if (poolID_TxOutRef === "") {
 				await getPoolID_TxOutRef()
@@ -116,6 +166,17 @@ export default function CreateStakingPool({query}: any ) {
 		}
 	}
 
+	// useEffect(() => {
+	// 	if (mastersAddresses != ""){
+	// 		try{
+	// 			setMasters(convertListOfMasterAddressesToListOfMasterPkh(mastersAddresses))
+	// 		}
+	// 		catch(error){
+	// 			setMasters("")
+	// 		}
+	// 	}
+	// }, [mastersAddresses])
+	
 	useEffect(() => {
 		// console.log("CreateStakingPool - useEffect - walletStore.connected: " + walletStore.connected)
 		if (walletStore.connected){
@@ -151,17 +212,34 @@ export default function CreateStakingPool({query}: any ) {
 
 		setActionMessage("Creating Smart Contracts, please wait...")
 
-		const timeoutGetEstadoDeploy = setInterval(async function () {
-			const message = await getEstadoDeployAPI(nombrePool)
-			setActionMessage("Creating Smart Contracts: " + message)
-
-			if (message.includes("Done!")) {
-				clearInterval(timeoutGetEstadoDeploy)
-				//setActionMessage("Smart Contracts created!")
-			}
-		}, 4000);
+		let timeoutGetEstadoDeploy: any = undefined
 
 		try {
+
+			let swFinishedDeploy = false
+
+			timeoutGetEstadoDeploy = setInterval(async function () {
+				const message = await getEstadoDeployAPI(nombrePool)
+				setActionMessage("Creating Smart Contracts: " + message)
+				// console.log ("CreatePoolFilesAction - getEstadoDeployAPI: " + message)
+
+				if (message.includes("Done!")) {
+					clearInterval(timeoutGetEstadoDeploy)
+					swFinishedDeploy = true
+					//setActionMessage("Smart Contracts created!")
+				}
+			}, TIME_WAIT_DEPLOY);
+
+			let masters = ""
+			try{
+				masters = convertListOfMasterAddressesToListOfMasterPkh(mastersAddresses)
+			}
+			catch(error){
+				throw error
+			}
+			
+			console.log("Masters Addresses: " + mastersAddresses)
+			console.log("Masters Pkh: " + masters)
 
 			let data = {
 				nombrePool: nombrePool,
@@ -191,7 +269,14 @@ export default function CreateStakingPool({query}: any ) {
 				interest: interest
 			}
 			
-			const [stakingPool, files] = await apiCreateStakingPool(data)
+			await apiCreateStakingPoolInit(data)
+
+			//create a while to wait for the deploy to finish
+			while (!swFinishedDeploy) {
+				await new Promise(r => setTimeout(r, TIME_WAIT_DEPLOY));
+			}
+			
+			const [stakingPool, files] = await apiCreateStakingPoolEnd(data)
 
 			if (files && files.length > 0 && swDownload) {
 				setActionMessage("Creating ZIP file...")
@@ -215,12 +300,11 @@ export default function CreateStakingPool({query}: any ) {
 							setActionMessage("ZIP file created!")
 						})
 						.catch(() => {
-							setActionMessage("Error creating Zip File!")
+							throw "Error creating Zip File!"
 						});
 
-					setActionMessage("Smart Contracts created!")
-				} catch (error) {
-					setActionMessage("Error creating Zip File!")
+				} catch (error : any) {
+					throw error
 				}
 			}
 
@@ -236,7 +320,7 @@ export default function CreateStakingPool({query}: any ) {
             setIsWorking("")
 			return "Smart Contracts created!";
 		} catch (error) {
-			clearInterval(timeoutGetEstadoDeploy)
+			if (timeoutGetEstadoDeploy) clearInterval(timeoutGetEstadoDeploy)
 			setIsWorking("")
 			throw error
 		}
@@ -313,12 +397,19 @@ export default function CreateStakingPool({query}: any ) {
 											<input name='image' value={image} style={{ width: 400, fontSize: 12 }} onChange={(event) => setImage(event.target.value)}  ></input>
 											<br></br><br></br>
 
-											<h4 className="pool__stat-title">Masters</h4>
+											<h4 className="pool__stat-title">Masters Addresses</h4>
+											<textarea name='ppMasters' value={mastersAddresses} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMastersAddresses(event.target.value)} rows={5}></textarea>
+											{/* <input name='ppMasters' value={mastersAddresses} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMastersAddresses(event.target.value)}  ></input> */}
+											<li className="info">Separate by comma the <b>Addresses</b> of the wallets</li>
+											<li className="info">Up to a maximum of {maxMasters}</li>
+											<br></br>
+
+											{/* <h4 className="pool__stat-title">Masters</h4>
 											<input name='ppMasters' value={masters} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
 											<li className="info">Separate by comma the <b>PaymentPubKeyHashes</b> of the wallets</li>
 											<li className="info">Each one must be a Hexadecimal string of 56 characters length</li>
 											<li className="info">Up to a maximum of {maxMasters}</li>
-											<br></br>
+											<br></br> */}
 											
 											<h4 className="pool__stat-title">UTxO for minting NFT PoolID</h4><p>txHash#OutputIndex</p>
 											<input name='ppPoolID_TxOutRef' value={poolID_TxOutRef} onChange={(event) => setPoolID_TxOutRef(event.target.value)} style={{ width: 335, fontSize: 12 }}></input>
@@ -572,4 +663,8 @@ export default function CreateStakingPool({query}: any ) {
 	)
 }
 
+
+function sleep(arg0: number) {
+	throw new Error('Function not implemented.');
+}
 

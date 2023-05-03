@@ -1,0 +1,25 @@
+{
+  "name": "NodeJs",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "node",
+  // "userEnvProbe": "loginShell",
+  "workspaceFolder": "/home/frontend/workspace",
+  "shutdownAction": "stopCompose",
+  "postStartCommand": "/home/frontend/workspace/.devcontainer/scripts/on-start-container-menu.sh",
+  "containerEnv": {
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "GitHub.copilot",
+        "GitHub.copilot-labs",
+        "ms-azuretools.vscode-docker",
+        "techer.open-in-browser"
+      ],
+      "settings": {
+      }
+    }
+  }
+}
+
+

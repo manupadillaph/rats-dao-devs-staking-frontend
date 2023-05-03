@@ -1,0 +1,21 @@
+version: "1.25"
+name: "rats-dao-front-end"
+services:
+  node:
+    image: manupadilla/ubuntu_full_nodejs:1.0
+    container_name: ${COMPOSE_PROJECT_NAME}_container
+    build:
+      context: ubuntu_full_nodejs
+      dockerfile: ../ubuntu_full_nodejs/Dockerfile
+      args:
+        USER: frontend
+        WORK: /home/frontend/workspace
+        TOOLS: /home/frontend/tools
+    volumes:
+      - ..:/home/frontend/workspace
+    command:  /bin/bash -c "/home/frontend/workspace/.devcontainer/scripts/on-create-container.sh && while sleep 1000; do :; done" 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"

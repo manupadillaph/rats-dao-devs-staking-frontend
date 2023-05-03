@@ -361,7 +361,7 @@ export function getTxMemAndStepsUse(protocolParameters: any, txSize: number, txJ
     //console.log ("getTxMemAndStepsUse - protocolParameters: " + toJson (protocolParameters))
 
     result.push({ "SIZE": txSize, "MEM": mem / 1000000, "STEPS": steps / 1000000000 })
-    result.push({ "MAX SIZE": maxTxSize, "MAX MEM": maxTxExMem / 1000000, "MAX STEPS": maxTxExSteps / 1000000000 })
+    // result.push({ "MAX SIZE": maxTxSize, "MAX MEM": maxTxExMem / 1000000, "MAX STEPS": maxTxExSteps / 1000000000 })
 
     return result
 }

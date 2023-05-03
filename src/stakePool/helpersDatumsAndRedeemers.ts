@@ -47,7 +47,7 @@ export function isScriptDatum(datum: any) {
 
 //---------------------------------------------------------------
 
-export async function getHexFrom_Validator_Datum(datum: Validator_Datum, swPrint: boolean = true) {
+export async function getHexFrom_Validator_Datum_And_SaveDB(datum: Validator_Datum, swPrint: boolean = true) {
     const plutusData = objToPlutusData(datum);
     const hex = showPtrInHex(plutusData);
     const hash = C.hash_plutus_data(plutusData);
@@ -66,7 +66,7 @@ export async function getHexFrom_Validator_Datum(datum: Validator_Datum, swPrint
 }
 //---------------------------------------------------------------
 
-export async function getHexFrom_Validator_Redeemer(redeemer: ValidatorRedeemer, swPrint: boolean = true) {
+export async function getHexFrom_Validator_Redeemer_And_SaveDB(redeemer: ValidatorRedeemer, swPrint: boolean = true) {
     const plutusData = objToPlutusData(redeemer);
     const hex = showPtrInHex(plutusData);
     const hash = C.hash_plutus_data(plutusData);

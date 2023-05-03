@@ -65,7 +65,7 @@ export class Maybe<T> {
     plutusDataIndex = 0 | 1
     val : T | undefined
     constructor (val? : T) {
-        if (val){
+        if (val != undefined) {
             this.val = val;
             this.plutusDataIndex = 0
         } else {

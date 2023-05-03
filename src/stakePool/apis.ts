@@ -249,6 +249,74 @@ export async function apiCreateStakingPool(data: any) {
 
 //----------------------------------------------------------------------
 
+export async function apiCreateStakingPoolInit(data: any) {
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/createStakingPool-init"
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions)
+    const json = await response.json()
+    const message = json.msg
+
+    switch (response.status) {
+        case 500:
+            console.error("apiCreateStakingPool - api/createStakingPool-init: Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiCreateStakingPool - api/createStakingPool-init - Error: " + message)
+            throw message;
+        default:
+            console.error("apiCreateStakingPool - api/createStakingPool-init: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiCreateStakingPool - api/createStakingPool-init: " + message)
+    }
+}
+
+//----------------------------------------------------------------------
+
+export async function apiCreateStakingPoolEnd(data: any) {
+
+    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/createStakingPool-end"
+
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: toJson(data)
+    };
+
+    const response = await fetch(urlApi, requestOptions)
+    const json = await response.json()
+    const message = json.msg
+
+    switch (response.status) {
+        case 500:
+            console.error("apiCreateStakingPool - api/createStakingPool-end: Error 500")
+            throw "Error 500";
+        case 400:
+            console.error("apiCreateStakingPool - api/createStakingPool-end - Error: " + message)
+            throw message;
+        default:
+            console.error("apiCreateStakingPool - api/createStakingPool-end: Error Unknown")
+            throw "Error Unknown";
+        case 200:
+            console.log("apiCreateStakingPool - api/createStakingPool-end: " + message)
+            let stakingPool : StakingPoolDBInterface | undefined = undefined
+            if (json.stakingPool)
+                stakingPool = stakingPoolDBParser(json.stakingPool)
+            const files = json.files
+            return [stakingPool, files]
+    }
+}
+
+
+//----------------------------------------------------------------------
+
 export async function apiUploadStakingPool(formData: any) {
 
     const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/uploadStakingPool"

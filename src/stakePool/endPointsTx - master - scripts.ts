@@ -3,7 +3,7 @@ import { EUTxO, PoolDatum, Redeemer_Burn_TxID, Redeemer_Master_DeleteScripts, Re
 import { StakingPoolDBInterface } from '../types/stakePoolDBModel';
 import { addAssets } from '../utils/cardano-helpers';
 import { createTx, fixTx } from '../utils/cardano-helpersTx';
-import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum, getHexFrom_Validator_Redeemer } from "./helpersDatumsAndRedeemers";
+import { getHexFrom_Redeemer_TxID, getHexFrom_Validator_Datum_And_SaveDB, getHexFrom_Validator_Redeemer_And_SaveDB } from "./helpersDatumsAndRedeemers";
 import { apiGetStakingPoolWithScriptsDB } from './apis';
 
 //--------------------------------------
@@ -20,7 +20,7 @@ export async function masterAddScriptsTx(
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
-    const script_Datum_Hex = await getHexFrom_Validator_Datum(script_Datum, true);
+    const script_Datum_Hex = await getHexFrom_Validator_Datum_And_SaveDB(script_Datum, true);
     //------------------
     const redeemer_For_Mint_TxID_Master_AddScripts_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_Master_AddScripts, true);
     //------------------
@@ -81,10 +81,10 @@ export async function masterDeleteScriptsTx(
     //------------------
     const scriptAddress: Address = poolInfo.scriptAddress;
     //------------------
-    const poolDatum_Out_Hex = await getHexFrom_Validator_Datum(poolDatum_Out, true);
+    const poolDatum_Out_Hex = await getHexFrom_Validator_Datum_And_SaveDB(poolDatum_Out, true);
     //------------------
-    const redeemer_For_Consuming_PoolDatum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_PoolDatum, true);
-    const redeemer_For_Consuming_Scripts_Datum_Hex = await getHexFrom_Validator_Redeemer(redeemer_For_Consuming_Scripts_Datum, true);
+    const redeemer_For_Consuming_PoolDatum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_PoolDatum, true);
+    const redeemer_For_Consuming_Scripts_Datum_Hex = await getHexFrom_Validator_Redeemer_And_SaveDB(redeemer_For_Consuming_Scripts_Datum, true);
     const redeemer_For_Mint_TxID_Master_DeleteScripts_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_Master_DeleteScripts, true);
     const redeemer_For_Burn_ScriptIDs_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Burn_ScriptIDs, true);
     //------------------
