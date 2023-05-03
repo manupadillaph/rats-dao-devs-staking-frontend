@@ -34,7 +34,9 @@ export default function RequestStakingPool( ) {
 	const [nombrePool, setNombrePool] = useState("")
 	const [image, setImage] = useState("https://")
 	
-	const [masters, setMasters] = useState(walletStore.pkh)
+	// const [masters, setMasters] = useState(walletStore.pkh)
+	const [mastersAddresses, setMastersAddresses] = useState("")
+
 	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState("")
 	const [beginAt, setBeginAt] = useState(Date.now().toString())
 	const [deadline, setppDeadline] = useState((parseInt(Date.now().toString()) + 1000000000).toString())
@@ -92,11 +94,29 @@ export default function RequestStakingPool( ) {
 		}
 	}
 
+	const convertListOfMasterAddressesToListOfMasterPkh = (input: string): string => {
+		const values = input.split(',');
+		const results = values.map((value) => {
+			if (value === "" || value === undefined) return undefined
+			try{
+				const result = walletStore.lucid!.utils.getAddressDetails(value)?.paymentCredential?.hash;
+				console.log ("ADDRESS : "+value +" > "+ result)
+				return result;
+			}
+			catch(error){
+				console.log("Can't convert Master address <"+value+"> to Payment Pub Key Hash")
+				throw "Can't convert Master address <"+value+"> to Payment Pub Key Hash"
+			}
+		});
+		return results.join(',');
+	}
+
 	const getDataFromWallet = async () => {
 		console.log("RequestStakingPool - getDataFromWallet")
 		if (walletStore.connected) {
-			if (masters === ""){
-				setMasters(walletStore.pkh)
+			if (mastersAddresses === ""){
+				//setMasters(walletStore.pkh!)
+				setMastersAddresses(await walletStore.lucid!.wallet.address())
 			}
 			if (poolID_TxOutRef === "") {
 				await getPoolID_TxOutRef()
@@ -129,6 +149,14 @@ export default function RequestStakingPool( ) {
 
 		try {
 
+			let masters = ""
+			try{
+				masters = convertListOfMasterAddressesToListOfMasterPkh(mastersAddresses)
+			}
+			catch(error){
+				throw error
+			}
+			
 			let data = {
 				username: username,
 				email: email,
@@ -202,7 +230,7 @@ export default function RequestStakingPool( ) {
 											<h3 className="pool__stat-title">Request Staking Pool</h3>
 											<br></br>
 											
-											<h4 className="pool__stat-title">Your names</h4>
+											<h4 className="pool__stat-title">Your name</h4>
 											<input name='username' value={username} style={{ width: 400, fontSize: 12 }} onChange={(event) => setUsername(event.target.value)} type="text" required />
 											<br></br><br></br>
 
@@ -219,12 +247,19 @@ export default function RequestStakingPool( ) {
 											<input name='image' value={image} style={{ width: 400, fontSize: 12 }} onChange={(event) => setImage(event.target.value)}  ></input>
 											<br></br><br></br>
 
+											<h4 className="pool__stat-title">Masters Addresses</h4>
+											<textarea name='ppMasters' value={mastersAddresses} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMastersAddresses(event.target.value)} rows={5}></textarea>
+											{/* <input name='ppMasters' value={mastersAddresses} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMastersAddresses(event.target.value)}  ></input> */}
+											<li className="info">Separate by comma the <b>Addresses</b> of the wallets</li>
+											<li className="info">Up to a maximum of {maxMasters}</li>
+											<br></br>
+{/* 											
 											<h4 className="pool__stat-title">Masters</h4>
 											<input name='ppMasters' value={masters} style={{ width: 400, fontSize: 12 }} onChange={(event) => setMasters(event.target.value)}  ></input>
 											<li className="info">Separate by comma the <b>PaymentPubKeyHashes</b> of the wallets</li>
 											<li className="info">Each one must be a Hexadecimal string of 56 characters length</li>
 											<li className="info">Up to a maximum of {maxMasters}</li>
-											<br></br>
+											<br></br> */}
 
 											<h4 className="pool__stat-title">UTxO for minting NFT PoolID</h4><p>txHash#OutputIndex</p>
 											<input name='ppPoolID_TxOutRef' value={poolID_TxOutRef} onChange={(event) => setPoolID_TxOutRef(event.target.value)} style={{ width: 335, fontSize: 12 }}></input>
@@ -428,5 +463,6 @@ export default function RequestStakingPool( ) {
 		</>
 	)
 }
+
 
 
