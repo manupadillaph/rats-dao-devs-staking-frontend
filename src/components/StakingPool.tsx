@@ -373,19 +373,23 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											postActionError={updateDetailsStakingPoolAndWallet}
 											setIsWorking={handleSetIsWorking} 
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={poolInfo.swClosed ? 
-												'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
-												: 
-												staking_AC_isAda? 
-													'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
-												: 
-													'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-													<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
-													<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
-													<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
-													<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
+											description={
+												!poolInfo.swIniciado ?
+														'<p className="info">TThe pool hasn\'t opened yet for deposits.</p>' 
+													: 
+														poolInfo.swClosed ? 
+															'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
+														: 
+														staking_AC_isAda? 
+															'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+															<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+															<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
+														: 
+															'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+															<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+															<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
+															<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
+															<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
@@ -405,19 +409,23 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											postActionError={updateDetailsStakingPoolAndWallet}
 											setIsWorking={handleSetIsWorking} 
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-											description={poolInfo.swClosed ? 
-												'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
-												: 
-													staking_AC_isAda? 
-														'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
+											description={
+												!poolInfo.swIniciado ?
+														'<p className="info">TThe pool hasn\'t opened yet for deposits.</p>' 
 													: 
-														'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
-														<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
-														<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
-														<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
-														<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
+														poolInfo.swClosed ? 
+															'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
+														: 
+															staking_AC_isAda? 
+																'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+																<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+																<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>' 
+															: 
+																'<li className="info">You are about to deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
+																<li className="info">In return, you will receive User Tokens (<b>' + userDeposit_TN + '</b>) that you must to keep safe.</li>\
+																<li className="info">You can withdraw your <b>' + poolInfo.staking_UI + '</b> at any time in exchange for the given User Tokens.</li>\
+																<li className="info">Please note that, in addition to the Transactions Fees, a minimum of ADA is required to be sent along with your <b>' + poolInfo.staking_UI + '</b>.</li>\
+																<li className="info">You will receive the ADA back when you withdraw your deposit.</li>'
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
