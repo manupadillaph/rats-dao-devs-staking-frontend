@@ -375,10 +375,10 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 											description={
 												!poolInfo.swIniciado ?
-														'<p className="info">TThe pool hasn\'t opened yet for deposits.</p>' 
+														'<p className="info" style="text-align: center;">The pool hasn\'t opened yet for deposits.</p>' 
 													: 
 														poolInfo.swClosed ? 
-															'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
+															'<p className="info" style="text-align: center;" >This Pool is already closed. You can\'t Deposit anymore.</p>' 
 														: 
 														staking_AC_isAda? 
 															'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
@@ -411,10 +411,10 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 											actionName="Deposit" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
 											description={
 												!poolInfo.swIniciado ?
-														'<p className="info">TThe pool hasn\'t opened yet for deposits.</p>' 
+														'<p className="info" style="text-align: center;">The pool hasn\'t opened yet for deposits.</p>' 
 													: 
 														poolInfo.swClosed ? 
-															'<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' 
+															'<p className="info" style="text-align: center;">This Pool is already closed. You can\'t Deposit anymore.</p>' 
 														: 
 															staking_AC_isAda? 
 																'<li className="info">You are about to Deposit <b>' + poolInfo.staking_UI + '</b> to this Pool.</li>\
@@ -446,7 +446,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									setIsWorking={handleSetIsWorking} 
 									cancel={handleCancel}
 									actionName="Deposit Batch" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-									description={poolInfo.swClosed ? '<p className="info">This Pool is already closed. You can\'t Deposit anymore.</p>' : '<p className="info">Create multiple Transactions for new Deposits in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
+									description={poolInfo.swClosed ? '<p className="info" style="text-align: center;">This Pool is already closed. You can\'t Deposit anymore.</p>' : '<p className="info">Create multiple Transactions for new Deposits in one go, rather than manually entering each Transaction individually. However, you will still need to individually sign each Transaction.</p>'}
 									poolInfo={poolInfo} 
 									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
