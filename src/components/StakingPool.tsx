@@ -389,7 +389,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed}  
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swIniciado && !poolInfo.swClosed}  
 											swShow={poolInfo.swFunded} 
 											swHash={true} 
 											inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
@@ -421,7 +421,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												}
 											poolInfo={poolInfo} 
 											swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded} 
-											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed}  
+											swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swIniciado && !poolInfo.swClosed}  
 											swShow={poolInfo.swFunded} 
 											swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals}  
 											swHash={true} 
@@ -442,7 +442,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									poolInfo={poolInfo} 
 									swShowInput={true} inputUnitForLucid={poolInfo.staking_Lucid} inputUnitForShowing={poolInfo.staking_UI} inputMax={walletStakingAmountUI} inputDecimals={poolInfo.staking_Decimals} 
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded } 
-									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && !poolInfo.swClosed} 
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded && isWalletDataLoaded && poolInfo.swIniciado && !poolInfo.swClosed} 
 									swShow={poolInfo.swFunded} 
 									swHash={false} 
 								/>
