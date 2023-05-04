@@ -381,7 +381,8 @@ export async function getAllStakingPoolsForHomeFromDB (pkh? : string | undefined
 					stakingPoolsDB.push(stakingPoolDB_Updated)
 				}
 			}else{
-				if (stakingPoolDB_Updated.swPreparado && stakingPoolDB_Updated.swIniciado && stakingPoolDB_Updated.swFunded && !stakingPoolDB_Updated.swClosed && !stakingPoolDB_Updated.swTerminated) {
+				// stakingPoolDB_Updated.swIniciado &&
+				if (stakingPoolDB_Updated.swPreparado &&  stakingPoolDB_Updated.swFunded && !stakingPoolDB_Updated.swClosed && !stakingPoolDB_Updated.swTerminated) {
 					stakingPoolsDB.push(stakingPoolDB_Updated)
 				}
 			}
