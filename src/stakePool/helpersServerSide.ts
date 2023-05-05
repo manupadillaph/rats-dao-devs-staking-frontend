@@ -386,6 +386,8 @@ export async function crearStakingPoolFromFiles(nombrePool: any, image: any, sta
 
             imageSrc: image,
 
+            swDelegate: false,
+
             swDeleted: false,
 
             swShowOnSite: true,

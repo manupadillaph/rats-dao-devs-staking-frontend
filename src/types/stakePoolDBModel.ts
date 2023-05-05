@@ -14,7 +14,10 @@ export interface StakingPoolDBInterface {
 	name: string,
 	imageSrc: string,
 
+	swDelegate: boolean,
+
 	swDeleted: boolean,
+	
 	swShowOnSite: boolean,
 	swShowOnHome: boolean,
 	swPreparado: boolean,
@@ -121,6 +124,8 @@ const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 
 	name: { type: String, required: true },
 	imageSrc: { type: String, required: true },
+	
+	swDelegate: { type: Boolean, required: false, default: true },
 
 	swDeleted: { type: Boolean, required: true },
 	

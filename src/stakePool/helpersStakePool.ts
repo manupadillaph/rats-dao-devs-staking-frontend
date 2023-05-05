@@ -17,6 +17,8 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
         imageSrc: stakingPoolDB.imageSrc,
 
         swDeleted: stakingPoolDB.swDeleted,
+
+        swDelegate: stakingPoolDB.swDelegate,
         
         swShowOnSite: stakingPoolDB.swShowOnSite,
         swShowOnHome: stakingPoolDB.swShowOnHome,
@@ -24,6 +26,7 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
         swIniciado: stakingPoolDB.swIniciado,
         swFunded: stakingPoolDB.swFunded,
         swClosed: stakingPoolDB.swClosed,
+        
         closedAt: (stakingPoolDB.closedAt !== undefined ? new Date(stakingPoolDB.closedAt) : undefined),
         swTerminated: stakingPoolDB.swTerminated,
         swZeroFunds: stakingPoolDB.swZeroFunds,

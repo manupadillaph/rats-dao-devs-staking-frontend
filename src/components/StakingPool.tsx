@@ -459,21 +459,25 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 							}
 						</div>
 						<div className="pool__stat">
-						
-							<ActionWithInputModalBtn 
-								action={delegateAction} 
-								postActionSuccess={updateDetailsStakingPoolAndWallet}
-								postActionError={updateDetailsStakingPoolAndWallet}
-								setIsWorking={handleSetIsWorking} 
-								actionName="Delegate" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
-								description={'<p className="info" style="text-align: center;">When you delegate your wallet to the 1Mate pool, you are providing us with direct support! You can be confident that none of your ADA will be taken from your wallet and that you will retain complete control.</p>'}
-								poolInfo={poolInfo} 
-								swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
-								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
-								swShow={true }
-								swHash={true}
-								swPaddintTop={false}
-							/>
+							
+							{poolInfo.swDelegate?
+								<ActionWithInputModalBtn 
+									action={delegateAction} 
+									postActionSuccess={updateDetailsStakingPoolAndWallet}
+									postActionError={updateDetailsStakingPoolAndWallet}
+									setIsWorking={handleSetIsWorking} 
+									actionName="Delegate" actionIdx={poolInfo.name} messageFromParent={actionMessage} hashFromParent={actionHash} isWorking={isWorking} 
+									description={'<p className="info" style="text-align: center;">When you delegate your wallet to the 1Mate pool, you are providing us with direct support! You can be confident that none of your ADA will be taken from your wallet and that you will retain complete control.</p>'}
+									poolInfo={poolInfo} 
+									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded} 
+									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
+									swShow={true }
+									swHash={true}
+									swPaddintTop={false}
+								/>
+							:
+								<></>
+							}
 							
 							<ActionWithInputModalBtn 
 								action={splitUTxOsAction} 
@@ -490,7 +494,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
 								swShow={true}
 								swHash={true}
-								swPaddintTop={true}
+								swPaddintTop={poolInfo.swDelegate}
 							/>
 
 							
