@@ -26,6 +26,19 @@ export default function InterestRateForm(props: any) {
         setInterestRates(newInterestRates);
     };
 
+    function daysToDurationString(days: number) {
+        let duration = '';
+        let remainingDays = Math.floor(days);
+        if (remainingDays > 1) {
+            duration += `${ remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+        }else {
+            duration += `0 days`;
+        }
+        return duration.trim();
+    }
+
+    
+
     return (
         <>
             <h4 className="pool__stat-title">Annual pay of Harvest Unit per Staking Unit</h4>
@@ -34,19 +47,30 @@ export default function InterestRateForm(props: any) {
                 interestRates.map((interestRate: any, index: any) => (
                 <div key={index} >
                     <table className="interesRates">
-                        <tr>
-                            <td style={{width: 120, fontSize: 12}}><b>Minimum Days: </b></td>
-                            <td style={{width: 120, fontSize: 12}}>
-                                {index<interestRates.length-1?<input
-                                    type="text"
-                                    style={{ width: 80, fontSize: 12 }} 
-                                    value={interestRate.iMinDays}
-                                    onChange={(event) => handleInputChange(event, index, "iMinDays")}
-                                />
-                                :<>No minimum days</>}
-                            </td>
-                            <td> </td>
-                        </tr>
+
+                        {index<interestRates.length-1?
+                            <tr>
+                                <td style={{width: 120, fontSize: 12}}><b>Longevity: </b></td>
+                                <td style={{width: 120, fontSize: 12}}>
+                                    <input
+                                        type="text"
+                                        style={{ width: 80, fontSize: 12 }} 
+                                        value={interestRate.iMinDays}
+                                        onChange={(event) => handleInputChange(event, index, "iMinDays")}
+                                    />
+                                </td>
+                                <td style={{fontSize: 12}}>How much days</td>
+                            </tr>
+                        :
+                            <tr>
+                                <td></td>
+                                <td style={{width: 200, fontSize: 12}} colSpan={2}>
+                                {interestRates.length==1?"All the time":"After "+daysToDurationString(Number(interestRates[index-1].iMinDays))+" until the end"}
+                                </td>
+                                
+                            </tr>
+                        }
+
                         <tr>
                             <td style={{width: 120, fontSize: 12}}><b>Staking: </b></td>
                             <td style={{width: 120, fontSize: 12}}>
