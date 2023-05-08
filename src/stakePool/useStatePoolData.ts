@@ -442,18 +442,16 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 }
                 
                 setInterestUI(interestUI)
-                
                 break;
 
             }
             default:{
                 const staking = 1
-                const stakingUI = poolInfo.staking_UI
+                const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI)
                 const harvest = Number((poolInfo.pParams.ppInterestRates[0] as InterestRateV1).iPercentage)
                 const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI)
                 const interestUI = "Earn <b>"+harvestUI+"</b> a year for each <b>"+stakingUI+"</b> that you stake!"
                 setInterestUI(interestUI)
-
                 break;
             }
         }
