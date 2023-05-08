@@ -408,7 +408,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
+                        interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -418,7 +418,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
+                        interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -427,7 +427,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                     const harvest = Number(interestRate.iHarvest)
                     const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                    interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
+                    interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
                     //------------------
                     interestUI += "</table>"
                 }else{
@@ -438,7 +438,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     const harvest = Number(interestRate.iHarvest)
                     const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
 
-                    interestUI = "Earn <b>"+harvestUI+"</b> a year for each <b>"+stakingUI+"</b> that you stake!" 
+                    interestUI = "Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> that you stake!" 
                 }
                 
                 setInterestUI(interestUI)
@@ -450,7 +450,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI)
                 const harvest = Number((poolInfo.pParams.ppInterestRates[0] as InterestRateV1).iPercentage)
                 const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI)
-                const interestUI = "Earn <b>"+harvestUI+"</b> a year for each <b>"+stakingUI+"</b> that you stake!"
+                const interestUI = "Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> that you stake!"
                 setInterestUI(interestUI)
                 break;
             }
