@@ -408,7 +408,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> from the beginning</td></tr>"
+                        interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> for new deposits</td></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -427,7 +427,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                     const harvest = Number(interestRate.iHarvest)
                     const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                    interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> until the end!</td></tr>"
+                    interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td></tr>"
                     //------------------
                     interestUI += "</table>"
                 }else{
