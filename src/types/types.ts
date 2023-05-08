@@ -78,7 +78,9 @@ export class Maybe<T> {
 
 //-------------------------------------------------------------
 
-export class InterestRate {
+export type InterestRate = InterestRateV1 | InterestRateV2
+export type InterestRates = InterestRateV1 [] | InterestRateV2 []
+export class InterestRateV1 {
     iMinDays: Maybe<number>;
     iPercentage: number ;
     constructor(    iMinDays : Maybe<number>,
@@ -87,9 +89,24 @@ export class InterestRate {
         this.iPercentage = iPercentage;
     }
 }
+
+export class InterestRateV2 {
+    iMinDays: Maybe<number>;
+    iStaking: number ;
+    iHarvest: number ;
+    constructor(    iMinDays : Maybe<number>,
+        iStaking : number, iHarvest : number) {
+        this.iMinDays = iMinDays;
+        this.iStaking = iStaking;
+        this.iHarvest = iHarvest;
+    }
+}
+
 //-------------------------------------------------------------
 
-export type PoolParams = { 
+export type PoolParams = PoolParamsV1 | PoolParamsV2
+
+export type PoolParamsV1 = { 
     ppPoolID_CS    : CS, 
     ppMasters : Master[], 
     ppBegintAt        : POSIXTime, 
@@ -99,7 +116,20 @@ export type PoolParams = {
     ppStaking_TN        : TN, 
     ppHarvest_CS        : CS, 
     ppHarvest_TN        : TN, 
-    ppInterestRates        : InterestRate[]
+    ppInterestRates        : InterestRateV1[]
+}
+
+export type PoolParamsV2 = { 
+    ppPoolID_CS    : CS, 
+    ppMasters : Master[], 
+    ppBegintAt        : POSIXTime, 
+    ppDeadline        : POSIXTime, 
+    ppGraceTime : POSIXTime, 
+    ppStaking_CS        : CS, 
+    ppStaking_TN        : TN, 
+    ppHarvest_CS        : CS, 
+    ppHarvest_TN        : TN, 
+    ppInterestRates     : InterestRateV2[]
 }
 
 //-------------------------------------------------------------

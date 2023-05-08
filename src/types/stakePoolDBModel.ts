@@ -5,13 +5,16 @@ import { serverSide_updateStakingPool } from '../stakePool/helpersServerSide';
 import { stakingPoolDBParser } from '../stakePool/helpersStakePool';
 import { toJson } from '../utils/utils';
 import { getEUTxOsFromDBByAddressAndPkh } from './eUTxODBModel';
-import { BIGINT, CurrencySymbol, EUTxO, PoolParams, TxOutRef, UTxO_Simple } from './types';
+import { BIGINT, CurrencySymbol, EUTxO, PoolParams, PoolParamsV1, PoolParamsV2, TxOutRef, UTxO_Simple } from './types';
 import { initializeLucid } from '../utils/initializeLucid';
 
 // 1. Create an interface representing a document in MongoDB.
 export interface StakingPoolDBInterface {
 
 	name: string,
+
+	version: number,
+
 	imageSrc: string,
 
 	swDelegate: boolean,
@@ -123,6 +126,9 @@ export interface StakingPoolDBInterface {
 const stakingPoolDBSchema = new Schema<StakingPoolDBInterface>({
 
 	name: { type: String, required: true },
+
+	version: { type: Number, required: false, default: 1 },
+
 	imageSrc: { type: String, required: true },
 	
 	swDelegate: { type: Boolean, required: false, default: true },

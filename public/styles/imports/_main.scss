@@ -290,6 +290,19 @@ body.preload .mobile {
   }
 }
 
+.interesRates{
+  // background-color: #E8B8B8;
+  // border-radius: 5px;
+  // border: 2px solid #EBBFC0;
+  // margin-bottom: 10px;
+  // padding: 10px;
+  width: 400px;
+  tr { width: 100%;
+    td {border-bottom: none; border: none}
+  }
+  
+}
+
 .vr {
   margin-top: $base-sizing;
 }

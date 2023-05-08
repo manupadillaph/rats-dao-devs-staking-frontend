@@ -1,6 +1,6 @@
 //--------------------------------------
 import { useEffect, useRef, useState } from "react";
-import { AssetClass, BIGINT, EUTxO, Master_Funder, PoolDatum, UserDatum } from "../types";
+import { AssetClass, BIGINT, EUTxO, InterestRateV1, InterestRateV2, Master_Funder, PoolDatum, UserDatum } from "../types";
 import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiSaveEUTxODB, apiGetEUTxOsDBByStakingPool,
@@ -24,6 +24,7 @@ type UserStakedData = {
     minADA: BIGINT;
     minADAUI: string | 0;
     createdAtUI: string | 0;
+    elapsedUI: string | 0;
     lastClaimAtUI: string | 0;
     rewardsPaidUI: string | 0;
     rewardsToPay: BIGINT;
@@ -184,6 +185,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 minADA: u.minADA,
                 minADAUI: ui,
                 createdAtUI: ui,
+                elapsedUI: ui,
                 lastClaimAtUI: ui,
                 rewardsPaidUI: ui,
                 rewardsToPay: 0n,
@@ -232,16 +234,32 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const refreshUserStakedData = async ( userStakedData: UserStakedData) => {
         console.log("useStatePoolData - " + poolInfo.name + " - refreshUserStakedData - Init")
         //------------------
+        function daysToElpasedString(days: number) {
+            let duration = '';
+            let remainingDays = Math.floor(days);
+            if (remainingDays > 1) {
+                duration += `${ remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+            }else {
+                duration += `0 days`;
+            }
+            return duration.trim();
+        }
+        //------------------
+        const now = new Date(); // get the current date
+        //------------------
         var userStakedDatas_: UserStakedData[] = []
         for (var i = 0; i < userStakedDatas.length; i += 1) {
             const u = userStakedDatas[i];
 
             if (eUTxO_With_PoolDatum && u.eUTxO_With_UserDatum && userStakedData.eUTxO_With_UserDatum && u.eUTxO_With_UserDatum.uTxO.txHash === userStakedData.eUTxO_With_UserDatum.uTxO.txHash && u.eUTxO_With_UserDatum.uTxO.outputIndex === userStakedData.eUTxO_With_UserDatum.uTxO.outputIndex) {
-
                 const userDatum: UserDatum = u.eUTxO_With_UserDatum.datum as UserDatum;
                 const pkh = userDatum.udUser
-
                 const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
+                //------------------
+                const timeDiff = now.getTime() - new Date(parseInt(userDatum.udCreatedAt.toString())).getTime(); 
+                const elapseDays = timeDiff / (1000 * 3600 * 24); 
+                const elapsedUI = daysToElpasedString(elapseDays)
+                //------------------
                 const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                     new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
                     :
@@ -261,6 +279,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     minADA: minADA,
                     minADAUI: minADAUI,
                     createdAtUI: createdAtUI,
+                    elapsedUI: elapsedUI,
                     lastClaimAtUI: lastClaimAtUI,
                     rewardsPaidUI: rewardsPaidUI,
                     rewardsToPay: rewardsToPay,
@@ -291,7 +310,154 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         const harvest_AC_isAda = (harvest_CS === 'lovelace')
         const harvest_AC_isWithoutTokenName = !harvest_AC_isAda && harvest_TN == ""
         //------------------
-        setInterestUI(formatAmount(Number(poolInfo.pParams.ppInterestRates[0].iPercentage), poolInfo.harvest_Decimals - poolInfo.staking_Decimals, poolInfo.harvest_UI))
+        switch (poolInfo.version) {
+            case 2:{
+
+                const interestRates = poolInfo.pParams.ppInterestRates as InterestRateV2[]
+
+                // const max = interestRates.reduce((maxRatioInterestRate: InterestRateV2, currentInterestRate: InterestRateV2) => {
+                //     const currentRatio = currentInterestRate.iHarvest / currentInterestRate.iStaking;
+                //     const maxRatio = maxRatioInterestRate.iHarvest / maxRatioInterestRate.iStaking;
+                //     if (maxRatio === undefined || currentRatio > maxRatio) {
+                //       return currentInterestRate;
+                //     }
+                //     return maxRatioInterestRate;
+                //   }, poolInfo.pParams.ppInterestRates[0] as InterestRateV2);
+
+                // const min = interestRates.reduce((minRatioInterestRate: InterestRateV2 , currentInterestRate: InterestRateV2) => {
+                //     const currentRatio = currentInterestRate.iHarvest / currentInterestRate.iStaking;
+                //     const minRatio = minRatioInterestRate.iHarvest / minRatioInterestRate.iStaking;
+                //     if (minRatio === undefined || currentRatio < minRatio) {
+                //       return currentInterestRate;
+                //     }
+                //     return minRatioInterestRate;
+                //   }, poolInfo.pParams.ppInterestRates[0] as InterestRateV2);
+
+                // const minstaking = Number(min.iStaking)
+                // const minstakingUI = formatAmount(minstaking, poolInfo.staking_Decimals, poolInfo.staking_UI) // minstaking==1?poolInfo.staking_UI : 
+                // const minharvest = Number(min.iHarvest)
+                // const minharvestUI = formatAmount(minharvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // minharvest==1?poolInfo.harvest_UI : 
+
+                // const maxstaking = Number(max.iStaking)
+                // const maxstakingUI = formatAmount(maxstaking, poolInfo.staking_Decimals, poolInfo.staking_UI) // maxstaking==1?poolInfo.staking_UI : 
+                // const maxharvest = Number(max.iHarvest)
+                // const maxharvestUI = formatAmount(maxharvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // maxharvest==1?poolInfo.harvest_UI : 
+
+                let interestUI = ""
+
+                // if (minstaking != maxstaking) {
+                
+                if (poolInfo.pParams.ppInterestRates.length > 1) {
+
+                    // interestUI = "Earn <b>"+minharvestUI+"</b> a year for each <b>"+minstakingUI+"</b> that you stake" 
+                    // interestUI += " up to <b>"+maxharvestUI+"</b> for each <b>"+maxstakingUI+"</b>!"
+
+                    interestUI = "<table>"
+                    //------------------
+                    // function daysToDurationString(days: number) {
+                    //     const yearDays = 365;
+                    //     const monthDays = 30;
+                    //     const weekDays = 7;
+                        
+                    //     let duration = '';
+                    //     let remainingDays = days;
+                      
+                    //     // Calculate number of years
+                    //     if (remainingDays >= yearDays) {
+                    //         const years = Math.floor(remainingDays / yearDays);
+                    //         duration += `<b>${years}</b> year${years > 1 ? 's' : ''} `;
+                    //         remainingDays -= years * yearDays;
+                    //     }
+                      
+                    //     // Calculate number of months
+                    //     if (remainingDays >= monthDays) {
+                    //         const months = Math.floor(remainingDays / monthDays);
+                    //         duration += `<b>${months}</b> month${months > 1 ? 's' : ''} `;
+                    //         remainingDays -= months * monthDays;
+                    //     }
+                      
+                    //     // Calculate number of weeks
+                    //     if (remainingDays >= weekDays) {
+                    //         const weeks = Math.floor(remainingDays / weekDays);
+                    //         duration += `<b>${weeks}</b> week${weeks > 1 ? 's' : ''} `;
+                    //         remainingDays -= weeks * weekDays;
+                    //     }
+                      
+                    //     // Calculate number of days
+                    //     if (remainingDays > 1) {
+                    //         duration += `<b>${remainingDays}</b> day${remainingDays > 1 ? 's' : ''}`;
+                    //     }else {
+                    //         duration += `<b>0</b> days`;
+                    //     }
+                      
+                    //     return duration.trim();
+                    // }
+                    //------------------
+                    function daysToDurationString(days: number) {
+                        let duration = '';
+                        let remainingDays = Math.floor(days);
+                        duration += `<b>${ remainingDays}</b> day${remainingDays > 1 ? 's' : ''}`;
+                        return duration.trim();
+                    }
+                    //------------------
+                    let days = 0
+                    //------------------
+                    {
+                        const interestRate = poolInfo.pParams.ppInterestRates[0] as InterestRateV2
+                        const staking = Number(interestRate.iStaking)
+                        const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
+                        const harvest = Number(interestRate.iHarvest)
+                        const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
+                        interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> from the beginning</td></tr>"
+                        days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
+                    }
+                    //------------------
+                    for (let i = 1; i < poolInfo.pParams.ppInterestRates.length - 1; i++) {
+                        const interestRate = poolInfo.pParams.ppInterestRates[i] as InterestRateV2
+                        const staking = Number(interestRate.iStaking)
+                        const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
+                        const harvest = Number(interestRate.iHarvest)
+                        const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
+                        interestUI += "<tr><td>Earn <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td></tr>"
+                        days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
+                    }
+                    //------------------
+                    const interestRate = poolInfo.pParams.ppInterestRates[poolInfo.pParams.ppInterestRates.length-1] as InterestRateV2
+                    const staking = Number(interestRate.iStaking)
+                    const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
+                    const harvest = Number(interestRate.iHarvest)
+                    const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
+                    interestUI += "<tr><td>Earn  <b>"+harvestUI+"</b> for each <b>"+stakingUI+"</b> until the end!</td></tr>"
+                    //------------------
+                    interestUI += "</table>"
+                }else{
+
+                    const interestRate = poolInfo.pParams.ppInterestRates[0] as InterestRateV2
+                    const staking = Number(interestRate.iStaking)
+                    const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
+                    const harvest = Number(interestRate.iHarvest)
+                    const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
+
+                    interestUI = "Earn <b>"+harvestUI+"</b> a year for each <b>"+stakingUI+"</b> that you stake!" 
+                }
+                
+                setInterestUI(interestUI)
+                
+                break;
+
+            }
+            default:{
+                const staking = 1
+                const stakingUI = poolInfo.staking_UI
+                const harvest = Number((poolInfo.pParams.ppInterestRates[0] as InterestRateV1).iPercentage)
+                const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI)
+                const interestUI = "Earn <b>"+harvestUI+"</b> a year for each <b>"+stakingUI+"</b> that you stake!"
+                setInterestUI(interestUI)
+
+                break;
+            }
+        }
+        
         //------------------
         const poolID_AC_Lucid = poolInfo.pParams.ppPoolID_CS + strToHex(poolID_TN);
         //------------------
@@ -415,11 +581,29 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     setUserStakedUI(stakedAmountUI)
                     setUserRewardsPaidUI(rewardsPaidUI)
                     setUserRewardsToPayUI(rewardsToPayUI)
-                    
+                    //------------------
+                    function daysToElpasedString(days: number) {
+                        let duration = '';
+                        let remainingDays = Math.floor(days);
+                        if (remainingDays > 1) {
+                            duration += `${ remainingDays} day${remainingDays > 1 ? 's' : ''}`;
+                        }else {
+                            duration += `0 days`;
+                        }
+                        return duration.trim();
+                    }
+                    //------------------
+                    const now = new Date(); // get the current date
+                    //------------------
                     var userStakedDatas: UserStakedData[] = []
                     for (var i = 0; i < eUTxOs_With_UserDatumOfUser.length; i += 1) {
                         const userDatum: UserDatum = eUTxOs_With_UserDatumOfUser[i].datum as UserDatum;
                         const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
+                        //------------------
+                        const timeDiff = now.getTime() - new Date(parseInt(userDatum.udCreatedAt.toString())).getTime(); 
+                        const elapseDays = timeDiff / (1000 * 3600 * 24); 
+                        const elapsedUI = daysToElpasedString(elapseDays)
+                        //------------------
                         const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                             new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
                             :
@@ -439,6 +623,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                             minADA: minADA,
                             minADAUI: minADAUI,
                             createdAtUI: createdAtUI,
+                            elapsedUI: elapsedUI,
                             lastClaimAtUI: lastClaimAtUI,
                             rewardsPaidUI: rewardsPaidUI,
                             rewardsToPay: rewardsToPay,

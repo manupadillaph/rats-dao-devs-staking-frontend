@@ -1,6 +1,6 @@
 import { C, Constr, Data, fromHex, PaymentKeyHash } from "lucid-cardano";
 import { Address, BaseAddress, Bip32PrivateKey, Bip32PublicKey, Ed25519KeyHash, EnterpriseAddress, StakeCredential } from "@dcspark/cardano-multiplatform-lib-browser";
-import { InterestRate, Maybe, TxOutRef, StakeCredentialPubKeyHash } from "../types";
+import { InterestRateV1, Maybe, TxOutRef, StakeCredentialPubKeyHash, InterestRateV2 } from "../types";
 import { bytesUint8ArraToHex } from "./utils";
 
 //---------------------------------------------------------------
@@ -171,11 +171,20 @@ function itemToData(item: any) {
         const res2 = new Constr(0, list2);
         return (res2);
 
-    } else if (item instanceof InterestRate) {
+    } else if (item instanceof InterestRateV1) {
 
         var list2: any[] = [];
         list2.push(new Constr(item.iMinDays.val !== undefined ? 0 : 1, item.iMinDays.val !== undefined ? [item.iMinDays.val] : []));
         list2.push(item.iPercentage);
+        const res2 = new Constr(0, list2);
+        return (res2);
+
+    } else if (item instanceof InterestRateV2) {
+
+        var list2: any[] = [];
+        list2.push(new Constr(item.iMinDays.val !== undefined ? 0 : 1, item.iMinDays.val !== undefined ? [item.iMinDays.val] : []));
+        list2.push(item.iStaking);
+        list2.push(item.iHarvest);
         const res2 = new Constr(0, list2);
         return (res2);
 

@@ -1,6 +1,6 @@
 import path from 'path';
 
-import { CurrencySymbol, EUTxO, InterestRate, Maybe, PoolDatum, PoolParams, UserDatum } from '../types';
+import { CurrencySymbol, EUTxO, InterestRate, InterestRateV1, InterestRateV2, InterestRates, Maybe, PoolDatum, PoolParams, PoolParamsV1, PoolParamsV2, UserDatum } from '../types';
 import { fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN, scriptID_Master_Emergency_TN, TIME_OUT_TRY_UPDATESTAKINGPOOL } from '../types/constantes';
 import { deleteEUTxOsFromDBByAddress, deleteEUTxOsFromDBByTxHashAndIndex, deleteEUTxOsFromDBPreparingOrConsumingByAddress, getEUTxODBModel, getEUTxOFromDBByTxHashAndIndex, getEUTxOsFromDBByAddress, updateEUTxOsFromDBPreparingOrConsumingByAddress } from '../types/eUTxODBModel';
 import { getStakingPoolDBModel, StakingPoolDBInterface } from '../types/stakePoolDBModel';
@@ -178,7 +178,7 @@ export async function createStakingPoolFilesFromZip (nombrePool: string, zip: JS
 export async function crearStakingPoolFromFiles(nombrePool: any, image: any, staking_UI: any, harvest_UI: any, staking_Decimals: any, harvest_Decimals: any) {
 	
     try{
-        
+
         console.log("crearStakingPoolFromFiles - stakingPoolDB: " + toJson(nombrePool));
 
         const pabPoolParamsJsonFileName = nombrePool + "/" + 'PABPoolParams-HEX.json';
@@ -364,25 +364,48 @@ export async function crearStakingPoolFromFiles(nombrePool: any, image: any, sta
         txID_User_Harvest_CS = pabPoolParams.txID_User_Harvest_CS;
         txID_User_Withdraw_CS = pabPoolParams.txID_User_Withdraw_CS;
 
-        const poolParams: PoolParams = {
-            ppPoolID_CS: pabPoolParams.poolID_CS,
-            ppMasters: pabPoolParams.masters,
-            ppBegintAt: pabPoolParams.beginAt,
-            ppDeadline: pabPoolParams.deadline,
-            ppGraceTime: pabPoolParams.graceTime,
-            ppStaking_CS: pabPoolParams.ppStaking_CS,
-            ppStaking_TN: pabPoolParams.ppStaking_TN,
-            ppHarvest_CS: pabPoolParams.ppHarvest_CS,
-            ppHarvest_TN: pabPoolParams.ppHarvest_TN,
-            ppInterestRates: pabPoolParams.interestRates
-        };
+        let poolParams: PoolParams;
 
-        console.log("crearStakingPoolFromFiles - params: " + toJson(poolParams));
+        switch (pabPoolParams.version) {
+            case 2:
+                poolParams = {
+                    ppPoolID_CS: pabPoolParams.poolID_CS,
+                    ppMasters: pabPoolParams.masters,
+                    ppBegintAt: pabPoolParams.beginAt,
+                    ppDeadline: pabPoolParams.deadline,
+                    ppGraceTime: pabPoolParams.graceTime,
+                    ppStaking_CS: pabPoolParams.ppStaking_CS,
+                    ppStaking_TN: pabPoolParams.ppStaking_TN,
+                    ppHarvest_CS: pabPoolParams.ppHarvest_CS,
+                    ppHarvest_TN: pabPoolParams.ppHarvest_TN,
+                    ppInterestRates: pabPoolParams.interestRates
+                } as PoolParamsV2;
+                break;
+
+            default:
+                poolParams = {
+                    ppPoolID_CS: pabPoolParams.poolID_CS,
+                    ppMasters: pabPoolParams.masters,
+                    ppBegintAt: pabPoolParams.beginAt,
+                    ppDeadline: pabPoolParams.deadline,
+                    ppGraceTime: pabPoolParams.graceTime,
+                    ppStaking_CS: pabPoolParams.ppStaking_CS,
+                    ppStaking_TN: pabPoolParams.ppStaking_TN,
+                    ppHarvest_CS: pabPoolParams.ppHarvest_CS,
+                    ppHarvest_TN: pabPoolParams.ppHarvest_TN,
+                    ppInterestRates: pabPoolParams.interestRates
+                } as PoolParamsV1;
+                break;
+        }
+        
+        console.log("crearStakingPoolFromFiles - params: " + toJson(poolParams!));
 
         var StakingPoolDBModel = getStakingPoolDBModel();
 
         const newStakingPoolDB = new StakingPoolDBModel({
             name: nombrePool,
+
+            version: pabPoolParams.version,
 
             imageSrc: image,
 
@@ -519,6 +542,8 @@ export async function getPABPoolParamsFromFile(filename: string) {
         //console.log(data);
         let jsonFile = JSON.parse(data);
 
+        var version = jsonFile!.pppVersion? jsonFile!.pppVersion : 1;
+
         var staking_Lucid;
         var staking_UI = jsonFile!.pppStaking_UI;
         var staking_CS;
@@ -539,7 +564,6 @@ export async function getPABPoolParamsFromFile(filename: string) {
         console.log("Staking UI: " + toJson(staking_UI));
         console.log("Staking CS: " + toJson(staking_CS));
         console.log("Staking TN Hex: " + toJson(staking_TN_Hex));
-
 
         var harvest_Lucid;
         // var ppHarvestUnit : AssetClass
@@ -566,7 +590,20 @@ export async function getPABPoolParamsFromFile(filename: string) {
         const poolID_CS = (jsonFile!.pppCurSymbol_PoolID.unCurrencySymbol);
         console.log("PoolID CS: " + toJson(poolID_CS));
 
+        let interestRates : InterestRates
+        switch (version) {
+            case 2:
+                interestRates =  jsonFile!.pppPoolParams.ppInterestRates.map((item: any) => { return new InterestRateV2(new Maybe<number>(item.iMinDays), item.iStaking, item.iHarvest); }) as InterestRateV2[] 
+                break;
+            default:
+                interestRates = jsonFile!.pppPoolParams.ppInterestRates.map((item: any) => { return new InterestRateV1(new Maybe<number>(item.iMinDays), item.iPercentage); }) as InterestRateV1[] 
+                break;
+        }
+
         const pabPoolParams = {
+
+            version: version,
+
             poolID_TxOutRef: { txHash: jsonFile!.pppPoolID_TxOutRef.txOutRefId.getTxId, outputIndex: jsonFile!.pppPoolID_TxOutRef.txOutRefIdx },
 
             // ppMasters:           jsonFile!.pppPoolParams.ppMasters.map ((item: any) => { return hexToStr(item) }),  
@@ -586,7 +623,7 @@ export async function getPABPoolParamsFromFile(filename: string) {
             staking_Lucid: staking_Lucid,
             harvest_Lucid: harvest_Lucid,
 
-            interestRates: jsonFile!.pppPoolParams.ppInterestRates.map((item: any) => { return new InterestRate(new Maybe<number>(item.iMinDays), item.iPercentage); }),
+            interestRates: interestRates,
 
             // pppPolicy_PoolID : createScriptFromHEXCBOR(jsonFile!.pppPolicy_PoolID.getMintingPolicy),
             // pppPolicy_TxID_Master_Fund : createScriptFromHEXCBOR(jsonFile!.pppPolicy_TxID_Master_Fund.getMintingPolicy),

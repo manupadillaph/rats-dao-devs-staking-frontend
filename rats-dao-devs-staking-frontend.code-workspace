@@ -5,6 +5,12 @@
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"terminal.integrated.defaultProfile.linux": "bashVcode",
+		"terminal.integrated.profiles.linux": {
+			"bashVcode": {
+				"path": "bash",
+				"args": ["--init-file", "vcode_init_script.sh"]
+			}
+		}	
 	}
 }

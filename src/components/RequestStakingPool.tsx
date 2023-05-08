@@ -19,6 +19,7 @@ import { AssetClass, EUTxO } from '../types';
 import { newTransaction } from '../utils/cardano-helpersTx';
 import { toJson } from '../utils/utils';
 import { getDecimalsInMetadata } from '../utils/cardano-helpers';
+import InterestRateForm from './InputInterestRates';
 
 //--------------------------------------
 
@@ -39,23 +40,23 @@ export default function RequestStakingPool( ) {
 
 	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState("")
 	const [beginAt, setBeginAt] = useState(Date.now().toString())
-	const [deadline, setppDeadline] = useState((parseInt(Date.now().toString()) + 1000000000).toString())
+	const [deadline, setDeadline] = useState((parseInt(Date.now().toString()) + 1000000000).toString())
 
 	const [graceTime, setppGraceTime] = useState((1000 * 60 * 60 * 24 * 15).toString()) // 15 dias
 
-	const [staking_CS, setppStakingCS] = useState("")
-	const [harvest_CS, setppHarvestCS] = useState("")
+	const [staking_CS, setStakingCS] = useState("")
+	const [harvest_CS, setHarvestCS] = useState("")
 
-	const [staking_TN, setppStakingTN] = useState("")
-	const [harvest_TN, setppHarvestTN] = useState("")
+	const [staking_TN, setStakingTN] = useState("")
+	const [harvest_TN, setHarvestTN] = useState("")
 
 	const [staking_UI, setStakingUnitForShowing] = useState(ADA_UI)
 	const [harvest_UI, setHarvestUnitForShowing] = useState(ADA_UI)
 
-	const [staking_Decimals, setppStakingDecimals] = useState("0")
-	const [harvest_Decimals, setppHarvestDecimals] = useState("0")
+	const [staking_Decimals, setStakingDecimals] = useState("0")
+	const [harvest_Decimals, setHarvestDecimals] = useState("0")
 
-	const [interest, setppInterest] = useState((365 * 24 * 60).toString()) //uno por minuto
+	const [interest, setInterest] = useState([{ iMinDays: "", iStaking: "1", iHarvest: (1*356*24*60).toString() }])
 
 	const [dateInputValueppBeginAt, setDateInputValueppBeginAt] = useState(new Date(parseInt(beginAt)))
 	const [dateInputValueppDeadline, setDateInputValueppDeadline] = useState(new Date(parseInt(deadline)))
@@ -67,6 +68,11 @@ export default function RequestStakingPool( ) {
 	const [isWorking, setIsWorking] = useState("")
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
+
+	const handleSetInterest = (interestRates:any) => {
+		setInterest(interestRates);
+		console.log(interestRates); 
+	  };
 
 	const getUTxOsFromWallet = async () => {
 		console.log("RequestStakingPool - getUTxOsFromWallet")
@@ -157,6 +163,10 @@ export default function RequestStakingPool( ) {
 				throw error
 			}
 			
+			const encodedInterest = interest
+			    .map((ir:any) => `${ir.iMinDays}:${ir.iStaking}:${ir.iHarvest}`)
+			    .join(",");
+
 			let data = {
 				username: username,
 				email: email,
@@ -177,7 +187,7 @@ export default function RequestStakingPool( ) {
 				harvest_CS: harvest_CS,
 				harvest_TN: harvest_TN,
 				harvest_Decimals: harvest_Decimals,
-				interest: interest
+				interest: encodedInterest
 			}
 
 			await apiRequestStakingPool(data)
@@ -306,13 +316,13 @@ export default function RequestStakingPool( ) {
 											<br></br><br></br>
 
 											<h4 className="pool__stat-title">Deadline</h4>
-											<input name='deadline' value={deadline} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setppDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
+											<input name='deadline' value={deadline} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
 												<DateTimePicker
 													renderInput={(props) => <TextField {...props} />}
 													value={dateInputValueppDeadline}
 													onChange={(newValue) => {
-														setppDeadline(format(newValue!, 'T'));
+														setDeadline(format(newValue!, 'T'));
 														setDateInputValueppDeadline(newValue!)
 													}}
 												/>
@@ -340,26 +350,26 @@ export default function RequestStakingPool( ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Currency Symbol</h4>
-											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
+											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setStakingCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 											
 											<h4 className="pool__stat-title">Token Name</h4>
-											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
+											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setStakingTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Leave empty to use any Token Name within the chosen Currency Symbol</li>
 											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
-											<input name='staking_Decimals' value={staking_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppStakingDecimals(event.target.value)}  ></input>
+											<input name='staking_Decimals' value={staking_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setStakingDecimals(event.target.value)}  ></input>
 											<button style={{ width: 85}} onClick={async (event) => {
 												
 												setIsDecimalsInMetadataLoading(true)
 												event.preventDefault(); 
-												setppStakingDecimals(""); 
-												setppStakingDecimals((await getDecimalsInMetadata(staking_CS, staking_TN)).toString())
+												setStakingDecimals(""); 
+												setStakingDecimals((await getDecimalsInMetadata(staking_CS, staking_TN)).toString())
 												setIsDecimalsInMetadataLoading(false)
 
 											}}>Metadata</button>
@@ -379,26 +389,26 @@ export default function RequestStakingPool( ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Currency Symbol</h4>
-											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
+											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setHarvestCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Token Name</h4>
-											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
+											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setHarvestTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Can't be empty if you choose to use another Currency Symbol</li>
 											<li className="info">Enter the <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
-											<input name='harvest_Decimals' value={harvest_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppHarvestDecimals(event.target.value)}  ></input>
+											<input name='harvest_Decimals' value={harvest_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setHarvestDecimals(event.target.value)}  ></input>
 											<button style={{ width: 85}} onClick={async (event) => {
 												
 												setIsDecimalsInMetadataLoading(true)
 												event.preventDefault(); 
-												setppHarvestDecimals("")
-												setppHarvestDecimals((await getDecimalsInMetadata(harvest_CS,harvest_TN)).toString())
+												setHarvestDecimals("")
+												setHarvestDecimals((await getDecimalsInMetadata(harvest_CS,harvest_TN)).toString())
 												setIsDecimalsInMetadataLoading(false)
 
 
@@ -412,17 +422,13 @@ export default function RequestStakingPool( ) {
 											<h3 className="pool__stat-title">Rewards</h3>
 											<br></br>
 
-											<h4 className="pool__stat-title">Annual pay of Harvest Unit per each Staking Unit</h4>
 
-											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input>
-											<li className="info">(To have 1 per year, enter: 1)</li>
-											<li className="info">(To have 1 per month, enter: 1*12 = 12)</li>
-											<li className="info">(To have 1 per day, enter: 1*365 = 365)</li>
-											<li className="info">(To have 1 per hour, enter: 1*365*24 = 8760)</li>
-											<li className="info">(To have 1 per minute, enter: 1*365*24*60 = 525600)</li>
-											<li className="info">(To have 1 per second, enter: 1*365*24*60*60 = 31536000)</li>
-											<li className="info">The Unit of the Asset refers to the smallest division of the token when using decimals</li>
-											<li className="info">For example, if you are using 6 decimals like in ADA and you enter 1, you are referring to 0.000001 ADA or just 1 lovelace</li>
+											<InterestRateForm interestRates={interest} setInterestRates={handleSetInterest} />
+
+											{/* 
+											<p>Parent Interest Rates: {JSON.stringify(interest)}</p>
+											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input> */}
+											
 											<br></br>
 
 										</form>

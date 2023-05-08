@@ -1249,6 +1249,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					
 					{process.env.NODE_ENV==="development"?
 						<>
+							<div>Pool Version:  {poolInfo.version} </div>
+							<br></br>
+							
 							<div>Pool Prepared:  {swPreparadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<div>Pool Started:  {swIniciadoUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
 							<div>Pool has Funds:  {swFundedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />} </div>
@@ -1269,7 +1272,12 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
 					<br></br>
 
-					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> a year for every <b>{poolInfo.staking_UI}</b>!</></p>
+					<p><>{interestUI!=0? 
+						<div dangerouslySetInnerHTML={{ __html: interestUI! }} />
+						: 
+						<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
+						}</>
+					</p>
 					<br></br>
 
 					<div>

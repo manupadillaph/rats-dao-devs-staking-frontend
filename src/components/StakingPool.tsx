@@ -256,7 +256,12 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 					<div>Status <b>{statusUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></div>
 					<br></br>
 
-					<p><>Earn <b>{interestUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b> a year for every <b>{poolInfo.staking_UI}</b>!</></p>
+					<p><>{interestUI!=0? 
+						<div dangerouslySetInnerHTML={{ __html: interestUI! }} />
+						: 
+						<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
+						}</>
+					</p>
 					<br></br>
 					
 					<div>
@@ -509,9 +514,11 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 								
 								<div className="pool__action_card "  >
 								
-									<div className="pool__stat">
-										<br></br>
+									<div className="pool__stat" style={{justifyContent:  'center'}}>
+										
 										<div style={{textAlign: 'left', width:"100%"}}><b>Date</b> {userStakedData.createdAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+										<div style={{textAlign: 'left', width:"100%"}}><b>Elpased</b> {userStakedData.elapsedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+										
 										{userStakedData.lastClaimAtUI !== "..." ?
 											<>
 												<div style={{textAlign: 'left', width:"100%"}}><b>Last Claim</b> {userStakedData.lastClaimAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>

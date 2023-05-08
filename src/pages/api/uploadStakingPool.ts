@@ -6,7 +6,7 @@ import { toJson } from '../../utils/utils';
 import { MintingPolicy, SpendingValidator } from 'lucid-cardano';
 import { getSession } from 'next-auth/react';
 import { crearStakingPoolFromFiles, createMainJsonFile, createStakingPoolFilesFromZip, getEstadoDeployFromFile, getPABPoolParamsFromFile } from "../../stakePool/helpersServerSide";
-import { CurrencySymbol, PoolParams } from '../../types';
+import { CurrencySymbol, PoolParamsV1 } from '../../types';
 import { maxMasters } from '../../types/constantes';
 import { getStakingPoolDBModel, getStakingPoolFromDBByName, StakingPoolDBInterface } from '../../types/stakePoolDBModel';
 import { getScriptFromFile, getTextFromFile, mkdir, rmdir } from '../../utils/utilsServerSide';

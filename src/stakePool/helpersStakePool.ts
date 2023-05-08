@@ -1,5 +1,5 @@
 import { Assets, PaymentKeyHash } from "lucid-cardano";
-import { BIGINT, EUTxO, FundDatum, InterestRate, Master, Maybe, PoolDatum, POSIXTime, UserDatum } from "../types";
+import { BIGINT, EUTxO, FundDatum, InterestRate, InterestRates, InterestRateV1, InterestRateV2, Master, Maybe, PoolDatum, POSIXTime, UserDatum } from "../types";
 import { maxRewards, poolDatum_ClaimedFund, txID_User_Withdraw_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { addAssetsList, sumTokensAmt_From_AC_Lucid } from "../utils/cardano-helpers";
@@ -14,6 +14,9 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 
     const stakingPoolDB_: StakingPoolDBInterface = {
         name: stakingPoolDB.name,
+
+        version: (stakingPoolDB.version !== undefined ? stakingPoolDB.version : 1),
+
         imageSrc: stakingPoolDB.imageSrc,
 
         swDeleted: stakingPoolDB.swDeleted,
@@ -120,7 +123,18 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
         txID_User_Withdraw_Script: (stakingPoolDB.txID_User_Withdraw_Script)
     };
 
-    stakingPoolDB_.pParams.ppInterestRates = stakingPoolDB_.pParams.ppInterestRates.map((item: any) => { return new InterestRate(item.iMinDays.plutusDataIndex === 1? new Maybe<number>() : new Maybe<number> (item.iMinDays.val), item.iPercentage); });
+    let interestRates : InterestRates
+    switch (stakingPoolDB_.version) {
+        case 2:
+            interestRates =  stakingPoolDB_.pParams.ppInterestRates.map((item: any) => { return new InterestRateV2(item.iMinDays.plutusDataIndex === 1? new Maybe<number>() : new Maybe<number> (item.iMinDays.val), item.iStaking, item.iHarvest); }) as InterestRateV2[] 
+            // jsonFile!.pppPoolParams.ppInterestRates.map((item: any) => { return new InterestRateV2(new Maybe<number>(item.iMinDays), item.iStaking, item.iHarvest); }) as InterestRateV2[] 
+            break;
+        default:
+            interestRates = stakingPoolDB_.pParams.ppInterestRates.map((item: any) => { return new InterestRateV1(item.iMinDays.plutusDataIndex === 1? new Maybe<number>() : new Maybe<number> (item.iMinDays.val), item.iPercentage); }) as InterestRateV1[] 
+            break;
+    }
+    
+    stakingPoolDB_.pParams.ppInterestRates = interestRates
 
     //console.log ("stakingPoolDBParser - end - stakingPoolDB: " + stakingPoolDB.name);
 
@@ -130,30 +144,33 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 
 //----------------------------------------------------------------------
 
-export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRate[], lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
-    //console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRates, lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
+    console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     var upperTime;
     if (closedAt !== undefined) {
-        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
+        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
         upperTime = BigInt(closedAt);
     } else if (now > BigInt(poolInfo.deadline.getTime())) {
-        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
+        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
         upperTime = BigInt(poolInfo.deadline.getTime());
     } else {
-        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando now: " + now)
+        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando now: " + now)
         upperTime = now;
     }
 
     function lowerTime(upperTime: BIGINT, depositOrLClaim: BIGINT) {
         if (depositOrLClaim > upperTime) {
+            console.log ("getRewardsPerInvest - lowerTime - usando upperTime: " + upperTime)
             return upperTime;
         } else {
+            console.log ("getRewardsPerInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
             return depositOrLClaim;
         }
     }
 
-
     let diffForInterestRate = upperTime - depositTime;
+    console.log ("getRewardsPerInvest - diffForInterestRate: " + diffForInterestRate)
+
     let msPerDay = 1000 * 60 * 60 * 24;
     let msPerYear = msPerDay * 365;
 
@@ -161,11 +178,11 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
         return (n * msPerDay);
     }
 
-    function isDiffLessThanMinDays(diffForInterestRate: number, minDays: number | undefined): boolean {
-        return minDays === undefined ? true : diffForInterestRate <= minDays;
+    function isDiffLessThanMinDays(diffForInterestRate: number, minDays: number): boolean {
+        return diffForInterestRate <= days (minDays);
     }
 
-    function getInterestRate(interestRates: InterestRate[]): number {
+    function getInterestRateV1(interestRates: InterestRateV1[]): number {
         //console.log ("getInterestRate - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     
         if (interestRates.length == 0) {
@@ -177,11 +194,30 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
               
             return x.iPercentage;
         }
-        return getInterestRate(xs);
+        return getInterestRateV1(xs);
     }
 
-    function getRewards(duration: BIGINT): BIGINT {
-        const rewards = (BigInt(getInterestRate(interestRates)) * duration * invest) / BigInt(msPerYear);
+    function getInterestRateV2(interestRates: InterestRateV2[]): {iStaking: number, iHarvest: number} {
+        //console.log ("getInterestRate - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+    
+        if (interestRates.length == 0) {
+            throw "It shouldn't happen that you don't find a suitable rate...";
+        }
+        const [x, ...xs] = interestRates;
+        // if (x.iMinDays.plutusDataIndex === 1 || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
+        if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
+              
+            return {
+                iStaking: x.iStaking, 
+                iHarvest : x.iHarvest
+            };
+        }
+        return getInterestRateV2(xs);
+    }
+
+    function getRewardsV1(interestRates: InterestRateV1[], duration: BIGINT): BIGINT {
+        const interestRate = getInterestRateV1(interestRates)
+        const rewards = (BigInt(interestRate) * duration * invest) / BigInt(msPerYear);
         if (rewards + rewardsNotClaimed > maxRewards)
             return maxRewards - rewardsNotClaimed;
 
@@ -189,10 +225,32 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
             return rewards;
     }
 
+    function getRewardsV2(interestRates: InterestRateV2[], duration: BIGINT): BIGINT {
+        const {iStaking, iHarvest} = getInterestRateV2(interestRates)
+        console.log ("getRewardsV2: rate: "+ toJson(getInterestRateV2(interestRates)))
+        const rewards = BigInt(Math.floor(iHarvest * Number(duration) * Number((invest)) / (msPerYear * Number(iStaking))));
+        if (rewards + rewardsNotClaimed > maxRewards)
+            return maxRewards - rewardsNotClaimed;
+
+        else
+            return rewards;
+    }
+
+    function getRewards(interestRates: InterestRates, duration: BIGINT): BIGINT {
+        switch (interestRates[0].constructor.name) {
+            case "InterestRateV1":
+                return getRewardsV1(interestRates as InterestRateV1[], duration);
+            case "InterestRateV2":
+                return getRewardsV2(interestRates as InterestRateV2[], duration);
+            default:
+                throw "InterestRate type not supported";
+        }
+    }
+
     if (lastClaim.val === undefined) {
-        return getRewards(upperTime - lowerTime(upperTime, depositTime));
+        return getRewards(interestRates, upperTime - lowerTime(upperTime, depositTime));
     } else {
-        return getRewards(upperTime - lowerTime(upperTime, lastClaim.val));
+        return getRewards(interestRates, upperTime - lowerTime(upperTime, lastClaim.val));
     }
 
 }

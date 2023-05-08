@@ -32,6 +32,7 @@ import FormLabel from '@mui/material/FormLabel';
 import { useSearchParams } from "react-router-dom";
 import { pubKeyHashToAddress } from '../utils/cardano-utils';
 import { thunkOn } from 'easy-peasy';
+import InterestRateForm from './InputInterestRates';
 
 //--------------------------------------
 
@@ -51,23 +52,35 @@ export default function CreateStakingPool({query}: any ) {
 
 	const [poolID_TxOutRef, setPoolID_TxOutRef] = useState(query?.poolID_TxOutRef? query?.poolID_TxOutRef : "")
 	const [beginAt, setBeginAt] = useState(query?.beginAt? query?.beginAt : Date.now().toString())
-	const [deadline, setppDeadline] = useState(query?.deadline? query?.deadline : (parseInt(Date.now().toString()) + 1000000000).toString())
+	const [deadline, setDeadline] = useState(query?.deadline? query?.deadline : (parseInt(Date.now().toString()) + 1000000000).toString())
 
-	const [graceTime, setppGraceTime] = useState(query?.graceTime? query?.graceTime : (1000 * 60 * 60 * 24 * 15).toString()) // 15 dias
+	const [graceTime, setGraceTime] = useState(query?.graceTime? query?.graceTime : (1000 * 60 * 60 * 24 * 15).toString()) // 15 dias
 
-	const [staking_CS, setppStakingCS] = useState(query?.staking_CS? query?.staking_CS : "")
-	const [harvest_CS, setppHarvestCS] = useState(query?.harvest_CS? query?.harvest_CS : "")
+	const [staking_CS, setStakingCS] = useState(query?.staking_CS? query?.staking_CS : "")
+	const [harvest_CS, setHarvestCS] = useState(query?.harvest_CS? query?.harvest_CS : "")
 
-	const [staking_TN, setppStakingTN] = useState(query?.staking_TN? query?.staking_TN : "")
-	const [harvest_TN, setppHarvestTN] = useState(query?.harvest_TN? query?.harvest_TN : "")
+	const [staking_TN, setStakingTN] = useState(query?.staking_TN? query?.staking_TN : "")
+	const [harvest_TN, setHarvestTN] = useState(query?.harvest_TN? query?.harvest_TN : "")
 
 	const [staking_UI, setStakingUnitForShowing] = useState(query?.staking_UI? query?.staking_UI : ADA_UI)
 	const [harvest_UI, setHarvestUnitForShowing] = useState(query?.harvest_UI? query?.harvest_UI : ADA_UI)
 
-	const [staking_Decimals, setppStakingDecimals] = useState(query?.staking_Decimals? query?.staking_Decimals : "0")
-	const [harvest_Decimals, setppHarvestDecimals] = useState(query?.harvest_Decimals? query?.harvest_Decimals : "0")
+	const [staking_Decimals, setStakingDecimals] = useState(query?.staking_Decimals? query?.staking_Decimals : "0")
+	const [harvest_Decimals, setHarvestDecimals] = useState(query?.harvest_Decimals? query?.harvest_Decimals : "0")
 
-	const [interest, setppInterest] = useState(query?.interest? query?.interest : (365 * 24 * 60).toString()) //uno por minuto
+	const decodedInterest = query?.interest? 
+		query?.interest.split(",").map((interest:any) => {
+			const [iMinDays, iStaking, iHarvest] = interest.split(":");
+			return {
+				iMinDays: iMinDays,
+				iStaking: iStaking,
+				iHarvest: iHarvest,
+			};
+		})
+		:
+		[{ iMinDays: "", iStaking: "1", iHarvest: (1*356*24*60).toString() }]
+
+	const [interest, setInterest] = useState(decodedInterest)
 
 	const [dateInputValueppBeginAt, setDateInputValueppBeginAt] = useState(new Date(parseInt(beginAt)))
 	const [dateInputValueppDeadline, setDateInputValueppDeadline] = useState(new Date(parseInt(deadline)))
@@ -80,7 +93,11 @@ export default function CreateStakingPool({query}: any ) {
 	const [actionMessage, setActionMessage] = useState("")
 	const [actionHash, setActionHash] = useState("")
 
-	
+	const handleSetInterest = (interestRates:any) => {
+		setInterest(interestRates);
+		console.log(interestRates); 
+	  };
+
 	const getUTxOsFromWallet = async () => {
 		console.log("CreateStakingPool - getUTxOsFromWallet")
 		if (walletStore.connected) {
@@ -217,9 +234,13 @@ export default function CreateStakingPool({query}: any ) {
 		try {
 
 			let swFinishedDeploy = false
+			let swFinishedDeployError = false
+			let error = ""
+
+			const nombrePoolTrim = nombrePool.trim()
 
 			timeoutGetEstadoDeploy = setInterval(async function () {
-				const message = await getEstadoDeployAPI(nombrePool)
+				const message = await getEstadoDeployAPI(nombrePoolTrim)
 				setActionMessage("Creating Smart Contracts: " + message)
 				// console.log ("CreatePoolFilesAction - getEstadoDeployAPI: " + message)
 
@@ -227,6 +248,16 @@ export default function CreateStakingPool({query}: any ) {
 					clearInterval(timeoutGetEstadoDeploy)
 					swFinishedDeploy = true
 					//setActionMessage("Smart Contracts created!")
+				}
+				if (message.includes("Error")) {
+					clearInterval(timeoutGetEstadoDeploy)
+					swFinishedDeploy = true
+					swFinishedDeployError = true
+					//const errorStr = message.indexOf("CallStack") > -1 ? message.slice(7,message.indexOf("CallStack")-2) : message  
+					error = message.indexOf("CallStack") > -1 ? message.split('CallStack')[0] : message ;
+					error = error.indexOf("Error: ") > -1 ? error.split('Error: ')[1] : error ;
+					setActionMessage(error)
+					throw error
 				}
 			}, TIME_WAIT_DEPLOY);
 
@@ -241,8 +272,14 @@ export default function CreateStakingPool({query}: any ) {
 			console.log("Masters Addresses: " + mastersAddresses)
 			console.log("Masters Pkh: " + masters)
 
+			const encodedInterest = interest
+			    .map((ir:any) => `${ir.iMinDays}:${ir.iStaking}:${ir.iHarvest}`)
+			    .join(",");
+				
+			console.log("encodedInterest: " + encodedInterest)
+
 			let data = {
-				nombrePool: nombrePool,
+				nombrePool: nombrePoolTrim,
 				image: image,
 
 				swCreate: swCreate,
@@ -266,7 +303,7 @@ export default function CreateStakingPool({query}: any ) {
 				staking_Decimals: staking_Decimals,
 				harvest_Decimals: harvest_Decimals,
 				
-				interest: interest
+				interest: encodedInterest
 			}
 			
 			await apiCreateStakingPoolInit(data)
@@ -276,49 +313,55 @@ export default function CreateStakingPool({query}: any ) {
 				await new Promise(r => setTimeout(r, TIME_WAIT_DEPLOY));
 			}
 			
-			const [stakingPool, files] = await apiCreateStakingPoolEnd(data)
+			if (!swFinishedDeployError){
+				const [stakingPool, files] = await apiCreateStakingPoolEnd(data)
 
-			if (files && files.length > 0 && swDownload) {
-				setActionMessage("Creating ZIP file...")
+				if (files && files.length > 0 && swDownload) {
+					setActionMessage("Creating ZIP file...")
 
-				try {
-					const zip = new JSZip();
-					const remoteZips = files.map(async (file: { url: RequestInfo | URL; name: any; type: any; }) => {
-						const response = await fetch(file.url);
+					try {
+						const zip = new JSZip();
+						const remoteZips = files.map(async (file: { url: RequestInfo | URL; name: any; type: any; }) => {
+							const response = await fetch(file.url);
 
-						const data = await response.blob();
-						zip.file(`${file.name}`, data);
+							const data = await response.blob();
+							zip.file(`${file.name}`, data);
 
-						return data;
-					});
-
-					Promise.all(remoteZips)
-						.then(() => {
-							zip.generateAsync({ type: "blob" }).then((content) => {
-								saveAs(content, nombrePool + "-files.zip");
-							});
-							setActionMessage("ZIP file created!")
-						})
-						.catch(() => {
-							throw "Error creating Zip File!"
+							return data;
 						});
 
-				} catch (error : any) {
-					throw error
+						Promise.all(remoteZips)
+							.then(() => {
+								zip.generateAsync({ type: "blob" }).then((content) => {
+									saveAs(content, nombrePoolTrim + "-files.zip");
+								});
+								setActionMessage("ZIP file created!")
+							})
+							.catch(() => {
+								throw "Error creating Zip File!"
+							});
+
+					} catch (error : any) {
+						throw error
+					}
 				}
-			}
 
-			setActionMessage("Smart Contracts created!")
-			clearInterval(timeoutGetEstadoDeploy)
+				setActionMessage("Smart Contracts created!")
+				clearInterval(timeoutGetEstadoDeploy)
 
-			if(stakingPool && swAdd){
-				setTimeout(setStakingPoolCreated, 3000, stakingPool);
+				if(stakingPool && swAdd){
+					setTimeout(setStakingPoolCreated, 3000, stakingPool);
+					setIsWorking("")
+					return "Redirecting page...";
+				}
+
 				setIsWorking("")
-				return "Redirecting page...";
+				return "Smart Contracts created!";
+
+			}else{
+				throw error
 			}
 
-            setIsWorking("")
-			return "Smart Contracts created!";
 		} catch (error) {
 			if (timeoutGetEstadoDeploy) clearInterval(timeoutGetEstadoDeploy)
 			setIsWorking("")
@@ -456,13 +499,13 @@ export default function CreateStakingPool({query}: any ) {
 											<br></br><br></br>
 
 											<h4 className="pool__stat-title">Deadline</h4>
-											<input name='deadline' value={deadline} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setppDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
+											<input name='deadline' value={deadline} style={{ width: 400, fontSize: 12 }} onChange={(event) => { setDeadline(event.target.value); setDateInputValueppDeadline(new Date(parseInt(event.target.value))) }} ></input>
 											<LocalizationProvider dateAdapter={AdapterDateFns}>
 												<DateTimePicker
 													renderInput={(props) => <TextField {...props} />}
 													value={dateInputValueppDeadline}
 													onChange={(newValue) => {
-														setppDeadline(format(newValue!, 'T'));
+														setDeadline(format(newValue!, 'T'));
 														setDateInputValueppDeadline(newValue!)
 													}}
 												/>
@@ -472,7 +515,7 @@ export default function CreateStakingPool({query}: any ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Grace Time</h4>
-											<input name='ppGraceTieme' value={graceTime} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppGraceTime(event.target.value)}  ></input>
+											<input name='ppGraceTieme' value={graceTime} style={{ width: 400, fontSize: 12 }} onChange={(event) => setGraceTime(event.target.value)}  ></input>
 											<li className="info">Period for users to collect their rewards after the Deadline or forced close, in milliseconds.</li>
 											<li className="info">(To use 15 days, enter: 1000*60*60*24*15 = 1296000000)</li>
 											<li className="info">(To use 1 day, enter: 1000*60*60*24 = 86400000)</li>
@@ -490,26 +533,26 @@ export default function CreateStakingPool({query}: any ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Currency Symbol</h4>
-											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingCS(event.target.value)}  ></input>
+											<input name='staking_CS' value={staking_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setStakingCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 											
 											<h4 className="pool__stat-title">Token Name</h4>
-											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppStakingTN(event.target.value)}  ></input>
+											<input name='staking_TN' value={staking_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setStakingTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Leave empty to use any Token Name within the chosen Currency Symbol</li>
 											<li className="info">If you want to an specific Token Name you must enter its <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
-											<input name='staking_Decimals' value={staking_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppStakingDecimals(event.target.value)}  ></input>
+											<input name='staking_Decimals' value={staking_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setStakingDecimals(event.target.value)}  ></input>
 											<button style={{ width: 85}} onClick={async (event) => {
 												
 												setIsDecimalsInMetadataLoading(true)
 												event.preventDefault(); 
-												setppStakingDecimals(""); 
-												setppStakingDecimals((await getDecimalsInMetadata(staking_CS, staking_TN)).toString())
+												setStakingDecimals(""); 
+												setStakingDecimals((await getDecimalsInMetadata(staking_CS, staking_TN)).toString())
 												setIsDecimalsInMetadataLoading(false)
 
 											}}>Metadata</button>
@@ -529,26 +572,26 @@ export default function CreateStakingPool({query}: any ) {
 											<br></br>
 
 											<h4 className="pool__stat-title">Currency Symbol</h4>
-											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestCS(event.target.value)}  ></input>
+											<input name='harvest_CS' value={harvest_CS} style={{ width: 400, fontSize: 12 }} onChange={(event) => setHarvestCS(event.target.value)}  ></input>
 											<li className="info">Leave empty to use { ADA_UI }</li>
 											<li className="info">If you want to use another token you must enter its <b>Policy Id</b>, must by a Hexadecimal string of 56 characters length</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Token Name</h4>
-											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppHarvestTN(event.target.value)}  ></input>
+											<input name='harvest_TN' value={harvest_TN} style={{ width: 400, fontSize: 12 }} onChange={(event) => setHarvestTN(event.target.value)}  ></input>
 											<li className="info">Must leave empty if you choose to use { ADA_UI } as Currency Symbol</li>
 											<li className="info">Can't be empty if you choose to use another Currency Symbol</li>
 											<li className="info">Enter the <b>Token Name</b> in pairs of Hexadecimal characters</li>
 											<br></br>
 
 											<h4 className="pool__stat-title">Decimals</h4>
-											<input name='harvest_Decimals' value={harvest_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setppHarvestDecimals(event.target.value)}  ></input>
+											<input name='harvest_Decimals' value={harvest_Decimals} style={{ width: 315, fontSize: 12 }} onChange={(event) => setHarvestDecimals(event.target.value)}  ></input>
 											<button style={{ width: 85}} onClick={async (event) => {
 												
 												setIsDecimalsInMetadataLoading(true)
 												event.preventDefault(); 
-												setppHarvestDecimals("")
-												setppHarvestDecimals((await getDecimalsInMetadata(harvest_CS,harvest_TN)).toString())
+												setHarvestDecimals("")
+												setHarvestDecimals((await getDecimalsInMetadata(harvest_CS,harvest_TN)).toString())
 												setIsDecimalsInMetadataLoading(false)
 
 
@@ -562,9 +605,11 @@ export default function CreateStakingPool({query}: any ) {
 											<h3 className="pool__stat-title">Rewards</h3>
 											<br></br>
 
-											<h4 className="pool__stat-title">Annual pay of Harvest Unit per each Staking Unit</h4>
+											<InterestRateForm interestRates={interest} setInterestRates={handleSetInterest} />
 
-											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setppInterest(event.target.value)}  ></input>
+											{/* <h4 className="pool__stat-title">Annual pay of Harvest Unit per each Staking Unit</h4>
+
+											<input name='interest' value={interest} style={{ width: 400, fontSize: 12 }} onChange={(event) => setInterest(event.target.value)}  ></input>
 											<li className="info">(To have 1 per year, enter: 1)</li>
 											<li className="info">(To have 1 per month, enter: 1*12 = 12)</li>
 											<li className="info">(To have 1 per day, enter: 1*365 = 365)</li>
@@ -572,7 +617,7 @@ export default function CreateStakingPool({query}: any ) {
 											<li className="info">(To have 1 per minute, enter: 1*365*24*60 = 525600)</li>
 											<li className="info">(To have 1 per second, enter: 1*365*24*60*60 = 31536000)</li>
 											<li className="info">The Unit of the Asset refers to the smallest division of the token when using decimals</li>
-											<li className="info">For example, if you are using 6 decimals like in ADA and you enter 1, you are referring to 0.000001 ADA or just 1 lovelace</li>
+											<li className="info">For example, if you are using 6 decimals like in ADA and you enter 1, you are referring to 0.000001 ADA or just 1 lovelace</li> */}
 											<br></br>
 
 										</form>

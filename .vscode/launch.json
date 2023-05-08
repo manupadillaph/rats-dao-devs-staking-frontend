@@ -2,6 +2,8 @@
     "version": "0.2.0",
     "configurations": [
       
+      
+      
       {
         "name": "Next.js: debug server-side",
         "type": "node-terminal",
@@ -10,9 +12,11 @@
       },
       {
         "name": "Next.js: debug client-side",
-        "type": "pwa-chrome",
+        // "type": "pwa-chrome",
+        "type": "chrome",
         "request": "launch",
-        "url": "http://localhost:3000"
+        "url": "http://localhost:3000",
+        "userDataDir": false
       },
       {
         "name": "Next.js: debug full stack",
