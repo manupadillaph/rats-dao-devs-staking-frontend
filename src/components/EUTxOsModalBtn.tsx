@@ -245,7 +245,7 @@ export default function EUTxOsModalBtn(
 									poolInfo={poolInfo}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
 									swEnabledBtnAction={walletStore.connected && isPoolDataLoaded}
-									swShow={poolInfo.swPreparado}
+									swShow={poolInfo.swPreparado || true}
 									swHash={false}
 								/>
 						

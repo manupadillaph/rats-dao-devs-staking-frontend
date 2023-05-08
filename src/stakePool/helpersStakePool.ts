@@ -237,13 +237,12 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
     }
 
     function getRewards(interestRates: InterestRates, duration: BIGINT): BIGINT {
-        switch (interestRates[0].constructor.name) {
-            case "InterestRateV1":
-                return getRewardsV1(interestRates as InterestRateV1[], duration);
-            case "InterestRateV2":
-                return getRewardsV2(interestRates as InterestRateV2[], duration);
-            default:
-                throw "InterestRate type not supported";
+        if (interestRates[0] instanceof InterestRateV1){
+            return getRewardsV1(interestRates as InterestRateV1[], duration);
+        }else if (interestRates[0] instanceof InterestRateV2){
+            return getRewardsV2(interestRates as InterestRateV2[], duration);
+        }else{
+            throw "InterestRate type not supported";
         }
     }
 

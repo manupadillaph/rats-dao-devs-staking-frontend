@@ -1522,8 +1522,8 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 									poolInfo_={poolInfo}
 									statePoolData={statePoolData}
 									swEnabledBtnOpenModal={walletStore.connected && isPoolDataLoaded}
-									swShow={poolInfo.swPreparado}
-									swPaddintTop={poolInfo.swPreparado && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser) || (poolInfo.swTerminated && swAnyScriptsUser))}
+									swShow={poolInfo.swPreparado || true}
+									swPaddintTop={(poolInfo.swPreparado  || true) && ((!swAllScriptsMaster) || (poolInfo.swTerminated && swAnyScriptsMaster) || (!swAllScriptsUser) || (poolInfo.swTerminated && swAnyScriptsUser))}
 								/>
 
 								<ActionModalBtn
