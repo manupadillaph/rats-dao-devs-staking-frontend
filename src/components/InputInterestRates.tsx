@@ -29,7 +29,7 @@ export default function InterestRateForm(props: any) {
     function daysToDurationString(days: number) {
         let duration = '';
         let remainingDays = Math.floor(days);
-        if (remainingDays > 1) {
+        if (remainingDays >= 1) {
             duration += `${ remainingDays} day${remainingDays > 1 ? 's' : ''}`;
         }else {
             duration += `0 days`;
