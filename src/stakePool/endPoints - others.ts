@@ -74,6 +74,7 @@ export async function delegate(wallet: Wallet, poolInfo: StakingPoolDBInterface)
     // const master = wallet.pkh!;
     const addr = await lucid!.wallet.address();
     const rewardAddressForTx = await lucid!.wallet.rewardAddress();
+    if (rewardAddressForTx === null) throw "Couldn't get your Reward Address. Try connecting your Wallet again";
     //------------------
     const poolId = process.env.NEXT_PUBLIC_STAKEPOOLID
     //------------------
