@@ -59,7 +59,7 @@ export default function InterestRateForm(props: any) {
                                         onChange={(event) => handleInputChange(event, index, "iMinDays")}
                                     />
                                 </td>
-                                <td style={{fontSize: 12}}>How much days</td>
+                                <td style={{fontSize: 12}}>{index>0?"After "+daysToDurationString(Number(interestRates[index-1].iMinDays))+" until which day?" : "From beggining until which day?"}</td>
                             </tr>
                         :
                             <tr>

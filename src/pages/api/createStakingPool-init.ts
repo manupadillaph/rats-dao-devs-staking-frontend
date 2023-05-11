@@ -155,6 +155,45 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 			throw "Harvest Token Name must be set if Harvest Currency Symbol is not empty"	
 		}
 
+		//--------------------------------
+
+		const interestRates = interest.split(",").map((interest:any) => {
+			const [iMinDays, iStaking, iHarvest] = interest.split(":");
+			return {
+				iMinDays: Number (iMinDays),
+				iStaking: Number (iStaking),
+				iHarvest: Number (iHarvest),
+			};
+		})
+		
+		//--------------------------------
+
+		let iMinDaysPrev: number | undefined = undefined;
+		let iHarvestStakingRatioPrev: number | undefined = undefined;
+		let isValid = true;
+		interestRates.forEach((interestRate: any) => {
+			// console.log ("TE:",interestRate.iMinDays)
+			if (iMinDaysPrev !== undefined && interestRate.iMinDays && interestRate.iMinDays <= iMinDaysPrev) {
+				isValid = false;
+				return;
+			}
+			
+			const iHarvestStakingRatio = interestRate.iHarvest / interestRate.iStaking;
+			if (iHarvestStakingRatioPrev !== undefined && iHarvestStakingRatio < iHarvestStakingRatioPrev) {
+				isValid = false;
+				return;
+			}
+			
+			iMinDaysPrev = interestRate.iMinDays;
+			iHarvestStakingRatioPrev = iHarvestStakingRatio;
+		});
+	
+		if (!isValid){
+			throw "Interest rates are not valid, must be Min Days and Harvest / Staking ratio in ascending order"
+		}
+
+		//--------------------------------
+
 		if (swCreate){
 			const rutaPool = path.join(process.env.REACT_SERVER_PATH_FOR_SCRIPTS!, nombrePool);
 			await rmdir (rutaPool)

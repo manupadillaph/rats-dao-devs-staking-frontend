@@ -6,6 +6,7 @@ import { setLocale } from 'yup';
 import { sendRequestMail } from '../../stakePool/helpersSendRequestEmail';
 import { maxMasters } from '../../types/constantes';
 import { toJson } from '../../utils/utils';
+import { InterestRateV2 } from '../../types';
 
 const fs = require('fs/promises');
 
@@ -105,7 +106,9 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		} catch (error) {
 			throw error 
 		}
-		
+
+		//--------------------------------
+
 		const mastersSplited = masters.split(',');
 
 		if (masters.length == 0 ){
@@ -131,6 +134,45 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
 		if (harvest_CS != "" && harvest_TN == "" ){
 			throw "Harvest Token Name must be set if Harvest Currency Symbol is not empty"	
 		}
+
+		//--------------------------------
+
+		const interestRates = interest.split(",").map((interest:any) => {
+			const [iMinDays, iStaking, iHarvest] = interest.split(":");
+			return {
+				iMinDays: Number (iMinDays),
+				iStaking: Number (iStaking),
+				iHarvest: Number (iHarvest),
+			};
+		})
+		
+		//--------------------------------
+
+		let iMinDaysPrev: number | undefined = undefined;
+		let iHarvestStakingRatioPrev: number | undefined = undefined;
+		let isValid = true;
+		interestRates.forEach((interestRate: any) => {
+			// console.log ("TE:",interestRate.iMinDays)
+			if (iMinDaysPrev !== undefined && interestRate.iMinDays && interestRate.iMinDays <= iMinDaysPrev) {
+				isValid = false;
+				return;
+			}
+			
+			const iHarvestStakingRatio = interestRate.iHarvest / interestRate.iStaking;
+			if (iHarvestStakingRatioPrev !== undefined && iHarvestStakingRatio < iHarvestStakingRatioPrev) {
+				isValid = false;
+				return;
+			}
+			
+			iMinDaysPrev = interestRate.iMinDays;
+			iHarvestStakingRatioPrev = iHarvestStakingRatio;
+		});
+	
+		if (!isValid){
+			throw "Interest rates are not valid, must be Min Days and Harvest / Staking ratio in ascending order"
+		}
+
+		//--------------------------------
 
 		await sendRequestMail(process.env.REQUEST_FROM! , process.env.REQUEST_TO!, 'New Staking Pool request', req.body);
 
