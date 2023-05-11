@@ -259,9 +259,9 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
                 //------------------
                 const timeDiff = now.getTime() - new Date(parseInt(userDatum.udCreatedAt.toString())).getTime(); 
-                console.log ("test -  now.getTime(): "+ now.getTime())
-                console.log ("test -  udCreatedAt: "+ new Date(parseInt(userDatum.udCreatedAt.toString())).getTime())
-                console.log ("test -  timeDiff: "+ timeDiff)
+                // console.log ("test -  now.getTime(): "+ now.getTime())
+                // console.log ("test -  udCreatedAt: "+ new Date(parseInt(userDatum.udCreatedAt.toString())).getTime())
+                // console.log ("test -  timeDiff: "+ timeDiff)
                 const elapseDays = timeDiff / (1000 * 3600 * 24); 
                 //------------------
                 const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
@@ -270,7 +270,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
                 const stringCategory = "*".repeat(rewardsCategory)
                 //------------------
-                const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + "d" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
+                const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + " day(s)" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                 //------------------
                 const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                     new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
@@ -622,7 +622,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
                         const stringCategory = "*".repeat(rewardsCategory)
                         //------------------
-                        const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + "d" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
+                        const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + " day(s)" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                         //------------------
                         const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                             new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")

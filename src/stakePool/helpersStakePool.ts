@@ -145,33 +145,33 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 //----------------------------------------------------------------------
 
 export function getCategoryOfInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRates, now: POSIXTime, depositTime: POSIXTime): number {
-    console.log ("getCategoryOfInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+    // console.log ("getCategoryOfInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     var upperTime;
     if (closedAt !== undefined) {
-        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
+        // console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
         upperTime = BigInt(closedAt);
     } else if (now > BigInt(poolInfo.deadline.getTime())) {
-        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
+        // console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
         upperTime = BigInt(poolInfo.deadline.getTime());
     } else {
-        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando now: " + now)
+        // console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando now: " + now)
         upperTime = now;
     }
 
     function lowerTime(upperTime: BIGINT, depositOrLClaim: BIGINT) {
         if (depositOrLClaim > upperTime) {
-            console.log ("getCategoryOfInvest - lowerTime - usando upperTime: " + upperTime)
+            // console.log ("getCategoryOfInvest - lowerTime - usando upperTime: " + upperTime)
             return upperTime;
         } else {
-            console.log ("getCategoryOfInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
+            // console.log ("getCategoryOfInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
             return depositOrLClaim;
         }
     }
 
     let diffForInterestRate = upperTime - depositTime;
-    console.log ("getCategoryOfInvest - upperTime: " + upperTime)
-    console.log ("getCategoryOfInvest - depositTime: " + depositTime)
-    console.log ("getCategoryOfInvest - diffForInterestRate: " + diffForInterestRate)
+    // console.log ("getCategoryOfInvest - upperTime: " + upperTime)
+    // console.log ("getCategoryOfInvest - depositTime: " + depositTime)
+    // console.log ("getCategoryOfInvest - diffForInterestRate: " + diffForInterestRate)
 
     let msPerDay = 1000 * 60 * 60 * 24;
 
@@ -190,10 +190,9 @@ export function getCategoryOfInvest(poolInfo: StakingPoolDBInterface, closedAt: 
         }
         const [x, ...xs] = interestRates;
         if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
-            if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
-            if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
-
-            console.log ("getInterestRate - getInterestRateIdxV1: " + idx)  
+            // if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
+            // if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
+            // // console.log ("getInterestRate - getInterestRateIdxV1: " + idx)  
             return idx;
         }
         return getInterestRateIdxV1(xs, ++idx);
@@ -206,10 +205,9 @@ export function getCategoryOfInvest(poolInfo: StakingPoolDBInterface, closedAt: 
         }
         const [x, ...xs] = interestRates;
         if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
-            if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
-            if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
-
-            console.log ("getInterestRate - getInterestRateIdxV2: " + idx)  
+            // if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
+            // if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
+            // console.log ("getInterestRate - getInterestRateIdxV2: " + idx)  
             return idx;
         }
         return getInterestRateIdxV2(xs, ++idx);
@@ -242,31 +240,31 @@ export function getCategoryOfInvest(poolInfo: StakingPoolDBInterface, closedAt: 
 
 
 export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRates, lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
-    console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+    // console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     var upperTime;
     if (closedAt !== undefined) {
-        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
+        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
         upperTime = BigInt(closedAt);
     } else if (now > BigInt(poolInfo.deadline.getTime())) {
-        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
+        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
         upperTime = BigInt(poolInfo.deadline.getTime());
     } else {
-        console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando now: " + now)
+        // console.log ("getRewardsPerInvest - deadlineOrCloseTime - usando now: " + now)
         upperTime = now;
     }
 
     function lowerTime(upperTime: BIGINT, depositOrLClaim: BIGINT) {
         if (depositOrLClaim > upperTime) {
-            console.log ("getRewardsPerInvest - lowerTime - usando upperTime: " + upperTime)
+            // console.log ("getRewardsPerInvest - lowerTime - usando upperTime: " + upperTime)
             return upperTime;
         } else {
-            console.log ("getRewardsPerInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
+            // console.log ("getRewardsPerInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
             return depositOrLClaim;
         }
     }
 
     let diffForInterestRate = upperTime - depositTime;
-    console.log ("getRewardsPerInvest - diffForInterestRate: " + diffForInterestRate)
+    // console.log ("getRewardsPerInvest - diffForInterestRate: " + diffForInterestRate)
 
     let msPerDay = 1000 * 60 * 60 * 24;
     let msPerYear = msPerDay * 365;
@@ -324,7 +322,7 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
 
     function getRewardsV2(interestRates: InterestRateV2[], duration: BIGINT): BIGINT {
         const {iStaking, iHarvest} = getInterestRateV2(interestRates)
-        console.log ("getRewardsV2: rate: "+ toJson(getInterestRateV2(interestRates)))
+        // console.log ("getRewardsV2: rate: "+ toJson(getInterestRateV2(interestRates)))
         const rewards = BigInt(Math.floor(iHarvest * Number(duration) * Number((invest)) / (msPerYear * Number(iStaking))));
         if (rewards + rewardsNotClaimed > maxRewards)
             return maxRewards - rewardsNotClaimed;
