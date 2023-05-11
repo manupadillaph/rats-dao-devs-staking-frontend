@@ -144,6 +144,103 @@ export function stakingPoolDBParser(stakingPoolDB: StakingPoolDBInterface) {
 
 //----------------------------------------------------------------------
 
+export function getCategoryOfInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRates, now: POSIXTime, depositTime: POSIXTime): number {
+    console.log ("getCategoryOfInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+    var upperTime;
+    if (closedAt !== undefined) {
+        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando closedAt: " + closedAt)
+        upperTime = BigInt(closedAt);
+    } else if (now > BigInt(poolInfo.deadline.getTime())) {
+        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando deadline: " + poolInfo.deadline)
+        upperTime = BigInt(poolInfo.deadline.getTime());
+    } else {
+        console.log ("getCategoryOfInvest - deadlineOrCloseTime - usando now: " + now)
+        upperTime = now;
+    }
+
+    function lowerTime(upperTime: BIGINT, depositOrLClaim: BIGINT) {
+        if (depositOrLClaim > upperTime) {
+            console.log ("getCategoryOfInvest - lowerTime - usando upperTime: " + upperTime)
+            return upperTime;
+        } else {
+            console.log ("getCategoryOfInvest - lowerTime - usando deposit Or Last Claim: " + depositOrLClaim)
+            return depositOrLClaim;
+        }
+    }
+
+    let diffForInterestRate = upperTime - depositTime;
+    console.log ("getCategoryOfInvest - upperTime: " + upperTime)
+    console.log ("getCategoryOfInvest - depositTime: " + depositTime)
+    console.log ("getCategoryOfInvest - diffForInterestRate: " + diffForInterestRate)
+
+    let msPerDay = 1000 * 60 * 60 * 24;
+
+    function days(n: number): number {
+        return (n * msPerDay);
+    }
+
+    function isDiffLessThanMinDays(diffForInterestRate: number, minDays: number): boolean {
+        return diffForInterestRate <= days (minDays);
+    }
+
+    function getInterestRateIdxV1(interestRates: InterestRateV1[], idx: number): number  {
+        //console.log ("getInterestRate - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+        if (interestRates.length == 0) {
+            throw "It shouldn't happen that you don't find a suitable rate...";
+        }
+        const [x, ...xs] = interestRates;
+        if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
+            if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
+            if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
+
+            console.log ("getInterestRate - getInterestRateIdxV1: " + idx)  
+            return idx;
+        }
+        return getInterestRateIdxV1(xs, ++idx);
+    }
+
+    function getInterestRateIdxV2(interestRates: InterestRateV2[], idx: number): number  {
+        //console.log ("getInterestRate - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
+        if (interestRates.length == 0) {
+            throw "It shouldn't happen that you don't find a suitable rate...";
+        }
+        const [x, ...xs] = interestRates;
+        if (x.iMinDays.val === undefined || isDiffLessThanMinDays(Number(diffForInterestRate), x.iMinDays.val)) {
+            if (x.iMinDays.val  === undefined) console.log ("getInterestRate -  days (minDays): no min " )  
+            if (x.iMinDays.val) console.log ("getInterestRate -  days (minDays): " +  days (x.iMinDays.val))  
+
+            console.log ("getInterestRate - getInterestRateIdxV2: " + idx)  
+            return idx;
+        }
+        return getInterestRateIdxV2(xs, ++idx);
+    }
+
+    function getCategoryRewardsV1(interestRates: InterestRateV1[]): number {
+        const interestRateIdx = getInterestRateIdxV1(interestRates, 0)
+        return interestRateIdx+1;
+    }
+
+    function getCategoryRewardsV2(interestRates: InterestRateV2[]): number {
+        const interestRateIdx = getInterestRateIdxV2(interestRates, 0)
+        return interestRateIdx+1;
+    }
+
+    function getCategoryRewards(interestRates: InterestRates): number {
+        if (interestRates[0] instanceof InterestRateV1){
+            return getCategoryRewardsV1(interestRates as InterestRateV1[]);
+        }else if (interestRates[0] instanceof InterestRateV2){
+            return getCategoryRewardsV2(interestRates as InterestRateV2[]);
+        }else{
+            throw "InterestRate type not supported";
+        }
+    }
+
+    return getCategoryRewards(interestRates);
+}
+
+//----------------------------------------------------------------------
+
+
 export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: POSIXTime | undefined, interestRates: InterestRates, lastClaim: Maybe<POSIXTime>, now: POSIXTime, depositTime: POSIXTime, invest: BIGINT, rewardsNotClaimed: BIGINT): BIGINT {
     console.log ("getRewardsPerInvest - Init - Rates: " + toJson(interestRates) + " - lenght: " + (interestRates.length))  
     var upperTime;

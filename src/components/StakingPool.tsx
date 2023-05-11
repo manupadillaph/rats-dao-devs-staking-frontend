@@ -517,7 +517,15 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 									<div className="pool__stat" style={{justifyContent:  'center'}}>
 										
 										<div style={{textAlign: 'left', width:"100%"}}><b>Deposit on</b> {userStakedData.createdAtUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
-										<div style={{textAlign: 'left', width:"100%"}}><b>Longevity</b> {userStakedData.elapsedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</div>
+										<div style={{textAlign: 'left', width:"100%"}}><b>Longevity</b> 
+										
+										<>{userStakedData.elapsedUI!=0? 
+											<div dangerouslySetInnerHTML={{ __html: userStakedData.elapsedUI! }} />
+											: 
+											<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
+											}</>
+										
+										</div>
 										
 										{userStakedData.lastClaimAtUI !== "..." ?
 											<>

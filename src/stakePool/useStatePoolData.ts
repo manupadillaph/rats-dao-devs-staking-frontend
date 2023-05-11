@@ -1,6 +1,6 @@
 //--------------------------------------
 import { useEffect, useRef, useState } from "react";
-import { AssetClass, BIGINT, EUTxO, InterestRateV1, InterestRateV2, Master_Funder, PoolDatum, UserDatum } from "../types";
+import { AssetClass, BIGINT, EUTxO, InterestRateV1, InterestRateV2, Master_Funder, POSIXTime, PoolDatum, UserDatum } from "../types";
 import { ADA_Decimals, ADA_UI, fundID_TN, poolDatum_ClaimedFund, poolID_TN, scriptID_Master_AddScripts_TN, scriptID_Master_ClosePool_TN, scriptID_Master_DeleteFund_TN, scriptID_Master_DeleteScripts_TN, scriptID_Master_FundAndMerge_TN, scriptID_Master_Fund_TN, scriptID_Master_SendBackDeposit_TN, scriptID_Master_SendBackFund_TN, scriptID_Master_SplitFund_TN, scriptID_Master_TerminatePool_TN, scriptID_User_Deposit_TN, scriptID_User_Harvest_TN, scriptID_User_Withdraw_TN, scriptID_Validator_TN, scriptID_TN, userID_TN } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiSaveEUTxODB, apiGetEUTxOsDBByStakingPool,
@@ -13,6 +13,7 @@ import {
     getEUTxOs_With_UserDatum_InEUxTOList_OfUser, getEUTxO_With_PoolDatum_InEUxTOList, getEUTxO_With_ScriptDatum_InEUxTOList, getMissingEUTxOsInDB
 } from "./helpersEUTxOs";
 import {
+    getCategoryOfInvest,
     getIfUserRegistered, getTotalAvailaibleFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
     getUserRewardsToPay, getUserStaked, sortFundDatum
 } from "./helpersStakePool";
@@ -252,13 +253,24 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
             const u = userStakedDatas[i];
 
             if (eUTxO_With_PoolDatum && u.eUTxO_With_UserDatum && userStakedData.eUTxO_With_UserDatum && u.eUTxO_With_UserDatum.uTxO.txHash === userStakedData.eUTxO_With_UserDatum.uTxO.txHash && u.eUTxO_With_UserDatum.uTxO.outputIndex === userStakedData.eUTxO_With_UserDatum.uTxO.outputIndex) {
+                
                 const userDatum: UserDatum = u.eUTxO_With_UserDatum.datum as UserDatum;
                 const pkh = userDatum.udUser
                 const createdAtUI = new Date(parseInt(userDatum.udCreatedAt.toString())).toLocaleString("en-US")
                 //------------------
                 const timeDiff = now.getTime() - new Date(parseInt(userDatum.udCreatedAt.toString())).getTime(); 
+                console.log ("test -  now.getTime(): "+ now.getTime())
+                console.log ("test -  udCreatedAt: "+ new Date(parseInt(userDatum.udCreatedAt.toString())).getTime())
+                console.log ("test -  timeDiff: "+ timeDiff)
                 const elapseDays = timeDiff / (1000 * 3600 * 24); 
-                const elapsedUI = daysToElpasedString(elapseDays)
+                //------------------
+                const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
+                const closedAt = poolDatum.pdClosedAt.val;
+                const claimAt: POSIXTime = BigInt(now.getTime());
+                const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
+                const stringCategory = "*".repeat(rewardsCategory)
+                //------------------
+                const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString():daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                 //------------------
                 const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                     new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
@@ -408,7 +420,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
+                        const stringCategory = "*".repeat(1)
+                        interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -418,7 +431,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
+                        const stringCategory = "*".repeat(i+1)
+                        interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -427,7 +441,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
                     const harvest = Number(interestRate.iHarvest)
                     const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                    interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
+                    const stringCategory = "*".repeat(poolInfo.pParams.ppInterestRates.length)
+                    interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
                     //------------------
                     interestUI += "</table>"
                 }else{
@@ -600,7 +615,14 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         //------------------
                         const timeDiff = now.getTime() - new Date(parseInt(userDatum.udCreatedAt.toString())).getTime(); 
                         const elapseDays = timeDiff / (1000 * 3600 * 24); 
-                        const elapsedUI = daysToElpasedString(elapseDays)
+                        //------------------
+                        const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum;
+                        const closedAt = poolDatum.pdClosedAt.val;
+                        const claimAt: POSIXTime = BigInt(now.getTime());
+                        const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
+                        const stringCategory = "*".repeat(rewardsCategory)
+                        //------------------
+                        const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString():daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                         //------------------
                         const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                             new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
