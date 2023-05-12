@@ -270,7 +270,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
                 const stringCategory = "*".repeat(rewardsCategory)
                 //------------------
-                const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + " day(s) [Diif:" + timeDiff +"]" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
+                const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString() + " day(s) [Dif:" + timeDiff +"]" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                 //------------------
                 const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                     new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
@@ -622,7 +622,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const rewardsCategory = getCategoryOfInvest(poolInfo, closedAt, poolInfo.pParams.ppInterestRates, claimAt, userDatum.udCreatedAt)
                         const stringCategory = "*".repeat(rewardsCategory)
                         //------------------
-                        const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString("en-US", {minimumFractionDigits: 8}) + " day(s) [Diif:" + timeDiff +"]" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
+                        const elapsedUI = (process.env.NODE_ENV==="development"? elapseDays.toLocaleString("en-US", {minimumFractionDigits: 8}) + " day(s) [Dif:" + timeDiff +"]" : daysToElpasedString(elapseDays)) + " (<b>" + stringCategory + "</b>)"
                         //------------------
                         const lastClaimAtUI = ((userDatum.udLastClaimAt.val !== undefined) ?
                             new Date(parseInt(userDatum.udLastClaimAt.val.toString())).toLocaleString("en-US")
