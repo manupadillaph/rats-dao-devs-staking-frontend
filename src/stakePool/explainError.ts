@@ -184,7 +184,7 @@ export function explainErrorTx(errorIn: any): string {
             }
 
             if (res === "" && error.includes("InputsExhaustedError")) {
-                res += sep + "You are dont have enought ADAs or Tokens in your Wallet to make this Transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
+                res += sep + "You dont have enought ADAs or Tokens in your Wallet to make this Transaction. It is possible that some transfer is still in the process of being validated. please try again later!"; sep = ", ";
             }
 
             if (res === "" && error.includes("Not enough ADA leftover to cover minADA")) {
