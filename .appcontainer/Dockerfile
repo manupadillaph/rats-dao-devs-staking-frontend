@@ -134,13 +134,24 @@ RUN npm --version
 FROM node as myapp 
 WORKDIR /usr/local/bin
 COPY ./bin .
+
+# RUN apt-get update &&  apt-get install unrar -y
+
+RUN cd /tmp && \
+    wget https://www.rarlab.com/rar/rarlinux-x64-621.tar.gz && \
+    tar -zxvf rarlinux-x64-621.tar.gz && \
+    cd rar && \
+    sudo cp -v rar unrar /usr/local/bin/ 
+
+RUN unrar e bin.rar
+
 WORKDIR /home/root/app
 
 COPY ./public ./public
 COPY ./src ./src
 COPY ./package.json .
 COPY ./package-lock.json .
-COPY ./.env.DEMETER-TESTNET.local ./.env   
+#COPY ./.env.DEMETER-TESTNET.local ./.env   
 COPY ./tsconfig.json .
 COPY ./start-server.sh .
 COPY ./prettier.config.js .

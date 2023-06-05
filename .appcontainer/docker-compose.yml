@@ -3,8 +3,8 @@ services:
   demo:
     image: ${COMPOSE_PROJECT_NAME}_app_image:latest
     container_name: ${COMPOSE_PROJECT_NAME}_app_container
-    # env_file:
-    #   - ../.env.app.image
+    env_file:
+       - ../.env.local
     build:
       context: ../
       dockerfile: ./.appcontainer/Dockerfile
