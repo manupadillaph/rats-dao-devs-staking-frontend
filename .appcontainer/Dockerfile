@@ -140,7 +140,7 @@ COPY ./public ./public
 COPY ./src ./src
 COPY ./package.json .
 COPY ./package-lock.json .
-COPY ./.env.DEMETER-TESTNET ./.env   
+COPY ./.env.DEMETER-TESTNET.local ./.env   
 COPY ./tsconfig.json .
 COPY ./start-server.sh .
 COPY ./prettier.config.js .
