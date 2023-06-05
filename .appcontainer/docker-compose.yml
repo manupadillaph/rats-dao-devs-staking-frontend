@@ -1,0 +1,33 @@
+version: "3.3"
+services:
+  demo:
+    image: ${COMPOSE_PROJECT_NAME}_app_image:latest
+    container_name: ${COMPOSE_PROJECT_NAME}_app_container
+    # env_file:
+    #   - ../.env.app.image
+    build:
+      context: ../
+      dockerfile: ./.appcontainer/Dockerfile
+      # target: system_deps_with_libsodium_and_secp256k1
+    user: root
+    ports:
+      - "3000:3000"
+    # volumes:
+    #   - /home/manuelpadilla/source/reposUbuntu/CARDANO/plutus-dokerfiles-v1.0/test:/test
+      # - /home/manuelpadilla/source/reposUbuntu/PROTOFIRE/protofire-nft-call-options-v1.0/.appcontainer/scripts:/home/root/app/scripts
+      # - node_modules:/home/root/app/web/node_modules
+
+    # command: tail -F /dev/null  # para que no se cierre el container
+
+    # command: /bin/bash -c "echo \"helo\"" &&  while sleep 1000; do :; done" 
+    # command:  /bin/bash -c "/home/root/app/scripts/on-create-container.sh && while sleep 1000; do :; done" 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "10"
+
+# en lugar de copiar de la carpeta del projecto, la carpeta de node modules, creo un volumen vacio, que va a persistir en el host, y lo monto en el container
+# asi en el container esa carpeta esta limpia en un comienzo, y luego se guarda como cache por si monto muchas veces el container
+# volumes:
+#   node_modules:
