@@ -143,7 +143,7 @@ RUN cd /tmp && \
     cd rar && \
     sudo cp -v rar unrar /usr/local/bin/ 
 
-RUN unrar e bin.rar
+RUN unrar e bin.rar && chmod +x ./deploy && rm -rf ./bin.rar /tmp/rar /tmp/rarlinux-x64-621.tar.gz
 
 WORKDIR /home/root/app
 
