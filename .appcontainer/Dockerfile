@@ -151,7 +151,7 @@ COPY ./public ./public
 COPY ./src ./src
 COPY ./package.json .
 COPY ./package-lock.json .
-#COPY ./.env.DEMETER-TESTNET.local ./.env   
+COPY ./.env.base ./.env   
 COPY ./tsconfig.json .
 COPY ./start-server.sh .
 COPY ./prettier.config.js .
@@ -161,11 +161,12 @@ COPY ./.gitignore .
 COPY ./.dockerignore .
 
 RUN npm install
-RUN npm run build
+# RUN npm run build
 
 #####################################################
 
 EXPOSE 3000
-CMD npm run start
+CMD bash ./start-server.sh 
+# CMD  npm run start
 
 #####################################################
