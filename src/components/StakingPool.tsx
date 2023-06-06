@@ -522,7 +522,7 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 												userStakedData.createdAtUI==0?
 													<Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />
 												:
-													<a target={'_blank'} href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}tx/${userStakedData.eUTxO_With_UserDatum!.uTxO.txHash}`}  style={{ cursor: 'pointer' }}>
+													<a target={'_blank'}  href={`${process.env.NEXT_PUBLIC_BLOCKCHAIN_EXPLORER_URL}tx/${userStakedData.eUTxO_With_UserDatum!.uTxO.txHash}`}  style={{ cursor: 'pointer', textDecoration: 'none' }}>
 														{userStakedData.createdAtUI}
 													</a>
 											}												

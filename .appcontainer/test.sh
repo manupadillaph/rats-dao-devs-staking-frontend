@@ -1,3 +1,2 @@
 
-docker run -d -it --name rats-conteiner -p 3000:3000 -p 3080:3080  manupadilla/rats-staking-git:ea27ca419ee82341b0549b5c6590ad2d665198d3 bash ./start-server.sh
- --env-file .env.local.copy 
+docker run -d -it --name rats-conteiner -p 3000:3000 -p 3080:3080  --env-file .env.copy.local manupadilla/rats-staking-git:5fb97719e4799bd4e07c794472b706eff4e32d1e bash ./start-server.sh
