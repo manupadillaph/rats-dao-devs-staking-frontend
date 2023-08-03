@@ -149,7 +149,7 @@ export default function Navbar() {
 									<div>
 										<MenuItem className='navbar-menuitem' onClick={handleCloseUser}><a href="/">Stake</a></MenuItem>
 										<MenuItem className='navbar-menuitem' onClick={handleCloseUser}><a href="/withdraw">My Deposits</a></MenuItem>
-										<MenuItem className='navbar-menuitem' onClick={handleCloseUser}><a href="http://69.55.59.109:3080/withdraw">Legacy Stake</a></MenuItem>
+										<MenuItem className='navbar-menuitem' onClick={handleCloseUser}><a href="https://89.117.75.75:3080/withdraw">Legacy Stake</a></MenuItem>
 									
 									</div>
 								</MenuList>
