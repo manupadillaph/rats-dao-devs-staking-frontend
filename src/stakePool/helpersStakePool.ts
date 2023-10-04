@@ -254,7 +254,7 @@ export function getRewardsPerInvest(poolInfo: StakingPoolDBInterface, closedAt: 
     }
 
     let diffForInterestRate = upperTime - depositTime;
-    console.log ("getRewardsPerInvest - diffForInterestRate: " + diffForInterestRate)
+    // console.log ("getRewardsPerInvest - diffForInterestRate: " + diffForInterestRate)
 
     let msPerDay = 1000 * 60 * 60 * 24;
     let msPerYear = msPerDay * 365;

@@ -4,7 +4,7 @@ const {access, symlink} = require('fs/promises')
 module.exports = {
   reactStrictMode: false,
   images : {
-    domains: ['ratsdao.io','upload.wikimedia.org','upload.wikimedia.org','**.amazonaws.com','aldea-nft-logo.s3.sa-east-1.amazonaws.com','https://falcon-logo.s3.sa-east-1.amazonaws.com/']
+    domains: ['ratsdao.io','upload.wikimedia.org','upload.wikimedia.org','**.amazonaws.com','aldea-nft-logo.s3.sa-east-1.amazonaws.com','falcon-logo.s3.sa-east-1.amazonaws.com','https://falcon-logo.s3.sa-east-1.amazonaws.com/']
   },
   webpack: (config, { isServer }) =>  
   // {
