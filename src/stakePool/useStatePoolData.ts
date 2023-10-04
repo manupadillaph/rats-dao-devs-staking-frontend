@@ -14,7 +14,7 @@ import {
 } from "./helpersEUTxOs";
 import {
     getCategoryOfInvest,
-    getIfUserRegistered, getTotalAvailaibleFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
+    getIfUserRegistered, getTotalAvailableFunds, getTotalCashedOut, getTotalFundAmount, getTotalFundAmountsRemains_ForMasters, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalStakedAmount, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getUserRewardsPaid,
     getUserRewardsToPay, getUserStaked, sortFundDatum
 } from "./helpersStakePool";
 import { useSession } from "next-auth/react";
@@ -94,7 +94,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
     const [countEUTxOs_With_UserDatumUI, setCountEUTxOs_With_UserDatumUI] = useState<string | 0> (ui_loading)
 
     const [totalFundAmountUI, setTotalFundAmountUI] = useState<string | 0>(ui_loading)
-    const [totalFundsAvailableUI, setTotalAvailaibleFundsUI] = useState<string | 0>(ui_loading)
+    const [totalFundsAvailableUI, setTotalAvailableFundsUI] = useState<string | 0>(ui_loading)
     const [totalStakedUI, setTotalStakedUI] = useState<string | 0>(ui_loading)
     const [totalRewardsPaidUI, setTotalRewardsPaidUI] = useState<string | 0>(ui_loading)
     const [totalRewardsToPayUI, setTotalRewardsToPayUI] = useState<string | 0>(ui_loading)
@@ -162,7 +162,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
         setCountEUTxOs_With_UserDatumUI(ui)
 
         setTotalFundAmountUI(ui)
-        setTotalAvailaibleFundsUI(ui)
+        setTotalAvailableFundsUI(ui)
         setTotalStakedUI(ui)
         setTotalRewardsPaidUI(ui)
         setTotalRewardsToPayUI(ui)
@@ -512,7 +512,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 setCountEUTxOs_With_FundDatumUI('0')
                 setCountEUTxOs_With_UserDatumUI('0')
                 setTotalFundAmountUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
-                setTotalAvailaibleFundsUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
+                setTotalAvailableFundsUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
                 setTotalStakedUI(formatAmount(0, poolInfo.staking_Decimals, poolInfo.staking_UI))
                 setTotalRewardsPaidUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
                 setTotalRewardsToPayUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
@@ -540,13 +540,13 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                 // console.log("useStatePoolData - " + poolInfo.name + " - setPoolData: Can't find any UTxO with FundDatum. Did you funded already?");
                 setEUTxOs_With_FundDatum([])
                 setCountEUTxOs_With_FundDatumUI('0')
-                setTotalAvailaibleFundsUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
+                setTotalAvailableFundsUI(formatAmount(0, poolInfo.harvest_Decimals, poolInfo.harvest_UI))
             } else {
                 //console.log("useStatePoolData - " + poolInfo.name + " - setPoolData: UTxOs with FundDatum lenght: " + eUTxOs_With_FundDatum.length)
                 const sorted_EUTxOs_With_FundDatum = sortFundDatum(poolInfo, eUTxOs_With_FundDatum)
                 setEUTxOs_With_FundDatum(sorted_EUTxOs_With_FundDatum)
                 setCountEUTxOs_With_FundDatumUI(eUTxOs_With_FundDatum.length.toString())
-                setTotalAvailaibleFundsUI(formatAmount(Number(getTotalAvailaibleFunds(eUTxOs_With_FundDatum)), poolInfo.harvest_Decimals, poolInfo.harvest_UI))
+                setTotalAvailableFundsUI(formatAmount(Number(getTotalAvailableFunds(eUTxOs_With_FundDatum)), poolInfo.harvest_Decimals, poolInfo.harvest_UI))
             }
             setTotalFundAmountsRemains_ForMasterUI(formatAmount(Number(getTotalFundAmountsRemains_ForMasters(eUTxO_With_PoolDatum, eUTxOs_With_FundDatum)[0]), poolInfo.harvest_Decimals, poolInfo.harvest_UI))
         }

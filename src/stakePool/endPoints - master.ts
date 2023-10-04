@@ -31,7 +31,7 @@ import {
     getEUTxO_With_PoolDatum_InEUxTOList
 } from './helpersEUTxOs';
 import {
-        getAvailaibleFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
+        getAvailableFunds_In_EUTxO_With_FundDatum, getFundAmountsRemains_ForMaster
 } from "./helpersStakePool";
 
 //--------------------------------------
@@ -611,7 +611,7 @@ export async function masterSplitFund(wallet: Wallet, poolInfo: StakingPoolDBInt
     const eUTxO_fundDatum_To_Split = eUTxOs_fundDatums_To_Split[0]
     //------------------
     const splitFundAmount = assets![poolInfo!.harvest_Lucid]
-    const maxFundAmount_To_Split = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO_fundDatum_To_Split)
+    const maxFundAmount_To_Split = getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO_fundDatum_To_Split)
     //---------------------
     if (splitFundAmount > maxFundAmount_To_Split) {
         throw "Wrong Split Fund Amount"

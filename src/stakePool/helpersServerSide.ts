@@ -9,7 +9,7 @@ import { apiDeleteEUTxOsDBByStakingPool, apiSaveEUTxODB } from "./apis";
 import { initializeLucid } from '../utils/initializeLucid';
 import { isEqual, strToHex, toJson } from '../utils/utils';
 import { getMissingEUTxOsInDB, getEUTxO_With_PoolDatum_InEUxTOList, getEUTxOs_With_FundDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList, getEUTxOs_With_UserDatum_InEUxTOList_OfUser, getEUTxO_With_ScriptDatum_InEUxTOList, eUTxODBParser, getExtraEUTxOsInDB, getEUTxO_With_AnyScriptDatum_InEUxTOList } from './helpersEUTxOs';
-import { getTotalFundAmount, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, sortFundDatum, getTotalAvailaibleFunds, getTotalFundAmountsRemains_ForMasters, getTotalCashedOut, getTotalStakedAmount, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getIfUserRegistered, getUserStaked, getUserRewardsPaid, getUserRewardsToPay } from './helpersStakePool';
+import { getTotalFundAmount, getTotalMastersMinAda_In_EUTxOs_With_UserDatum, sortFundDatum, getTotalAvailableFunds, getTotalFundAmountsRemains_ForMasters, getTotalCashedOut, getTotalStakedAmount, getTotalRewardsToPay_In_EUTxOs_With_UserDatum, getTotalUsersMinAda_In_EUTxOs_With_UserDatum, getIfUserRegistered, getUserStaked, getUserRewardsPaid, getUserRewardsToPay } from './helpersStakePool';
 import { getScriptFromFile, getTextFromFile, mkdir, rmdir } from '../utils/utilsServerSide';
 import { Lucid, MintingPolicy, SpendingValidator, UTxO } from 'lucid-cardano';
 import JSZip from 'jszip';

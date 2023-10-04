@@ -352,8 +352,8 @@ export function sortFundDatum(poolInfo: StakingPoolDBInterface, eUTxOs_With_Fund
     return eUTxOs_With_FundDatum.sort((a, b) => {
 
 
-        const fundsA = getAvailaibleFunds_In_EUTxO_With_FundDatum(a);
-        const fundsB = getAvailaibleFunds_In_EUTxO_With_FundDatum(b);
+        const fundsA = getAvailableFunds_In_EUTxO_With_FundDatum(a);
+        const fundsB = getAvailableFunds_In_EUTxO_With_FundDatum(b);
 
         if (fundsA > fundsB) {
             return -1;
@@ -417,7 +417,7 @@ export function sortFundDatum(poolInfo: StakingPoolDBInterface, eUTxOs_With_Fund
 //---------------------------------------------------------------
 
 export function calculate_Sort_FundDatum(poolInfo: StakingPoolDBInterface, eUTxO_With_FundDatum: EUTxO) {
-    const fundsA = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum);
+    const fundsA = getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum);
     return fundsA;
 }
 
@@ -430,7 +430,7 @@ export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EU
         var eUTxO_With_FundDatum_WithEnoughValueToClaimButMinSize: EUTxO |undefined = undefined;
         for (var i = 0; i < eUTxOs_With_FundDatum.length; i += 1) {
             var eUTxO = eUTxOs_With_FundDatum[i];
-            var valueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
+            var valueCanUse = getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO);
             if (claim - valueCanUse <= 0) {
                 eUTxO_With_FundDatum_WithEnoughValueToClaimButMinSize = eUTxO;
             }else{
@@ -449,7 +449,7 @@ export function selectFundDatum_WithEnoughValueToClaim(eUTxOs_With_FundDatum: EU
             break
         }else{
             eUTxO = eUTxOs_With_FundDatum[i];
-            var valueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
+            var valueCanUse = getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO);
             claimLeft = claimLeft - valueCanUse;
             eUTxOs_With_FundDatum_WithEnoughValueToClaim.push(eUTxO);
             if (claimLeft <= 0) {
@@ -554,13 +554,13 @@ export function getStakedAmount_In_EUTxO_With_UserDatum(eUTxO_With_UserDatum: EU
 
 //---------------------------------------------------------------
 
-export function getTotalAvailaibleFunds(eUTxOs_With_FundDatum: EUTxO[]) {
+export function getTotalAvailableFunds(eUTxOs_With_FundDatum: EUTxO[]) {
     var total: BIGINT = 0n;
 
     for (var i = 0; i < eUTxOs_With_FundDatum.length; i += 1) {
         const eUTxO = eUTxOs_With_FundDatum[i];
 
-        total += getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO);
+        total += getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO);
     }
 
     return total;
@@ -569,7 +569,7 @@ export function getTotalAvailaibleFunds(eUTxOs_With_FundDatum: EUTxO[]) {
 
 //---------------------------------------------------------------
 
-export function getAvailaibleFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum: EUTxO): BIGINT {
+export function getAvailableFunds_In_EUTxO_With_FundDatum(eUTxO_With_FundDatum: EUTxO): BIGINT {
     const fundDatum: FundDatum = eUTxO_With_FundDatum.datum as FundDatum;
     return BigInt(fundDatum.fdFundAmount - fundDatum.fdCashedOut);
 }

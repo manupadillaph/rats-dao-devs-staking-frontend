@@ -21,7 +21,7 @@ import {
     getEUTxOs_With_FundDatum_InEUxTOList, getEUTxO_With_PoolDatum_InEUxTOList
 } from './helpersEUTxOs';
 import {
-    getAvailaibleFunds_In_EUTxO_With_FundDatum, getRewardsPerInvest, getTotalAvailaibleFunds,
+    getAvailableFunds_In_EUTxO_With_FundDatum, getRewardsPerInvest, getTotalAvailableFunds,
     selectFundDatum_WithEnoughValueToClaim, sortFundDatum
 } from "./helpersStakePool";
 
@@ -262,7 +262,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
     console.log(functionName + " - Harvest Value: " + toJson(harvest_Value));
     //------------------
     //calculo la cantidad de fondos maximas disponibles que se pueden pagar
-    const maxValueToClaim = getTotalAvailaibleFunds(eUTxOs_With_FundDatum);
+    const maxValueToClaim = getTotalAvailableFunds(eUTxOs_With_FundDatum);
     if (harvest_Amount > maxValueToClaim)
         throw "There are not enough funds in the available UTxOs with FundDatums to cover the claim. Available now: " + formatAmount(Number(maxValueToClaim), poolInfo.harvest_Decimals, poolInfo.harvest_UI);
     //------------------
@@ -312,7 +312,7 @@ export async function userHarvest(wallet: Wallet, poolInfo: StakingPoolDBInterfa
         let value_In_FundDatum = u.uTxO.assets;
         console.log(functionName + " - Value In FundDatum: " + toJson(value_In_FundDatum));
 
-        var harvestUnitFromValueCanUse = getAvailaibleFunds_In_EUTxO_With_FundDatum(u);
+        var harvestUnitFromValueCanUse = getAvailableFunds_In_EUTxO_With_FundDatum(u);
         var usingValueAsset: Assets = {};
 
         if (claimLeft >= harvestUnitFromValueCanUse) {

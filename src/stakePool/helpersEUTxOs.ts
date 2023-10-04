@@ -312,28 +312,28 @@ export async function getEUTxO_With_PoolDatum_InEUxTOList(poolInfo: StakingPoolD
             eUTxOs_With_PoolDatum_And_Token.push(eUTxOs_With_PoolDatum[i])
     }
     //-------------------
-    var eUTxOs_With_PoolDatum_And_Token_Availaible: EUTxO[] = []
+    var eUTxOs_With_PoolDatum_And_Token_Available: EUTxO[] = []
     for (var i = 0; i < eUTxOs_With_PoolDatum_And_Token.length; i += 1) {
         if (eUTxOs_With_PoolDatum_And_Token[i].isPreparing.plutusDataIndex === 1 && eUTxOs_With_PoolDatum_And_Token[i].isConsuming.plutusDataIndex === 1)
-            eUTxOs_With_PoolDatum_And_Token_Availaible.push(eUTxOs_With_PoolDatum_And_Token[i])
+            eUTxOs_With_PoolDatum_And_Token_Available.push(eUTxOs_With_PoolDatum_And_Token[i])
     }
     //-------------------
-    if (eUTxOs_With_PoolDatum_And_Token_Availaible.length > 1){
+    if (eUTxOs_With_PoolDatum_And_Token_Available.length > 1){
         await apiDeleteEUTxOsDBByStakingPool(poolInfo!.name)
         throw "There is an error in EUTxO list in DB. We're updating EUTxO list, please try again later..."
     }
     //-------------------
     if (checkConsumingOrPreparing === true){
-        if (eUTxOs_With_PoolDatum_And_Token_Availaible.length == 1){
-            return eUTxOs_With_PoolDatum_And_Token_Availaible[0]
+        if (eUTxOs_With_PoolDatum_And_Token_Available.length == 1){
+            return eUTxOs_With_PoolDatum_And_Token_Available[0]
         }else if (eUTxOs_With_PoolDatum_And_Token.length == 1){
             throw "EUTxO with PoolDatum is being consumed, wait for next block."
         }else{
             return undefined
         }
     }else{
-        if (eUTxOs_With_PoolDatum_And_Token_Availaible.length == 1){
-            return eUTxOs_With_PoolDatum_And_Token_Availaible[0]
+        if (eUTxOs_With_PoolDatum_And_Token_Available.length == 1){
+            return eUTxOs_With_PoolDatum_And_Token_Available[0]
         }else if (eUTxOs_With_PoolDatum_And_Token.length == 1){
             return eUTxOs_With_PoolDatum_And_Token[0]
         }else{

@@ -1716,7 +1716,7 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 								<p>Total Staked <b>{totalStakedUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>Total Claimed <b>{totalRewardsPaidUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 								<p>Rewards to Pay <b>{totalRewardsToPayUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
-								<p>Availaible Funds <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
+								<p>Available Funds <b>{totalFundsAvailableUI || <Skeleton width={'50%'} baseColor='#e2a7a7' highlightColor='#e9d0d0' />}</b></p>
 							</div>
 						</div>
 					</div>
