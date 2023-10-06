@@ -5,7 +5,7 @@ module.exports = {
   reactStrictMode: false,
   images: {
     domains: [
-      'ratsdao.io',
+      'ratsdao.io','staking.ratsdao.io',
       'upload.wikimedia.org',
       'upload.wikimedia.org',
       '**.amazonaws.com',
