@@ -422,7 +422,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                             const harvest = Number(interestRate.iHarvest)
                             const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
                             const stringCategory = "*".repeat(1)
-                            interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
+                            interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
                             days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                         }
                     }
@@ -434,7 +434,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                         const harvest = Number(interestRate.iHarvest)
                         const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
                         const stringCategory = "*".repeat(i+1)
-                        interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
+                        interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+"</td style='border: none'></tr>"
                         days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
@@ -444,7 +444,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     const harvest = Number(interestRate.iHarvest)
                     const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
                     const stringCategory = "*".repeat(poolInfo.pParams.ppInterestRates.length)
-                    interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
+                    interestUI += "<tr><td style='border: none'>Earn <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> after "+daysToDurationString(days)+" until the end!</td style='border: none'></tr>"
                     //------------------
                     interestUI += "</table>"
                 }else{
