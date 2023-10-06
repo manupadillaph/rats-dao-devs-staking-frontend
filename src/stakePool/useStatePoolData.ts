@@ -416,13 +416,15 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     //------------------
                     {
                         const interestRate = poolInfo.pParams.ppInterestRates[0] as InterestRateV2
-                        const staking = Number(interestRate.iStaking)
-                        const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
-                        const harvest = Number(interestRate.iHarvest)
-                        const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
-                        const stringCategory = "*".repeat(1)
-                        interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
-                        days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
+                        if(interestRate.iHarvest > 0){
+                            const staking = Number(interestRate.iStaking)
+                            const stakingUI = formatAmount(staking, poolInfo.staking_Decimals, poolInfo.staking_UI) // staking==1?poolInfo.staking_UI : 
+                            const harvest = Number(interestRate.iHarvest)
+                            const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
+                            const stringCategory = "*".repeat(1)
+                            interestUI += "<tr><td style='border: none'><b>"+stringCategory+"<b> Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
+                            days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
+                        }
                     }
                     //------------------
                     for (let i = 1; i < poolInfo.pParams.ppInterestRates.length - 1; i++) {
