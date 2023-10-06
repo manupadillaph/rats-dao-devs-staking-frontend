@@ -364,7 +364,7 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                     // interestUI = "Earn <b>"+minharvestUI+"</b> a year for each <b>"+minstakingUI+"</b> that you stake" 
                     // interestUI += " up to <b>"+maxharvestUI+"</b> for each <b>"+maxstakingUI+"</b>!"
 
-                    interestUI = "<table>"
+                    interestUI = "<table style='border: none'>"
                     //------------------
                     // function daysToDurationString(days: number) {
                     //     const yearDays = 365;
@@ -423,8 +423,8 @@ export default function useStatePoolData(stakingPoolInfo: StakingPoolDBInterface
                             const harvestUI = formatAmount(harvest, poolInfo.harvest_Decimals, poolInfo.harvest_UI) // harvest==1?poolInfo.harvest_UI : 
                             const stringCategory = "*".repeat(1)
                             interestUI += "<tr><td style='border: none'>Earn  <b>"+harvestUI+"</b> per year for each <b>"+stakingUI+"</b> for new deposits</td style='border: none'></tr>"
-                            days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                         }
+                        days = interestRate.iMinDays.val != undefined ? interestRate.iMinDays.val: 0
                     }
                     //------------------
                     for (let i = 1; i < poolInfo.pParams.ppInterestRates.length - 1; i++) {
