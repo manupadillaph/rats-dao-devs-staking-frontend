@@ -122,6 +122,13 @@ export async function getServerSideProps(context: any) {
 
         const filterName = context.query.search || undefined
 
+        if(filterName !== undefined){
+            console.log(
+                'Home getServerSideProps - Search:',
+                filterName
+            )
+        }
+
         var rawDataStakingPools: StakingPoolDBInterface[]
         rawDataStakingPools = await getStakingPools(
             true,
