@@ -72,7 +72,7 @@ const Home: NextPage<
                 <Message message={'Loading Page...'} />
             ) : (
                 <>
-                    <div>
+                    {/* <div>
                         <input
                             type="text"
                             value={searchTerm}
@@ -83,7 +83,7 @@ const Home: NextPage<
                             Search
                         </button>
                         {searchTerm && <button onClick={clearSearch}>X</button>}
-                    </div>
+                    </div> */}
 
                     {stakingPoolsParsed.length > 0 ? (
                         stakingPoolsParsed.map(
