@@ -83,11 +83,25 @@ export async function getServerSideProps(context : any) {
 		//console.log ("Admin getServerSideProps - init - context.query?.pkh:", context.query?.pkh);
 		await connect();
 		const session = await getSession(context)
+
+
+
+
 		var rawDataStakingPools : StakingPoolDBInterface []
 		if (session) {
 			console.log ("Admin getServerSideProps - init - session:", toJson (session));
 			if (session.user.pkh !== undefined) {
-				rawDataStakingPools  = await getStakingPools(false, session.user.pkh, session.user.swPortalAdmin)
+
+				const filterName = context.query.search || undefined
+
+				if(filterName !== undefined){
+					console.log(
+						'Admin getServerSideProps - Search:',
+						filterName
+					)
+				}	
+
+				rawDataStakingPools  = await getStakingPools(false, session.user.pkh, session.user.swPortalAdmin, filterName)
 			}else{
 				rawDataStakingPools = []
 			}
