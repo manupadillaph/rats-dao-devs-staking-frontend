@@ -19,6 +19,7 @@ import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 import StakingPool from '../components/StakingPool'
 import Message from '../components/Message'
+import escapeStringRegexp from 'escape-string-regexp'
 
 //--------------------------------------
 
@@ -120,9 +121,9 @@ export async function getServerSideProps(context: any) {
             //console.log ("Create getServerSideProps - init - session: undefined");
         }
 
-        const filterName = context.query.search || undefined
-
+        let filterName = context.query.search || undefined
         if(filterName !== undefined){
+            filterName = escapeStringRegexp(filterName);
             console.log(
                 'Home getServerSideProps - Search:',
                 filterName

@@ -12,6 +12,7 @@ import { stakingPoolDBParser } from '../stakePool/helpersStakePool'
 import { getSession, useSession } from 'next-auth/react'
 import StakingPoolAdmin from '../components/StakingPoolAdmin'
 import Message from '../components/Message'
+import escapeStringRegexp from 'escape-string-regexp'
 //--------------------------------------
 const Admin : NextPage<InferGetServerSidePropsType<typeof getServerSideProps>> =  ({pkh, stakingPools} : InferGetServerSidePropsType<typeof getServerSideProps>) =>  {
 	
@@ -92,9 +93,9 @@ export async function getServerSideProps(context : any) {
 			console.log ("Admin getServerSideProps - init - session:", toJson (session));
 			if (session.user.pkh !== undefined) {
 
-				const filterName = context.query.search || undefined
-
+				let filterName = context.query.search || undefined
 				if(filterName !== undefined){
+					filterName = escapeStringRegexp(filterName);
 					console.log(
 						'Admin getServerSideProps - Search:',
 						filterName
