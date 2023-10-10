@@ -224,9 +224,20 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 
 	//--------------------------------------
 
+	useEffect(() => {
+        const hash = window.location.hash;
+        if (hash) {
+            const element = document.getElementById(hash.substring(1));
+            if (element) element.scrollIntoView();
+        }
+    }, []);
+	
+	//--------------------------------------
+
 	return (
 
-		<div className="section__text pool">
+		<div className="section__text pool" id={poolInfo.name}>
+			<a id={poolInfo.name}></a>
 			<div className="pool__data">
 
 				<div className="pool__image ">
