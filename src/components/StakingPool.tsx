@@ -227,11 +227,13 @@ export default function StakingPool ({ stakingPoolInfo }: { stakingPoolInfo: Sta
 	useEffect(() => {
         const hash = window.location.hash;
         if (hash) {
+			console.log("hash: " + toJson(hash))
             const element = document.getElementById(hash.substring(1));
+			console.log("element: " + toJson(element))
             if (element) element.scrollIntoView();
         }
     }, []);
-	
+
 	//--------------------------------------
 
 	return (

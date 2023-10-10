@@ -1214,7 +1214,9 @@ export default function StakingPoolAdmin({ stakingPoolInfo }: { stakingPoolInfo:
 	useEffect(() => {
         const hash = window.location.hash;
         if (hash) {
+			console.log("hash: " + toJson(hash))
             const element = document.getElementById(hash.substring(1));
+			console.log("element: " + toJson(element))
             if (element) element.scrollIntoView();
         }
     }, []);
