@@ -21,7 +21,7 @@
     "file-saver": "^2.0.5",
     "formidable": "^2.1.1",
     "jszip": "^3.10.1",
-    "lucid-cardano": "^0.6.0",
+    "lucid-cardano": "^0.10.11",
     "mailgen": "^2.0.27",
     "mongoose": "^6.6.1",
     "next": "^12.1.6",

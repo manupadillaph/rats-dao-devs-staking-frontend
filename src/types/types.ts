@@ -1,4 +1,4 @@
-import { SpendingValidator, Assets , UTxO, TxHash, PaymentKeyHash, MintingPolicy, C, toHex, PlutusData, fromHex, Data, Address} from "lucid-cardano"
+import { SpendingValidator, Assets , UTxO, TxHash, PaymentKeyHash, MintingPolicy, C, toHex, fromHex, Data, Address} from "lucid-cardano"
 import { strToHex, toJson } from "../utils/utils";
 
 //--------------------------------------------------------

@@ -786,7 +786,7 @@ export function getRewardsToPay_In_EUTxO_With_UserDatum(
     eUTxO_With_PoolDatum: EUTxO,
     eUTxO_With_UserDatum: EUTxO
 ) {
-    //console.log("getRewardsToPay_In_EUTxO_With_UserDatum - INIT - rates: " + toJson(poolInfo.pParams.ppInterestRates));
+    console.log("getRewardsToPay_In_EUTxO_With_UserDatum - INIT - rates: " + toJson(poolInfo.pParams.ppInterestRates));
 
     const poolDatum: PoolDatum = eUTxO_With_PoolDatum.datum as PoolDatum
     const userDatum: UserDatum = eUTxO_With_UserDatum.datum as UserDatum

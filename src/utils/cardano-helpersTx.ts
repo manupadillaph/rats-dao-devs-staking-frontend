@@ -53,40 +53,40 @@ export async function newTransaction (title : string, walletStore: Wallet, poolI
 //---------------------------------------------------------------
 
 export function createTx (lucid: Lucid, protocolParameters: any, tx: any) {
-    //---------------------------------------------
-    // console.log("createTx - minFeeA", protocolParameters.minFeeA)
-    // console.log("createTx - minFeeB", protocolParameters.minFeeB)
-    //---------------------------------------------
-    const minFeeA = Math.floor(protocolParameters.minFeeA * 1.1);
-    const minFeeB = Math.floor(protocolParameters.minFeeB * 1.1);
-    const nimFeeA_ = C.BigNum.from_str((minFeeA.toString()));
-    const nimFeeB_ = C.BigNum.from_str((minFeeB.toString()));
-    //---------------------------------------------
-    // const linearFee = CardanoWasm.LinearFee.new(
-    //     CardanoWasm.BigNum.from_str('44'),
-    //     CardanoWasm.BigNum.from_str('155381')
-    // );
+    // //---------------------------------------------
+    // // console.log("createTx - minFeeA", protocolParameters.minFeeA)
+    // // console.log("createTx - minFeeB", protocolParameters.minFeeB)
+    // //---------------------------------------------
+    // const minFeeA = Math.floor(protocolParameters.minFeeA * 1.1);
+    // const minFeeB = Math.floor(protocolParameters.minFeeB * 1.1);
+    // const nimFeeA_ = C.BigNum.from_str((minFeeA.toString()));
+    // const nimFeeB_ = C.BigNum.from_str((minFeeB.toString()));
+    // //---------------------------------------------
+    // // const linearFee = CardanoWasm.LinearFee.new(
+    // //     CardanoWasm.BigNum.from_str('44'),
+    // //     CardanoWasm.BigNum.from_str('155381')
+    // // );
 
-    //---------------------------------------------
-    //const costModels = createCostModels(protocolParameters.costModels)
-    //---------------------------------------------
-    const txBuilderConfig = C.TransactionBuilderConfigBuilder.new()
-        .coins_per_utxo_byte(C.BigNum.from_str(protocolParameters.coinsPerUtxoByte.toString()))
-        .fee_algo(C.LinearFee.new(nimFeeA_, nimFeeB_))
-        .key_deposit(C.BigNum.from_str(protocolParameters.keyDeposit.toString()))
-        .pool_deposit(C.BigNum.from_str(protocolParameters.poolDeposit.toString()))
-        .max_tx_size(protocolParameters.maxTxSize)
-        .max_value_size(protocolParameters.maxValSize)
-        .collateral_percentage(protocolParameters.collateralPercentage)
-        .max_collateral_inputs(protocolParameters.maxCollateralInputs)
-        .ex_unit_prices(C.ExUnitPrices.from_float(protocolParameters.priceMem, protocolParameters.priceStep))
-        .blockfrost(
-            // Provider needs to be blockfrost in this case. Maybe we have better/more ways in the future to evaluate ex units
-            C.Blockfrost.new(lucid.provider.data.url + "/utils/txs/evaluate", lucid.provider.data.projectId))
-        .costmdls(createCostModels(protocolParameters.costModels))
-        .build();
-    //---------------------------------------------
-    tx.txBuilder = C.TransactionBuilder.new(txBuilderConfig);
+    // //---------------------------------------------
+    // //const costModels = createCostModels(protocolParameters.costModels)
+    // //---------------------------------------------
+    // const txBuilderConfig = C.TransactionBuilderConfigBuilder.new()
+    //     .coins_per_utxo_byte(C.BigNum.from_str(protocolParameters.coinsPerUtxoByte.toString()))
+    //     .fee_algo(C.LinearFee.new(nimFeeA_, nimFeeB_))
+    //     .key_deposit(C.BigNum.from_str(protocolParameters.keyDeposit.toString()))
+    //     .pool_deposit(C.BigNum.from_str(protocolParameters.poolDeposit.toString()))
+    //     .max_tx_size(protocolParameters.maxTxSize)
+    //     .max_value_size(protocolParameters.maxValSize)
+    //     .collateral_percentage(protocolParameters.collateralPercentage)
+    //     .max_collateral_inputs(protocolParameters.maxCollateralInputs)
+    //     .ex_unit_prices(C.ExUnitPrices.from_float(protocolParameters.priceMem, protocolParameters.priceStep))
+    //     .blockfrost(
+    //         // Provider needs to be blockfrost in this case. Maybe we have better/more ways in the future to evaluate ex units
+    //         C.Blockfrost.new(lucid.provider.data.url + "/utils/txs/evaluate", lucid.provider.data.projectId))
+    //     .costmdls(createCostModels(protocolParameters.costModels))
+    //     .build();
+    // //---------------------------------------------
+    // tx.txBuilder = C.TransactionBuilder.new(txBuilderConfig);
     return tx;
 }
 
@@ -289,12 +289,16 @@ export async function makeTx(functionName: string, wallet: Wallet, protocolParam
             console.log(functionName + " - Tx Using Provider")
             // txCompleteHash = await lucid!.provider.submitTx(toHex(txCompleteSigned.txSigned.to_bytes()));
             // txCompleteHash = await blockFrostSubmitTx(txCompleteSigned.txSigned);
-            txCompleteHash = await lucid!.provider.submitTx(txCompleteSigned.txSigned);
+            // txCompleteHash = await lucid!.provider.submitTx(txCompleteSigned.txSigned);
+            txCompleteHash = await txCompleteSigned.submit()
         } else {
             console.log(functionName + " - Tx Using Wallet")
             //txCompleteHash = await lucid!.wallet.submitTx(toHex(txCompleteSigned.txSigned.to_bytes()));
             //txCompleteHash = await txCompleteSigned.submit();
-            txCompleteHash = await lucid!.wallet.submitTx(txCompleteSigned.txSigned);
+            // txCompleteHash = await lucid!.wallet.submitTx(txCompleteSigned.txSigned);
+            // txCompleteHash = await lucid!.wallet.submitTx(txCompleteSigned.txSigned);
+            txCompleteHash = await txCompleteSigned.submit()
+
         }
     } catch (error: any) {
         console.error(functionName + " - Error txCompleteHash: " + error)
