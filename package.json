@@ -2,6 +2,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev  -p 3000",
+    "deb": "cross-env DEBUG=true NODE_OPTIONS='--inspect' next dev  -p 3000",
     "build": "next build",
     "start": "next start -p 80",
     "lint": "next lint"
@@ -42,6 +43,7 @@
     "@types/file-saver": "^2.0.5",
     "@types/formidable": "^2.0.5",
     "@types/nodemailer": "^6.4.7",
+    "cross-env": "^7.0.3",
     "prettier": "^2.5.1"
   }
 }
