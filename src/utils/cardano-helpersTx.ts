@@ -5,7 +5,7 @@ import { BigNum, Costmdls, CostModel, hash_script_data, Int, Language, Transacti
 import { SetStateAction } from "react";
 import { explainErrorTx } from "../stakePool/explainError";
 import { EUTxO, Master, Maybe, POSIXTime } from "../types";
-import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, TIME_OUT_TRY_UPDATESTAKINGPOOL, TIME_SAFETY_AFTER_TX, txConsumingTime, txPreparingTime, validTimeRangeInSlots } from "../types/constantes";
+import { maxTxExMem, maxTxExSteps, maxTxSize, TIME_OUT_TRY_TX, TIME_OUT_TRY_UPDATESTAKINGPOOL, TIME_SAFETY_AFTER_TX, txConsumingTime, txPreparingTime, validTimeRange, validTimeRangeInSlots } from "../types/constantes";
 import { StakingPoolDBInterface } from "../types/stakePoolDBModel";
 import { apiDeleteEUTxODB, apiGetTxCountStakingPoolFromDB, apiUpdateEUTxODBIsConsuming, apiUpdateEUTxODBIsPreparing } from "../stakePool/apis";
 import { showPtrInHex, toJson } from "./utils";
@@ -94,108 +94,117 @@ export function createTx (lucid: Lucid, protocolParameters: any, tx: any) {
 
 export async function fixTx(tx_Building: any, lucid: Lucid, protocolParameters: any) {
 
-    for (const task of tx_Building.tasks) {
-        await task();
-    }
+    const now = Math.floor(Date.now())
+    const from = now - (1 * 60 * 1000)
+    const until = now + (validTimeRange) - (1 * 60 * 1000) 
 
-    var blockLast: number | undefined = undefined
+    const txFinal = await tx_Building.validFrom(from).validTo(until) 
 
-    const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/blocks/latest'
-    const requestOptions = {
-        method: 'GET',
-        headers: {
-          'project_id': "xxxxx"
-        },
-      }
+    const txComplete = await txFinal.complete();
+    return  txComplete
 
-    await fetch(urlApi, requestOptions)
-        .then(response => response.json())
-        .then(json => {
-            //console.log(toJson(json))
-            blockLast = Number(json.slot)
-        }
-        );
-    if (blockLast === undefined) {
-        throw "Error: Can't get last block from Blockfrost"
-    }
-    console.log ("blockLast: " +  blockLast)	
-    const from = blockLast! -1*60
-    const until = blockLast! + validTimeRangeInSlots -1*60
+    // for (const task of tx_Building.tasks) {
+    //     await task();
+    // }
 
-    // console.log ("from: " +  from!.toString())	
-    // console.log ("until: " +  until.toString())	
+    // var blockLast: number | undefined = undefined
 
-    tx_Building.txBuilder.set_validity_start_interval(C.BigNum.from_str(from!.toString()));
-    tx_Building.txBuilder.set_ttl(C.BigNum.from_str(until.toString()));
+    // const urlApi = process.env.NEXT_PUBLIC_REACT_SERVER_URL + "/api/blockfrost" + '/blocks/latest'
+    // const requestOptions = {
+    //     method: 'GET',
+    //     headers: {
+    //       'project_id': "xxxxx"
+    //     },
+    //   }
+
+    // await fetch(urlApi, requestOptions)
+    //     .then(response => response.json())
+    //     .then(json => {
+    //         //console.log(toJson(json))
+    //         blockLast = Number(json.slot)
+    //     }
+    //     );
+    // if (blockLast === undefined) {
+    //     throw "Error: Can't get last block from Blockfrost"
+    // }
+    // console.log ("blockLast: " +  blockLast)	
+    // const from = blockLast! -1*60
+    // const until = blockLast! + validTimeRangeInSlots -1*60
+
+    // // console.log ("from: " +  from!.toString())	
+    // // console.log ("until: " +  until.toString())	
+
+    // tx_Building.txBuilder.set_validity_start_interval(C.BigNum.from_str(from!.toString()));
+    // tx_Building.txBuilder.set_ttl(C.BigNum.from_str(until.toString()));
    
-    const utxos = await lucid.wallet.getUtxosCore();
-    const changeAddress = C.Address.from_bech32(await lucid.wallet.address());
+    // const utxos = await lucid.wallet.getUtxosCore();
+    // const changeAddress = C.Address.from_bech32(await lucid.wallet.address());
 
-    tx_Building.txBuilder.add_inputs_from(utxos, changeAddress);
-    tx_Building.txBuilder.balance(changeAddress, undefined);
+    // tx_Building.txBuilder.add_inputs_from(utxos, changeAddress);
+    // tx_Building.txBuilder.balance(changeAddress, undefined);
 
-    const transaction_NOT_READY_ONLY_FOR_SHOWING = tx_Building.txBuilder.build_tx();
+    // const transaction_NOT_READY_ONLY_FOR_SHOWING = tx_Building.txBuilder.build_tx();
 
-    console.log("fixTx - Tx Complete before evaluate:");
-    console.log(transaction_NOT_READY_ONLY_FOR_SHOWING.to_json());
+    // console.log("fixTx - Tx Complete before evaluate:");
+    // console.log(transaction_NOT_READY_ONLY_FOR_SHOWING.to_json());
 
-    const feeActual = tx_Building.txBuilder.get_fee_if_set()
+    // const feeActual = tx_Building.txBuilder.get_fee_if_set()
 
-    const transaction = await tx_Building.txBuilder.construct(utxos, changeAddress);
+    // const transaction = await tx_Building.txBuilder.construct(utxos, changeAddress);
 
-    const body = transaction.body();
+    // const body = transaction.body();
 
-    const feeActual_ = body.fee()
-    console.log("fixTx - fee: " + feeActual?.to_str() + " - fee Fixed:" + feeActual_?.to_str());
+    // const feeActual_ = body.fee()
+    // console.log("fixTx - fee: " + feeActual?.to_str() + " - fee Fixed:" + feeActual_?.to_str());
 
-    const witness_set = transaction.witness_set();
+    // const witness_set = transaction.witness_set();
 
-    // console.log("witness_set: " + witness_set.to_json());
+    // // console.log("witness_set: " + witness_set.to_json());
 
-    const auxiliary_data = transaction.auxiliary_data();
+    // const auxiliary_data = transaction.auxiliary_data();
 
-    const transaction_to_bytes = transaction.to_bytes();
+    // const transaction_to_bytes = transaction.to_bytes();
 
-    const transaction_NEW_VERISON = Transaction.from_bytes(transaction_to_bytes);
+    // const transaction_NEW_VERISON = Transaction.from_bytes(transaction_to_bytes);
 
-    // const body_NEW_VERISON  = transaction_NEW_VERISON.body()
-    // const feeActual___ = body_NEW_VERISON.fee()
-    // console.log("feeActual__:" + feeActual___?.to_str());
+    // // const body_NEW_VERISON  = transaction_NEW_VERISON.body()
+    // // const feeActual___ = body_NEW_VERISON.fee()
+    // // console.log("feeActual__:" + feeActual___?.to_str());
 
-    const witness_set_NEW_VERISON = transaction_NEW_VERISON.witness_set();
-    // console.log("fixTx - witness_set_NEW_VERISON: " + witness_set_NEW_VERISON.to_json());
+    // const witness_set_NEW_VERISON = transaction_NEW_VERISON.witness_set();
+    // // console.log("fixTx - witness_set_NEW_VERISON: " + witness_set_NEW_VERISON.to_json());
 
-    //const witness_set_NEW_VERISON_Json = witness_set_NEW_VERISON.to_json()
-    //const auxiliary_data_NEW_VERISON  = transaction_NEW_VERISON.auxiliary_data()
+    // //const witness_set_NEW_VERISON_Json = witness_set_NEW_VERISON.to_json()
+    // //const auxiliary_data_NEW_VERISON  = transaction_NEW_VERISON.auxiliary_data()
 
 
-    if (
-        witness_set_NEW_VERISON.redeemers() === undefined ||witness_set_NEW_VERISON.redeemers() === null 
-        ) {
-        console.log("fixTx - No redeemers");
+    // if (
+    //     witness_set_NEW_VERISON.redeemers() === undefined ||witness_set_NEW_VERISON.redeemers() === null 
+    //     ) {
+    //     console.log("fixTx - No redeemers");
         
-    }else{
-        const redeemers = witness_set_NEW_VERISON.redeemers();
-        console.log("fixTx - With Redeemers: " + redeemers?.len());
+    // }else{
+    //     const redeemers = witness_set_NEW_VERISON.redeemers();
+    //     console.log("fixTx - With Redeemers: " + redeemers?.len());
 
-        const datums = witness_set_NEW_VERISON.plutus_data();
+    //     const datums = witness_set_NEW_VERISON.plutus_data();
 
-        //const costModels = createCostModels(protocolParameters.costModels);
-        const costModels_NEW_VERISON = createCostModels_NEW_VERISON(protocolParameters.costModels);
+    //     //const costModels = createCostModels(protocolParameters.costModels);
+    //     const costModels_NEW_VERISON = createCostModels_NEW_VERISON(protocolParameters.costModels);
 
-        const scriptHash = hash_script_data(redeemers!, costModels_NEW_VERISON, datums);
+    //     const scriptHash = hash_script_data(redeemers!, costModels_NEW_VERISON, datums);
 
-        console.log("fixTx - scriptHash: " + showPtrInHex(scriptHash));
+    //     console.log("fixTx - scriptHash: " + showPtrInHex(scriptHash));
 
-        //body.set_script_data_hash(scriptHash)
-        body.set_script_data_hash(C.ScriptDataHash.from_bytes(scriptHash.to_bytes()));
-    }
+    //     //body.set_script_data_hash(scriptHash)
+    //     body.set_script_data_hash(C.ScriptDataHash.from_bytes(scriptHash.to_bytes()));
+    // }
 
-    const transaction_FIXED = C.Transaction.new(body, witness_set, auxiliary_data);
+    // const transaction_FIXED = C.Transaction.new(body, witness_set, auxiliary_data);
 
-    const newTx = new TxComplete(lucid, transaction_FIXED);
+    // const newTx = new TxComplete(lucid, transaction_FIXED);
 
-    return newTx;
+    // return newTx;
 }
 
 //---------------------------------------------------------------
