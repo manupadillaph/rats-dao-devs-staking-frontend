@@ -46,7 +46,7 @@ export default async function handler( req: NextApiRequest, res: NextApiResponse
             return 
         } else {
             const stakingPool = stakingPoolWithSameName[0]
-            if (!stakingPool.masters.includes(sesionPkh!) || session?.user.swRatsDAOAdmin === false){
+            if (!stakingPool.masters.includes(sesionPkh!) && session?.user.swRatsDAOAdmin === false){
                 console.error("/api/deleteEUTxOsByStakingPool - You aren't master of this Staking Pool"); 
                 res.status(400).json({ msg: "You aren't master of this Staking Pool"})
                 return 
