@@ -27,6 +27,7 @@ export async function userDepositTx(
     console.log(functionName + " - userDatum_Out_Hex: " + userDatum_Out_Hex)
     //------------------
     const redeemer_For_Mint_TxID_User_Deposit_Hex = await getHexFrom_Redeemer_TxID(redeemer_For_Mint_TxID_User_Deposit, true);
+    console.log(functionName + " - redeemer_For_Mint_TxID_User_Deposit_Hex: " + redeemer_For_Mint_TxID_User_Deposit_Hex)
     //------------------
     // const now = Math.floor(Date.now())
     // console.log(functionName + " - now: " + now)
