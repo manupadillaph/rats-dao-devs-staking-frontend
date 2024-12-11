@@ -162,7 +162,7 @@ export function pubKeyHashToAddress(network: number, pkh: PaymentKeyHash, stakeP
 function itemToData(item: any) {
 
     if (typeof item === 'bigint' || typeof item === 'number' || typeof item === 'string' && !isNaN(parseInt(item)) && item.slice(-1) === 'n') {
-        return (item);
+        return (BigInt(item));
     } else if (item instanceof TxOutRef) {
 
         var list2: any[] = [];
